@@ -1,0 +1,416 @@
+diff --git a/app/styles/base.css b/app/styles/base.css
+index adad415..dfefa6a 100644
+--- a/app/styles/base.css
++++ b/app/styles/base.css
+@@ -683,7 +683,7 @@ select:active {
+ #noVNC_setting_port {
+   width: 80px;
+ }
+-#noVNC_setting_path {
++#noVNC_setting_path #noVNC_setting_apath {
+   width: 100px;
+ }
+ 
+diff --git a/app/ui.js b/app/ui.js
+index cb6a9fd..4d599e1 100644
+--- a/app/ui.js
++++ b/app/ui.js
+@@ -15,6 +15,7 @@ import KeyTable from "../core/input/keysym.js";
+ import keysyms from "../core/input/keysymdef.js";
+ import Keyboard from "../core/input/keyboard.js";
+ import RFB from "../core/rfb.js";
++import WebAudio from "../core/webaudio.js";
+ import * as WebUtil from "./webutil.js";
+ 
+ const PAGE_TITLE = "noVNC";
+@@ -40,6 +41,7 @@ const UI = {
+     inhibitReconnect: true,
+     reconnectCallback: null,
+     reconnectPassword: null,
++    webaudio: null,
+ 
+     prime() {
+         return WebUtil.initSettings().then(() => {
+@@ -171,6 +173,7 @@ const UI = {
+         UI.initSetting('compression', 2);
+         UI.initSetting('shared', true);
+         UI.initSetting('view_only', false);
++        UI.initSetting('audio', true);
+         UI.initSetting('show_dot', false);
+         UI.initSetting('path', 'websockify');
+         UI.initSetting('repeaterID', '');
+@@ -200,6 +203,20 @@ const UI = {
+         }
+     },
+ 
++    toggleAudio() {
++        console.log('here');
++        const audio = UI.getSetting('audio');
++        if (audio) {
++            UI.webaudio.start();
++        } else {
++            if(UI.webaudio !== null) {
++                if (UI.webaudio.connected) {
++                    UI.webaudio.stop();
++                }
++            }
++        }
++    },
++
+ /* ------^-------
+ *     /INIT
+ * ==============
+@@ -356,6 +373,8 @@ const UI = {
+         UI.addSettingChangeHandler('shared');
+         UI.addSettingChangeHandler('view_only');
+         UI.addSettingChangeHandler('view_only', UI.updateViewOnly);
++        UI.addSettingChangeHandler('audio');
++        UI.addSettingChangeHandler('audio', UI.updateEnableAudio);
+         UI.addSettingChangeHandler('show_dot');
+         UI.addSettingChangeHandler('show_dot', UI.updateShowDotCursor);
+         UI.addSettingChangeHandler('host');
+@@ -841,6 +860,7 @@ const UI = {
+         UI.updateSetting('compression');
+         UI.updateSetting('shared');
+         UI.updateSetting('view_only');
++        UI.updateSetting('audio');
+         UI.updateSetting('path');
+         UI.updateSetting('repeaterID');
+         UI.updateSetting('logging');
+@@ -1041,6 +1061,7 @@ const UI = {
+         UI.rfb.resizeSession = UI.getSetting('resize') === 'remote';
+         UI.rfb.qualityLevel = parseInt(UI.getSetting('quality'));
+         UI.rfb.compressionLevel = parseInt(UI.getSetting('compression'));
++        UI.rfb.enableAudio = UI.getSetting('audio');
+         UI.rfb.showDotCursor = UI.getSetting('show_dot');
+ 
+         UI.updateViewOnly(); // requires UI.rfb
+@@ -1056,6 +1077,10 @@ const UI = {
+ 
+         UI.updateVisualState('disconnecting');
+ 
++        if(UI.webaudio !== null && UI.webaudio.socket !== null) {
++            UI.webaudio.socket.close();
++        }
++
+         // Don't display the connection settings until we're actually disconnected
+     },
+ 
+@@ -1097,6 +1122,19 @@ const UI = {
+ 
+         // Do this last because it can only be used on rendered elements
+         UI.rfb.focus();
++
++        let audio_url;
++        let host = window.location.hostname; 
++        let port = 32123;
++        if (window.location.protocol === "https:") {
++            audio_url = 'wss';
++        } else {
++            audio_url = 'ws';
++        }
++        audio_url += '://' + host + ':' + port;
++
++        UI.webaudio = new WebAudio(audio_url);
++        UI.toggleAudio();
+     },
+ 
+     disconnectFinished(e) {
+@@ -1647,6 +1685,12 @@ const UI = {
+         }
+     },
+ 
++    updateEnableAudio() {
++        if (!UI.rfb) return;
++        UI.rfb.enableAudio = UI.getSetting('audio');
++        UI.toggleAudio();
++    },
++
+     updateShowDotCursor() {
+         if (!UI.rfb) return;
+         UI.rfb.showDotCursor = UI.getSetting('show_dot');
+diff --git a/core/webaudio.js b/core/webaudio.js
+new file mode 100644
+index 0000000..28c71ac
+--- /dev/null
++++ b/core/webaudio.js
+@@ -0,0 +1,142 @@
++export default class WebAudio {
++    constructor(url) {
++        this.url = url
++
++        this.connected = false;
++
++        //constants for audio behavoir
++        this.maximumAudioLag = 1.5; //amount of seconds we can potentially be behind the server audio stream
++        this.syncLagInterval = 5000; //check every x milliseconds if we are behind the server audio stream
++        this.updateBufferEvery = 20; //add recieved data to the player buffer every x milliseconds
++        this.reduceBufferInterval = 500; //trim the output audio stream buffer every x milliseconds so we don't overflow
++        this.maximumSecondsOfBuffering = 1; //maximum amount of data to store in the play buffer
++        this.connectionCheckInterval = 500; //check the connection every x milliseconds
++
++        //register all our background timers. these need to be created only once - and will run independent of the object's streams/properties
++        this.updateCheck = null;
++        this.syncCheck = null;
++        this.reduceCheck = null;
++        this.ConnCheck = null;
++
++    }
++
++    //registers all the event handlers for when this stream is closed - or when data arrives.
++    registerHandlers() {
++        this.mediaSource.addEventListener('sourceended', e => this.socketDisconnected(e))
++        this.mediaSource.addEventListener('sourceclose', e => this.socketDisconnected(e))
++        this.mediaSource.addEventListener('error', e => this.socketDisconnected(e))
++        this.buffer.addEventListener('error', e => this.socketDisconnected(e))
++        this.buffer.addEventListener('abort', e => this.socketDisconnected(e))
++    }
++
++    //starts the web audio stream. only call this method on button click.
++    start() {
++        if (!!this.connected) return;
++        if (!!this.audio) this.audio.remove();
++        this.queue = null;
++
++        if (this.updateCheck === null) this.updateCheck = setInterval(() => this.updateQueue(), this.updateBufferEvery);
++        if (this.syncCheck === null) this.syncCheck = setInterval(() => this.syncInterval(), this.syncLagInterval);
++        if (this.reduceCheck === null) this.reduceCheck = setInterval(() => this.reduceBuffer(), this.reduceBufferInterval);
++        if (this.ConnCheck === null) this.ConnCheck = setInterval(() => this.tryLastPacket(), this.connectionCheckInterval);
++
++        this.mediaSource = new MediaSource()
++        this.mediaSource.addEventListener('sourceopen', e => this.onSourceOpen())
++        //first we need a media source - and an audio object that contains it.
++        this.audio = document.createElement('audio');
++        this.audio.src = window.URL.createObjectURL(this.mediaSource);
++
++        //start our stream - we can only do this on user input
++        this.audio.play();
++    }
++
++    stop() {
++        // Clear all interval timers
++        clearInterval(this.updateCheck);
++        clearInterval(this.syncCheck);
++        clearInterval(this.reduceCheck);
++        clearInterval(this.ConnCheck);
++        // Close the socket
++        this.socket.close();
++        this.connected = false;
++        // Reset timers to null
++        this.updateCheck = null;
++        this.syncCheck = null;
++        this.reduceCheck = null;
++        this.ConnCheck = null;
++    }
++
++    wsConnect() {
++        if (!!this.socket) this.socket.close();
++
++        this.socket = new WebSocket(this.url, ['binary', 'base64'])
++        this.socket.binaryType = 'arraybuffer'
++        this.socket.addEventListener('message', e => this.websocketDataArrived(e), false);
++    }
++
++    //this is called when the media source contains data
++    onSourceOpen(e) {
++        this.buffer = this.mediaSource.addSourceBuffer('audio/webm; codecs="opus"')
++        this.registerHandlers();
++        this.wsConnect();
++    }
++
++    //whenever data arrives in our websocket this is called.
++    websocketDataArrived(e) {
++        this.lastPacket = Date.now();
++        this.connected = true;
++        this.queue = this.queue == null ? e.data : this.concat(this.queue, e.data);
++    }
++
++    //whenever a disconnect happens this is called.
++    socketDisconnected(e) {
++        console.log(e);
++        this.connected = false;
++    }
++
++    tryLastPacket() {
++        if (this.lastPacket == null) return;
++        if ((Date.now() - this.lastPacket) > 1000) {
++            this.socketDisconnected('timeout');
++        }
++    }
++
++    //this updates the buffer with the data from our queue
++    updateQueue() {
++        if (!(!!this.queue && !!this.buffer && !this.buffer.updating)) {
++            return;
++        }
++
++        this.buffer.appendBuffer(this.queue);
++        this.queue = null;
++    }
++
++    //reduces the stream buffer to the minimal size that we need for streaming
++    reduceBuffer() {
++        if (!(this.buffer && !this.buffer.updating && !!this.audio && !!this.audio.currentTime && this.audio.currentTime > 1)) {
++            return;
++        }
++
++        this.buffer.remove(0, this.audio.currentTime - 1);
++    }
++
++    //synchronizes the current time of the stream with the server
++    syncInterval() {
++        if (!(this.audio && this.audio.currentTime && this.audio.currentTime > 1 && this.buffer && this.buffer.buffered && this.buffer.buffered.length > 1)) {
++            return;
++        }
++
++        var currentTime = this.audio.currentTime;
++        var targetTime = this.buffer.buffered.end(this.buffer.buffered.length - 1);
++
++        if (targetTime > (currentTime + this.maximumAudioLag)) this.audio.fastSeek(targetTime);
++    }
++
++    //joins two data arrays - helper function
++    concat(buffer1, buffer2) {
++        var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
++        tmp.set(new Uint8Array(buffer1), 0);
++        tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
++        return tmp.buffer;
++    };
++}
+diff --git a/vnc.html b/vnc.html
+index c678c2a..d1652a0 100644
+--- a/vnc.html
++++ b/vnc.html
+@@ -170,6 +170,10 @@
+                         <label><input id="noVNC_setting_view_only" type="checkbox"> View Only</label>
+                     </li>
+                     <li><hr></li>
++                    <li>
++                        <label><input id="noVNC_setting_audio" type="checkbox"> Enable Audio</label>
++                    </li>
++                    <li><hr></li>
+                     <li>
+                         <label><input id="noVNC_setting_view_clip" type="checkbox"> Clip to Window</label>
+                     </li>
+diff --git a/vnc_lite.html b/vnc_lite.html
+index 8e2f5cb..d3cf6ab 100644
+--- a/vnc_lite.html
++++ b/vnc_lite.html
+@@ -41,6 +41,15 @@
+         #status {
+             text-align: center;
+         }
++        #toggleAudioButton {
++            position: fixed;
++            top: 0px;
++            left: 0px;
++            border: 1px outset;
++            padding: 5px 5px 4px 5px;
++            cursor: pointer;
++            display: none;
++        }
+         #sendCtrlAltDelButton {
+             position: fixed;
+             top: 0px;
+@@ -60,18 +69,38 @@
+     <script type="module" crossorigin="anonymous">
+         // RFB holds the API to connect and communicate with a VNC server
+         import RFB from './core/rfb.js';
++        import WebAudio from './core/webaudio.js';
+ 
+         let rfb;
+         let desktopName;
++        let wa;
+ 
+         // When this function is called we have
+         // successfully connected to a server
+         function connectedToServer(e) {
++            let audio_url;
++            let host = window.location.hostname; 
++            let port = 32123;
++            if (window.location.protocol === "https:") {
++                audio_url = 'wss';
++            } else {
++                audio_url = 'ws';
++            }
++            audio_url += '://' + host + ':' + port;
++
++            wa = new WebAudio(audio_url);
++            document.getElementById('toggleAudioButton').style.display = "block";
++
+             status("Connected to " + desktopName);
+         }
+ 
+         // This function is called when we are disconnected
+         function disconnectedFromServer(e) {
++            if(wa !== null) {
++                wa.stop();
++                wa = null;
++                document.getElementById('toggleAudioButton').style.display = "none";
++            }
+             if (e.detail.clean) {
+                 status("Disconnected");
+             } else {
+@@ -100,6 +129,19 @@
+             return false;
+         }
+ 
++        // Enable the audio websocket
++        function toggleAudio() {
++            if (wa.connected) {
++                console.log('Stopping audio...')
++                wa.stop();
++                document.getElementById('toggleAudioButton').innerText = "Enable Audio (requires access to port 32123)";
++            } else {
++                console.log('Starting audio websocket on: ' + audio_url)
++                wa.start();
++                document.getElementById('toggleAudioButton').innerText = "Disable Audio";
++            }
++        }
++
+         // Show a status text in the top bar
+         function status(text) {
+             document.getElementById('status').textContent = text;
+@@ -135,12 +177,16 @@
+         document.getElementById('sendCtrlAltDelButton')
+             .onclick = sendCtrlAltDel;
+ 
++        document.getElementById('toggleAudioButton')
++            .onclick = toggleAudio;
++
+         // Read parameters specified in the URL query string
+         // By default, use the host and port of server that served this file
+         const host = readQueryVariable('host', window.location.hostname);
+         let port = readQueryVariable('port', window.location.port);
+         const password = readQueryVariable('password');
+         const path = readQueryVariable('path', 'websockify');
++        const audio_path = readQueryVariable('audio_path', '');
+ 
+         // | | |         | | |
+         // | | | Connect | | |
+@@ -150,6 +196,7 @@
+ 
+         // Build the websocket URL used to connect
+         let url;
++        let audio_url;
+         if (window.location.protocol === "https:") {
+             url = 'wss';
+         } else {
+@@ -159,6 +206,9 @@
+         if(port) {
+             url += ':' + port;
+         }
++        if(audio_path !== '') {
++            audio_url = url + '/' + audio_path;
++        }
+         url += '/' + path;
+ 
+         // Creating a new RFB object will start a new connection
+@@ -179,6 +229,7 @@
+ 
+ <body>
+     <div id="top_bar">
++        <div id="toggleAudioButton">Enable Audio (requires access to port 32123)</div>
+         <div id="status">Loading</div>
+         <div id="sendCtrlAltDelButton">Send CtrlAltDel</div>
+     </div>
