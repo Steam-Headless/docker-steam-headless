@@ -1,6 +1,6 @@
 # Headless Steam Service
 
-Play your games in the browser with audio. Connect another device and use it with Steam Remote Play. 
+Play your games in the browser with audio. Connect another device and use it with Steam Remote Play. Easily deploy a Steam Docker instance in seconds.
 
 ## Features:
 - Full video/audio noVNC web access to a Xfce4 Desktop
