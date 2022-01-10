@@ -1,0 +1,120 @@
+name: Build and Deploy CI
+
+on:
+  push:
+    branches: [ 'dev-**', 'pr-**', staging, master ]
+    tags: [ '**' ]
+  pull_request:
+    branches: [ staging, master ]
+
+jobs:
+
+  build_docker:
+
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+    # Fetch shallow git repository
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Use QEMU to build
+    - name: Set up QEMU
+      if: success()
+      id: qemu
+      uses: docker/setup-qemu-action@v1
+
+    # Use docker buildx to build the docker image
+    - name: Build the Docker image
+      uses: docker/setup-buildx-action@v1
+      if: success()
+      id: buildx
+      with:
+        version: latest
+
+    # Generate 'prepare' build arguments to be retrieved later on
+    - name: Prepare
+      if: success()
+      id: prepare
+      run: |
+        echo  "GITHUB_REF:${GITHUB_REF}"
+        echo  "GITHUB_REPOSITORY:${GITHUB_REPOSITORY}"
+        DOCKER_IMAGE=docker.io/josh5/steam-headless
+        VERSION_TAG=${GITHUB_REF#refs/*/}
+
+        DOCKER_TAGS=""
+        if [[ ${VERSION_TAG%/merge} == 'master' ]]; then
+          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+        elif [[ ${VERSION_TAG%/merge} == 'staging' ]]; then
+          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:staging,"
+        elif [[ ${VERSION_TAG%/merge} =~ "dev-"* ]]; then
+          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${VERSION_TAG%/merge},"
+        fi
+        if [[ ${GITHUB_REF} == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+          if [[ ${VERSION} =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}[-\w]*$ ]]; then
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${VERSION},"
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+          fi
+        fi
+
+        DOCKER_PUSH="true"
+        if [[ ${DOCKER_IMAGE} != 'docker.io/josh5/steam-headless' ]]; then
+          DOCKER_PUSH="false"
+        fi
+        if [[ ${VERSION_TAG%/merge} =~ "pr-"* ]]; then
+          DOCKER_PUSH="false"
+        fi
+        if [[ ${VERSION_TAG%/merge} =~ ^[0-9]+$ ]]; then
+          DOCKER_PUSH="false"
+        fi
+
+        echo ::set-output name=docker_image::${DOCKER_IMAGE}
+        echo ::set-output name=docker_tags::$(echo ${DOCKER_TAGS} | sed 's/,$//')
+        echo ::set-output name=docker_platforms::linux/amd64
+        echo ::set-output name=docker_push::${DOCKER_PUSH}
+
+    # Cache the build
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      id: cache
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+    
+    # Login to Docker Hub
+    - name: Login to Docker Hub
+      if: success() && (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/'))
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    # Run docker build and push
+    - name: Docker Build and Push
+      if: success()
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: Dockerfile
+        platforms: ${{ steps.prepare.outputs.docker_platforms }}
+        push: ${{ steps.prepare.outputs.docker_push }}
+        tags: |
+          ${{ steps.prepare.outputs.docker_tags }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+
+    # Keep only latest cache
+    #   https://github.com/docker/build-push-action/issues/252
+    #   https://github.com/moby/buildkit/issues/1896
+    - name: Move cache
+      if: always()
+      run: |
+        if [[ -e /tmp/.buildx-cache-new ]]; then
+          echo "Cleaning up old cache..."
+          rm -rf /tmp/.buildx-cache
+          mv -v /tmp/.buildx-cache-new /tmp/.buildx-cache
+        fi
