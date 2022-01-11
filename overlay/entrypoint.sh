@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 7:08:46 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Tuesday, 11th January 2022 1:02:16 am
+# Last Modified: Tuesday, 11th January 2022 8:44:17 pm
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
@@ -44,4 +44,6 @@ for user_init_script in ${USER_HOME}/init.d/*.sh ; do
 done
 
 echo "**** Starting supervisord ****";
-exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon
+mkdir -p /var/log/supervisor
+chmod a+rw /var/log/supervisor
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon --user root

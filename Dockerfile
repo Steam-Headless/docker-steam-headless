@@ -14,7 +14,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install and configure locals ****" \
-        && apt-get -y install --no-install-recommends \
+        && apt-get install -y --no-install-recommends \
             locales \
             procps \
         && echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen \
@@ -40,7 +40,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install certificates ****" \
-        && apt-get -y install --reinstall \
+        && apt-get install -y --reinstall \
             ca-certificates \
     && \
     echo "**** Section cleanup ****" \
@@ -59,7 +59,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install tools ****" \
-        && apt-get -y install \
+        && apt-get install -y \
             bash \
             bash-completion \
             gcc \
@@ -68,9 +68,12 @@ RUN \
             less \
             make \
             nano \
+            rsync \
             sudo \
+            unzip \
             vim \
             wget \
+            xz-utils \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -87,8 +90,9 @@ RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install desktop requirements ****" \
-        && apt-get -y install --no-install-recommends \
+    echo "**** Install X Server requirements ****" \
+        && apt-get install -y --no-install-recommends \
+            avahi-utils \
             dbus-x11 \
             libxcomposite-dev \
             libxcursor1 \
@@ -100,11 +104,14 @@ RUN \
             python3 \
             python3-numpy \
             python3-setuptools \
-            rsync \
             x11vnc \
             xauth \
+            xfonts-base \
             xorg \
+            xserver-xorg-core \
+            xserver-xorg-input-libinput \
             xserver-xorg-legacy \
+            xserver-xorg-video-all \
             xvfb \
     && \
     echo "**** Section cleanup ****" \
@@ -123,7 +130,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install supervisor ****" \
-        && apt-get -y install \
+        && apt-get install -y \
             supervisor \
     && \
     echo "**** Section cleanup ****" \
@@ -142,7 +149,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install openssh server ****" \
-        && apt-get -y install \
+        && apt-get install -y \
             openssh-server \
         && echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
     && \
@@ -217,7 +224,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install desktop environment ****" \
-        && apt-get -y install \
+        && apt-get install -y \
             xfce4 \
             xfce4-terminal \
             msttcorefonts \
@@ -240,7 +247,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install firefox ****" \
-        && apt-get -y install \
+        && apt-get install -y \
             firefox-esr \
     && \
     echo "**** Section cleanup ****" \
@@ -260,15 +267,18 @@ RUN \
         && apt-get update \
         && echo steam steam/question select "I AGREE" | debconf-set-selections \
         && echo steam steam/license note '' | debconf-set-selections \
-        && apt-get -y install \
-            steam \
-            steam-devices \
-            vulkan-tools \
+        && apt-get install -y \
+            libgl1-mesa-dri \
+            libgl1-mesa-dri:i386 \
+            libgl1-mesa-glx \
+            libglx-mesa0:i386 \
             mesa-utils \
             mesa-vulkan-drivers \
-            libglx-mesa0:i386 \
             mesa-vulkan-drivers:i386 \
-            libgl1-mesa-dri:i386 \
+            vulkan-tools \
+        && apt-get install -y \
+            steam \
+            steam-devices \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -286,7 +296,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install audio streaming deps ****" \
-        && apt-get -y install --no-install-recommends \
+        && apt-get install -y --no-install-recommends \
             bzip2 \
             gstreamer1.0-alsa \
             gstreamer1.0-gl \
@@ -350,9 +360,10 @@ ENV \
     DISPLAY_SIZEH="900" \
     DISPLAY_SIZEW="1600" \
     DISPLAY_VIDEO_PORT="DFP" \
-    DISPLAY=":0" \
+    DISPLAY=":55" \
     NVIDIA_DRIVER_CAPABILITIES="all" \
-    NVIDIA_VISIBLE_DEVICES="all"
+    NVIDIA_VISIBLE_DEVICES="all" \
+    MODE="primary"
 
 # Be sure that the noVNC port is exposed
 EXPOSE 8083

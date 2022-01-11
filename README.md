@@ -8,6 +8,7 @@ Play your games in the browser with audio. Connect another device and use it wit
 - Root access
 - SSH server for remote terminal access
 
+
 ---
 ## Notes:
 
@@ -26,6 +27,18 @@ In this container, Steam is configured to automatically start. If you wish to ad
 
 ### NETWORK MODE:
 If you want to use the container as a Steam Remote Play (previously "In Home Streaming") host device you should create a custom network and assign this container it's own IP, if you don't do this the traffic will be routed through the internet since Steam thinks you are on a different network.
+
+### USING HOST X SERVER:
+If your host is already running X, you can just use that. To do this, be sure to configure:
+  - DISPLAY=:0    
+    **(Variable)** - *Configures the sceen to use the primary display. Set this to whatever your host is using*
+  - MODE=secondary    
+    **(Variable)** - *Configures the container to not start an X server of its own*
+  - HOST_DBUS=true    
+    **(Variable)** - *Optional - Configures the container to use the host dbus process*
+  - /run/dbus:/run/dbus:ro    
+    **(Mount)**  - *Optional - Configures the container to use the host dbus process*
+
 
 ---
 ## Running:

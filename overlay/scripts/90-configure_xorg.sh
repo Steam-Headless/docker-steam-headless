@@ -25,13 +25,6 @@ fi
 
 # Configure a NVIDIA X11 config
 function configure_nvidia_x_server {
-    # Configure x to be run by anyone
-    if grep -Fxq "allowed_users=console" /etc/X11/Xwrapper.config; then
-        echo "Configure Xwrapper.config"
-        sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
-    fi
-
-    # Configure xorg for NVIDIA
     echo "Configuring X11 with GPU ID: '${gpu_select}'"
     nvidia_gpu_hex_id=$(nvidia-smi --format=csv --query-gpu=pci.bus_id --id="${gpu_select}" 2> /dev/null | sed -n 2p)
     IFS=":." ARR_ID=(${nvidia_gpu_hex_id})
@@ -45,12 +38,44 @@ function configure_nvidia_x_server {
     sed -i '/Section\s\+"Monitor"/a\    '"${MODELINE}" /etc/X11/xorg.conf
 }
 
+# Allow anybody for running x server
+function configure_x_server {
+    # Configure x to be run by anyone
+    if grep -Fxq "allowed_users=console" /etc/X11/Xwrapper.config; then
+        echo "Configure Xwrapper.config"
+        sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
+    fi
+
+    # Ensure the X socket path exists
+    if [ ! -d /tmp/.X11-unix ]; then
+        mkdir -p /tmp/.X11-unix
+    fi
+
+    # Check if this container is being run as a secondary instance
+    if [ "${MODE}" == "p" ] | [ "${MODE}" == "primary" ]; then
+        echo "Configure container as primary the X server"
+        # Enable supervisord script
+        sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor/conf.d/xorg.conf
+    elif [ "${MODE}" == "fb" ] | [ "${MODE}" == "framebuffer" ]; then
+        echo "Configure container to use a virtual framebuffer as the X server"
+        # Disable supervisord script
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/xorg.conf
+    else
+        echo "Configure container as secondary and do not run an X server"
+        # Disable supervisord script
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/xorg.conf
+    fi
+    # Make startup script executable
+    chmod +x /usr/bin/start-xorg.sh
+}
+
 
 if [[ -z ${nvidia_gpu_hex_id} ]]; then
     echo "**** Generate default xorg.conf ****";
-    # TODO: Configure xorg.conf with no NVIDIA GPU
+    configure_x_server
 else
     echo "**** Generate NVIDIA xorg.conf ****";
+    configure_x_server
     configure_nvidia_x_server
 fi
 

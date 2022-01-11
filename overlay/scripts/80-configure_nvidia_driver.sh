@@ -19,7 +19,7 @@ function download_driver {
     mkdir -p ${USER_HOME}/.cache/nvidia
 
     if [[ ! -f "${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run" ]]; then
-        echo "Downloading driver"
+        echo "Downloading driver v${nvidia_host_driver_version}"
         wget -q --show-progress --progress=bar:force:noscroll \
             -O /tmp/NVIDIA.run \
             http://download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version}.run
@@ -32,12 +32,12 @@ function download_driver {
 function install_driver {
     # Check here if the currently installed version matches using nvidia-settings
     nvidia_settings_version=$(nvidia-settings --version 2> /dev/null | grep version | cut -d ' ' -f 4)
-    [[ "${nvidia_settings_version}x" == "${nvidia_host_driver_version}x" ]] && return 0
+    [[ "${nvidia_settings_version}x" == "${nvidia_host_driver_version}x" ]] && return 0;
 
     # Download the driver (if it does not yet exist locally)
     download_driver
 
-    echo "Installing driver"
+    echo "Installing driver v${nvidia_host_driver_version} to match what is running on the host"
     chmod +x ${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run
     ${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run \
         --silent \
