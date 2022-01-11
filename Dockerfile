@@ -59,7 +59,7 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install tools ****" \
-        && apt-get install -y \
+        && apt-get install -y --reinstall \
             bash \
             bash-completion \
             gcc \
@@ -68,6 +68,10 @@ RUN \
             less \
             make \
             nano \
+            python3 \
+            python3-numpy \
+            python3-pip \
+            python3-setuptools \
             rsync \
             sudo \
             unzip \
@@ -101,9 +105,6 @@ RUN \
             net-tools \
             pciutils \
             pkg-config \
-            python3 \
-            python3-numpy \
-            python3-setuptools \
             x11vnc \
             xauth \
             xfonts-base \
