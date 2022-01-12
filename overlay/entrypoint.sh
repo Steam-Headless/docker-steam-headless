@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # File: entrypoint.sh
-# Project: docker-steamos
+# Project: docker-steam-headless
 # File Created: Saturday, 8th January 2022 7:08:46 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
@@ -17,8 +17,8 @@ if [ ! -z "$@" ]; then
     exit $?
 fi
 
-# Execute all init scripts
-for init_script in /scripts/*.sh ; do
+# Execute all container init scripts
+for init_script in /etc/cont-init.d/*.sh ; do
     echo
     echo "[ ${init_script}: executing... ]"
     sed -i 's/\r$//' "${init_script}"

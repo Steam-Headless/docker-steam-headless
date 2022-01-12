@@ -16,16 +16,17 @@ export nvidia_gpu_name=$(nvidia-smi --format=csv --query-gpu=name --id="${gpu_se
 export nvidia_host_driver_version="$(nvidia-smi 2> /dev/null | grep NVIDIA-SMI | cut -d ' ' -f3)"
 
 function download_driver {
-    mkdir -p ${USER_HOME}/.cache/nvidia
+    mkdir -p ${USER_HOME}/Downloads
+    chown -R ${USER} ${USER_HOME}/Downloads
 
-    if [[ ! -f "${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run" ]]; then
+    if [[ ! -f "${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run" ]]; then
         echo "Downloading driver v${nvidia_host_driver_version}"
         wget -q --show-progress --progress=bar:force:noscroll \
             -O /tmp/NVIDIA.run \
             http://download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version}.run
         [[ $? -gt 0 ]] && echo "Error downloading driver. Exit!" && return 1
 
-        mv /tmp/NVIDIA.run ${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run
+        mv /tmp/NVIDIA.run ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
     fi
 }
 
@@ -38,8 +39,8 @@ function install_driver {
     download_driver
 
     echo "Installing driver v${nvidia_host_driver_version} to match what is running on the host"
-    chmod +x ${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run
-    ${USER_HOME}/.cache/nvidia/NVIDIA_${nvidia_host_driver_version}.run \
+    chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
+    ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
         --silent \
         --accept-license \
         --no-kernel-module \
@@ -51,7 +52,7 @@ function install_driver {
         --no-check-for-alternate-installs \
         --no-libglx-indirect \
         --no-install-libglvnd \
-        > ${USER_HOME}/.cache/nvidia/last_install.log 2>&1
+        > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
 }
 
 if [[ -z ${nvidia_pci_address} ]]; then
