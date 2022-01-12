@@ -363,8 +363,12 @@ ENV \
     DISPLAY_VIDEO_PORT="DFP" \
     DISPLAY=":55" \
     NVIDIA_DRIVER_CAPABILITIES="all" \
-    NVIDIA_VISIBLE_DEVICES="all" \
-    MODE="primary"
+    NVIDIA_VISIBLE_DEVICES="all"
+
+# Set container configuration environment variables
+ENV \
+    MODE="primary" \
+    ENABLE_VNC_AUDIO="true"
 
 # Be sure that the noVNC port is exposed
 EXPOSE 8083
