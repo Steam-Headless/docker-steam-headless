@@ -1,5 +1,5 @@
 
-echo "**** Configure pulseaudio ****"
+echo "**** Configure VNC audio ****"
 if [[ "${ENABLE_VNC_AUDIO}" == "true" ]]; then
     echo "Configure pulseaudio to use a socket to pipe audio to VNC"
     sed -i 's|^; default-server.*$|default-server = unix:/tmp/pulseaudio.socket|' /etc/pulse/client.conf
@@ -19,11 +19,12 @@ if [[ "${ENABLE_VNC_AUDIO}" == "true" ]]; then
         rm /opt/noVNC/audio.patch
     fi
     # Enable supervisord script
-    sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor/conf.d/audio.conf
+    sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor/conf.d/vnc-audio.conf
 else
-    echo "Disable pulseaudio"
+    echo "Disable audio stream"
+    echo "Disable audio websock"
     # Disable supervisord script
-    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/audio.conf
+    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/vnc-audio.conf
 
 fi
 

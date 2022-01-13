@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 2:34:23 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Tuesday, 11th January 2022 9:43:50 pm
+# Last Modified: Friday, 14th January 2022 8:45:00 am
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
@@ -101,6 +101,7 @@ sleep 1
 # Run
 docker run -d --name="${container_name}" \
     --privileged=true \
+    --network=host \
     --ipc="host" \
     -e PUID="99"  \
     -e PGID="100"  \
@@ -116,11 +117,10 @@ docker run -d --name="${container_name}" \
     -e DISPLAY_SIZEH="720" \
     -e DISPLAY_SIZEW="1280" \
     -e DISPLAY_VIDEO_PORT="DFP" \
-    -e DISPLAY=":55" \
+    -e DISPLAY=":2" \
     -e NVIDIA_DRIVER_CAPABILITIES="all" \
     -e NVIDIA_VISIBLE_DEVICES="all" \
-    -p 8083:8083 \
-    -p 32123:32123 \
+    -e ENABLE_VNC_AUDIO="false" \
     -v "${project_base_path}/config/home/default-${container_name}":"/home/default":"rw"  \
     -v "/tmp/":"/tmp/":"rw"  \
     --hostname="${container_name}" \
