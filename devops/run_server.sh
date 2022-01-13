@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 2:34:23 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Friday, 14th January 2022 8:45:04 am
+# Last Modified: Friday, 14th January 2022 8:53:16 am
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
@@ -124,7 +124,6 @@ docker run -d --name="${container_name}" \
     -v "${project_base_path}/config/home/default-${container_name}":"/home/default":"rw"  \
     -v "/tmp/":"/tmp/":"rw"  \
     -v /dev/input:/dev/input:ro \
-    -v /run/udev:/run/udev:ro \
     --hostname="${container_name}" \
     --shm-size=2G \
     ${additional_docker_params} \
