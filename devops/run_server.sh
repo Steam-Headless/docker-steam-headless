@@ -48,17 +48,17 @@ for ARG in ${@}; do
 done
 if [[ "${primary}" == "true" ]]; then
     container_name="${container_name}-p"
-    additional_docker_params="${additional_docker_params} -e MODE='primary'"
+    additional_docker_params="${additional_docker_params} -e MODE=primary"
     hostx="false"
 else
     container_name="${container_name}-s"
-    additional_docker_params="${additional_docker_params} -e MODE='secondary'"
+    additional_docker_params="${additional_docker_params} -e MODE=secondary"
     framebuffer="false"
 fi
 if [[ "${hostx}" == "true" ]]; then
     container_name="${container_name}-hx"
     additional_docker_params="${additional_docker_params} -v /tmp/.X11-unix:/tmp/.X11-unix"
-    additional_docker_params="${additional_docker_params} -e MODE='secondary'"
+    additional_docker_params="${additional_docker_params} -e MODE=secondary"
     nvidia="false"
     framebuffer="false"
 else
@@ -72,6 +72,9 @@ fi
 if [[ "${framebuffer}" == "true" ]]; then
     # TODO: Enable xvfb
     container_name="${container_name}-fb"
+fi
+if [[ -e /dev/dri ]]; then
+    additional_docker_params="${additional_docker_params} --device=/dev/dri"
 fi
 
 
@@ -99,35 +102,36 @@ sleep 1
 
 
 # Run
-docker run -d --name="${container_name}" \
+cmd="docker run -d --name='${container_name}' \
     --privileged=true \
     --network=host \
-    --ipc="host" \
-    -e PUID="99"  \
-    -e PGID="100"  \
-    -e UMASK="000"  \
-    -e USER_PASSWORD="password" \
-    -e USER="default" \
-    -e USER_HOME="/home/default" \
-    -e TZ="Pacific/Auckland" \
-    -e USER_LOCALES="en_US.UTF-8 UTF-8" \
-    -e DISPLAY_CDEPTH="24" \
-    -e DISPLAY_DPI="96" \
-    -e DISPLAY_REFRESH="60" \
-    -e DISPLAY_SIZEH="720" \
-    -e DISPLAY_SIZEW="1280" \
-    -e DISPLAY_VIDEO_PORT="DFP" \
-    -e DISPLAY=":2" \
-    -e NVIDIA_DRIVER_CAPABILITIES="all" \
-    -e NVIDIA_VISIBLE_DEVICES="all" \
-    -e ENABLE_VNC_AUDIO="false" \
-    -v "${project_base_path}/config/home/default-${container_name}":"/home/default":"rw"  \
-    -v "/tmp/":"/tmp/":"rw"  \
-    -v /dev/input:/dev/input:ro \
-    --hostname="${container_name}" \
+    --ipc='host' \
+    -e PUID='99'  \
+    -e PGID='100'  \
+    -e UMASK='000'  \
+    -e USER_PASSWORD='password' \
+    -e USER='default' \
+    -e USER_HOME='/home/default' \
+    -e TZ='Pacific/Auckland' \
+    -e USER_LOCALES='en_US.UTF-8 UTF-8' \
+    -e DISPLAY_CDEPTH='24' \
+    -e DISPLAY_DPI='96' \
+    -e DISPLAY_REFRESH='60' \
+    -e DISPLAY_SIZEH='720' \
+    -e DISPLAY_SIZEW='1280' \
+    -e DISPLAY_VIDEO_PORT='DFP' \
+    -e DISPLAY=':55' \
+    -e NVIDIA_DRIVER_CAPABILITIES='all' \
+    -e NVIDIA_VISIBLE_DEVICES='all' \
+    -e ENABLE_VNC_AUDIO='false' \
+    -v '${project_base_path}/config/home/default-${container_name}':'/home/default':'rw'  \
+    -v '/tmp/.X11-unix/':'/tmp/.X11-unix/':'rw'  \
+    -v '/dev/input':'/dev/input':'ro' \
+    --hostname='${container_name}' \
     --shm-size=2G \
     ${additional_docker_params} \
-    josh5/steam-headless:develop
-
+    josh5/steam-headless:develop"
+echo ${cmd}
+bash -c "${cmd}"
 
 docker logs -f ${container_name}
