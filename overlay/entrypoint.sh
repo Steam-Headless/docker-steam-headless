@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 7:08:46 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 16th January 2022 2:30:07 am
+# Last Modified: Sunday, 16th January 2022 6:00:04 am
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -19,7 +19,7 @@ fi
 
 # Print the current version (if the file exists)
 if [[ -f /version.txt ]]; then
-    echo "Version: $(cat /version.txt)"
+    cat /version.txt
 fi
 
 # Execute all container init scripts
