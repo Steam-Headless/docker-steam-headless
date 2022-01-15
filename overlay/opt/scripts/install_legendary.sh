@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:00:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 16th January 2022 4:54:27 am
+# Last Modified: Sunday, 16th January 2022 5:44:25 am
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -48,6 +48,21 @@ install() {
 
     # Remove installer shortcut
     rm -f /usr/share/applications/install.legendary.desktop
+
+# Add launcher shortcut
+cat << EOF > /usr/share/applications/rare.desktop
+[Desktop Entry]
+Name=Rare - (Epic Games Store)
+Comment=A frontend for legendary, the open source Epic Games Store alternative
+GenericName=Rare - (Epic Games Store)
+X-GNOME-FullName=Rare - (Epic Games Store)
+Exec=/usr/local/bin/rare %u
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=rare
+Categories=Game;
+EOF
 }
 
 
