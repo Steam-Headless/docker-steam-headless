@@ -59,7 +59,7 @@ jobs:
           fi
         fi
 
-        echo ${VERSION} > ./overlay/version.txt
+        echo "Build: [$(date +"%D %T")] [${GITHUB_REF_NAME}] [${GITHUB_SHA}]" > ./overlay/version.txt
 
         DOCKER_PUSH="true"
         if [[ ${DOCKER_IMAGE} != 'docker.io/josh5/steam-headless' ]]; then
