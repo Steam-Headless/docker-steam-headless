@@ -62,6 +62,7 @@ RUN \
         && apt-get install -y --reinstall \
             bash \
             bash-completion \
+            curl \
             gcc \
             git \
             kmod \
@@ -89,7 +90,26 @@ RUN \
     && \
     echo
 
-# Install desktop requirements
+# Install supervisor
+RUN \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install supervisor ****" \
+        && apt-get install -y \
+            supervisor \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
+# Install X Server requirements
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
@@ -98,13 +118,19 @@ RUN \
         && apt-get install -y --no-install-recommends \
             avahi-utils \
             dbus-x11 \
+            libgl1-mesa-dri \
+            libgl1-mesa-glx \
+            libglu1-mesa \
             libxcomposite-dev \
             libxcursor1 \
             man-db \
+            mesa-utils \
+            mesa-utils-extra \
             mlocate \
             net-tools \
             pciutils \
             pkg-config \
+            x11-xfs-utils \
             x11vnc \
             xauth \
             xfonts-base \
@@ -125,14 +151,14 @@ RUN \
     && \
     echo
 
-# Install supervisor
+# Install audio requirements
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install supervisor ****" \
-        && apt-get install -y \
-            supervisor \
+    echo "**** Install X Server requirements ****" \
+        && apt-get install -y --no-install-recommends \
+            pulseaudio \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -219,6 +245,39 @@ RUN \
             /tmp/websockify-* \
             /tmp/websockify.tar.gz
 
+# Install Steam
+RUN \
+    echo "**** Install steam ****" \
+        && dpkg --add-architecture i386 \
+        && apt-get update \
+        && echo steam steam/question select "I AGREE" | debconf-set-selections \
+        && echo steam steam/license note '' | debconf-set-selections \
+        && apt-get install -y \
+            libegl1 \
+            libgl1-mesa-dri:i386 \
+            libglx-mesa0:i386 \
+            libgtk-3-0 \
+            libgtk2.0-0 \
+            libsdl2-2.0-0 \
+            libvulkan1 \
+            libvulkan1:i386 \
+            mesa-vulkan-drivers \
+            mesa-vulkan-drivers:i386 \
+            vulkan-tools \
+        && apt-get install -y \
+            steam \
+            steam-devices \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
 # Install desktop environment
 RUN \
     echo "**** Update apt database ****" \
@@ -261,36 +320,6 @@ RUN \
     && \
     echo
 
-# Install Steam
-RUN \
-    echo "**** Install steam ****" \
-        && dpkg --add-architecture i386 \
-        && apt-get update \
-        && echo steam steam/question select "I AGREE" | debconf-set-selections \
-        && echo steam steam/license note '' | debconf-set-selections \
-        && apt-get install -y \
-            libgl1-mesa-dri \
-            libgl1-mesa-dri:i386 \
-            libgl1-mesa-glx \
-            libglx-mesa0:i386 \
-            mesa-utils \
-            mesa-vulkan-drivers \
-            mesa-vulkan-drivers:i386 \
-            vulkan-tools \
-        && apt-get install -y \
-            steam \
-            steam-devices \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
 # Setup browser audio streaming deps
 RUN \
     echo "**** Update apt database ****" \
@@ -309,17 +338,13 @@ RUN \
             gstreamer1.0-qt5 \
             gstreamer1.0-tools \
             gstreamer1.0-x \
-            libglu1-mesa \
             libgstreamer1.0-0 \
-            libgtk2.0-0 \
             libncursesw5 \
             libopenal1 \
             libsdl-image1.2 \
             libsdl-ttf2.0-0 \
             libsdl1.2debian \
             libsndfile1 \
-            novnc \
-            pulseaudio \
             ucspi-tcp \
     && \
     echo "**** Section cleanup ****" \
