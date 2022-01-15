@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Installer - Heroic (Epic Games Launcher)
+Categories=Game;
+Exec=/opt/scripts/install_heroic.sh %U
+Icon=installsoftware
+Terminal=true
+Type=Application
