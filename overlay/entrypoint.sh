@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 7:08:46 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Tuesday, 11th January 2022 8:44:17 pm
+# Last Modified: Saturday, 15th January 2022 11:55:48 pm
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
@@ -15,6 +15,11 @@ set -e
 if [ ! -z "$@" ]; then
     exec $@
     exit $?
+fi
+
+# Print the current version (if the file exists)
+if [[ -f /version.txt ]]; then
+    echo "Version: $(cat /version.txt)"
 fi
 
 # Execute all container init scripts

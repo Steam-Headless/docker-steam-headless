@@ -59,6 +59,8 @@ jobs:
           fi
         fi
 
+        echo ${VERSION} > ./overlay/version.txt
+
         DOCKER_PUSH="true"
         if [[ ${DOCKER_IMAGE} != 'docker.io/josh5/steam-headless' ]]; then
           DOCKER_PUSH="false"
