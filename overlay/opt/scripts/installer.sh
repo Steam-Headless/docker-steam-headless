@@ -23,6 +23,6 @@ if [[ "${script_path}" == *"opt/script"* ]]; then
     echo "Installed init script '${dest_file}'"
     echo "This script will install ${pkg^} when you next restart the container."
     echo
-    read -s -p "Press any key to continue"
+    read -s -p "Press enter to continue"
     echo
 fi
