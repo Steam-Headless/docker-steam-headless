@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Rare - (Epic Games Store)
+Comment=A frontend for legendary, the open source Epic Games Store alternative
+GenericName=Rare - (Epic Games Store)
+X-GNOME-FullName=Rare - (Epic Games Store)
+Exec=/usr/local/bin/rare %u
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=rare
+Categories=Game;

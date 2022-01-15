@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:45:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 16th January 2022 2:17:37 am
+# Last Modified: Sunday, 16th January 2022 4:54:11 am
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -25,6 +25,9 @@ install() {
 
         sed -i '/Exec=lutris %U/c\Exec=/usr/games/lutris %U' /usr/share/applications/net.lutris.Lutris.desktop
     fi
+
+    # Remove installer shortcut
+    rm -f /usr/share/applications/install.lutris.desktop
 }
 
 

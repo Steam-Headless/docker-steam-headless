@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:45:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 16th January 2022 2:17:35 am
+# Last Modified: Sunday, 16th January 2022 4:55:12 am
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -24,8 +24,9 @@ install() {
         # Update to the latest version on startup using the users Downloads directory
         su ${USER} -c "${pkg} -y -o '/home/${USER}/Downloads/'" &
     fi
-    # Make sure the desktop icon is removed
-    rm -f /usr/share/applications/protonup.desktop
+
+    # Remove installer shortcut
+    rm -f /usr/share/applications/install.protonup.desktop
 }
 
 
