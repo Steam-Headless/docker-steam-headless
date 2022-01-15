@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Installer - Protonup
+Categories=Game;
+Exec=/opt/scripts/install_protonup.sh %U
+Icon=installsoftware
+Terminal=true
+Type=Application
