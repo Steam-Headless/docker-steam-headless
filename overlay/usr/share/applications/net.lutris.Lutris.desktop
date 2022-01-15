@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Installer - Lutris
+Categories=Game;
+Exec=/opt/scripts/install_lutris.sh %U
+Icon=installsoftware
+Terminal=true
+Type=Application
