@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 7:08:46 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 16th January 2022 6:00:04 am
+# Last Modified: Sunday, 16th January 2022 3:18:38 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -58,6 +58,9 @@ chmod a+rwx /opt/scripts/*.sh
 # Start supervisord
 echo
 echo "**** Starting supervisord ****";
+echo "Logging all root services to `/var/log/supervisor/`"
+echo "Logging all user services to `/home/${USER}/.cache/log/`"
+echo
 mkdir -p /var/log/supervisor
 chmod a+rw /var/log/supervisor
 exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon --user root
