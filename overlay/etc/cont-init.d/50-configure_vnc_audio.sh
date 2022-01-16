@@ -20,12 +20,16 @@ if [[ "${ENABLE_VNC_AUDIO}" == "true" ]]; then
     fi
     # Enable supervisord script
     sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor/conf.d/vnc-audio.conf
+
+    # Remove x11vnc from applications menu
+    if !  grep -q 'Hidden=true' /usr/share/applications/x11vnc.desktop; then
+        echo 'Hidden=true' >> /usr/share/applications/x11vnc.desktop
+    fi
 else
     echo "Disable audio stream"
     echo "Disable audio websock"
     # Disable supervisord script
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/vnc-audio.conf
-
 fi
 
 echo "DONE"
