@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:00:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 16th January 2022 7:10:49 am
+# Last Modified: Monday, 17th January 2022 11:44:46 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -48,24 +48,6 @@ install() {
         chmod +x /home/${USER}/HeroicBashLauncher/setup.sh
         sed -i 's|^#!.*\/bash$|#!/usr/bin/env bash|' /home/${USER}/HeroicBashLauncher/setup.sh
     fi
-    # Run script on each start
-    su ${USER} -c "cd /home/${USER}/HeroicBashLauncher && bash ./setup.sh"
-
-# Add launcher to reload 
-cat << EOF > /usr/share/applications/heroicbashlauncher.desktop
-[Desktop Entry]
-Name=Heroic Games Reload Bash Launcher Scripts
-Comment=Manually reload the HeroicBashLauncher scripts
-GenericName=Heroic Games Reload Bahs Launcher Scripts
-X-GNOME-FullName=Heroic Games Reload Bahs Launcher Scripts
-Exec=/home/${USER}/HeroicBashLauncher/setup.sh %u
-Path=/home/${USER}/HeroicBashLauncher
-Terminal=true
-X-MultipleArgs=false
-Type=Application
-Icon=heroic
-Categories=Game;
-EOF
 
     # Remove installer shortcut
     rm -f /usr/share/applications/install.heroic.desktop
