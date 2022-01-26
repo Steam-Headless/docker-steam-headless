@@ -20,7 +20,7 @@ script inside the `~/init.d` directory ending with ".sh". This will be executed 
 Everything that you wish to save in this container should be stored in the home directory or a docker container mount that you have specified. All files that are store outside your home directory are not persistent and will be wiped if there is an update of the container or you change something in the template.
 
 ### GAMES LIBRARY:
-It is recommended that you mount your games library to `/games` and configure Steam to add that path.
+It is recommended that you mount your games library to `/mnt/games` and configure Steam to add that path.
 
 ### AUTO START APPLICATIONS:
 In this container, Steam is configured to automatically start. If you wish to add additional services to automatically start, add them under **Applications > Settings > Session and Startup** in the WebUI.

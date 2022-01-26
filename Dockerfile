@@ -418,11 +418,9 @@ RUN \
     echo "**** Configure default user '${USER}' ****" \
         && mkdir -p \
             ${USER_HOME} \
-            /games \
         && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
         && chown -R ${USER} \
             ${USER_HOME} \
-            /games \
         && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Add FS overlay
