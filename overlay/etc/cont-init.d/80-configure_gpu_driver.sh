@@ -11,9 +11,13 @@ else
     fi
 fi
 
+# NVIDIA Params
 export nvidia_pci_address="$(nvidia-smi --format=csv --query-gpu=pci.bus_id --id="${gpu_select}" 2> /dev/null | sed -n 2p | cut -d ':' -f2,3)"
 export nvidia_gpu_name=$(nvidia-smi --format=csv --query-gpu=name --id="${gpu_select}" | sed -n 2p 2> /dev/null)
 export nvidia_host_driver_version="$(nvidia-smi 2> /dev/null | grep NVIDIA-SMI | cut -d ' ' -f3)"
+
+# Intel params
+export intel_cpu_model="$(lscpu | grep 'Model name:' | grep Intel | cut -d':' -f2 | xargs)"
 
 function download_driver {
     mkdir -p ${USER_HOME}/Downloads
@@ -30,7 +34,7 @@ function download_driver {
     fi
 }
 
-function install_driver {
+function install_nvidia_driver {
     # Check here if the currently installed version matches using nvidia-settings
     nvidia_settings_version=$(nvidia-settings --version 2> /dev/null | grep version | cut -d ' ' -f 4)
     [[ "${nvidia_settings_version}x" == "${nvidia_host_driver_version}x" ]] && return 0;
@@ -38,7 +42,17 @@ function install_driver {
     # Download the driver (if it does not yet exist locally)
     download_driver
 
-    echo "Installing driver v${nvidia_host_driver_version} to match what is running on the host"
+    # if command -v pacman &> /dev/null; then
+    #     echo "Install NVIDIA vulkan utils" \
+    #         && pacman -Syu --noconfirm --needed \
+    #             lib32-nvidia-utils \
+    #             lib32-vulkan-icd-loader
+    #             nvidia-utils \
+    #             vulkan-icd-loader \
+    #         && echo
+    # fi
+
+    echo "Installing NVIDIA driver v${nvidia_host_driver_version} to match what is running on the host"
     chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
     ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
         --silent \
@@ -55,11 +69,41 @@ function install_driver {
         > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
 }
 
-if [[ -z ${nvidia_pci_address} ]]; then
-    echo "**** No NVIDIA device found ****";
-else
+function install_amd_driver {
+    if command -v pacman &> /dev/null; then
+        echo "Install AMD vulkan driver" \
+        && pacman -Syu --noconfirm --needed \
+            lib32-mesa \
+            lib32-vulkan-icd-loader \
+            lib32-vulkan-radeon \
+            vulkan-icd-loader \
+            vulkan-radeon \
+        && echo
+    fi
+}
+
+function install_intel_driver {
+    if command -v pacman &> /dev/null; then
+        echo "Install Intel vulkan driver" \
+        && pacman -Syu --noconfirm --needed \
+            lib32-mesa \
+            lib32-vulkan-icd-loader \
+            lib32-vulkan-intel \
+            vulkan-icd-loader \
+            vulkan-intel \
+        && echo
+    fi
+}
+
+
+if [[ ! -z ${nvidia_pci_address} ]]; then
     echo "**** Found NVIDIA device '${nvidia_gpu_name}' ****";
-    install_driver
+    install_nvidia_driver
+elif [[ ! -z ${intel_cpu_model} ]]; then
+    echo "**** Found Intel device '${intel_cpu_model}' ****";
+    install_intel_driver
+else
+    echo "**** No NVIDIA device found ****";
 fi
 
 echo "DONE"
