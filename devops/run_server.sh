@@ -5,8 +5,8 @@
 # File Created: Saturday, 8th January 2022 2:34:23 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Friday, 14th January 2022 8:53:16 am
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Wednesday, 26th January 2022 3:55:24 pm
+# Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
 script_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd );
@@ -16,6 +16,7 @@ project_base_path=$(realpath ${script_path}/..);
 # Parse params
 additional_docker_params=""
 container_name="steam"
+tag="develop"
 for ARG in ${@}; do
     case ${ARG} in
         *primary)
@@ -42,6 +43,12 @@ for ARG in ${@}; do
         root)
             script_mode="root"
             ;;
+        *arch)
+            tag="arch";
+            ;;
+        *debian)
+            tag="debian";
+            ;;
         *)
             ;;
     esac
@@ -57,12 +64,9 @@ else
 fi
 if [[ "${hostx}" == "true" ]]; then
     container_name="${container_name}-hx"
-    additional_docker_params="${additional_docker_params} -v /tmp/.X11-unix:/tmp/.X11-unix"
     additional_docker_params="${additional_docker_params} -e MODE=secondary"
     nvidia="false"
     framebuffer="false"
-else
-    additional_docker_params="${additional_docker_params} -v /tmp/headless/.X11-unix:/tmp/.X11-unix"
 fi
 if [[ "${nvidia}" == "true" ]]; then
     container_name="${container_name}-hw"
@@ -128,9 +132,10 @@ cmd="docker run -d --name='${container_name}' \
     -v '/tmp/.X11-unix/':'/tmp/.X11-unix/':'rw'  \
     -v '/dev/input':'/dev/input':'ro' \
     --hostname='${container_name}' \
+    --add-host=${container_name}:127.0.0.1 \
     --shm-size=2G \
     ${additional_docker_params} \
-    josh5/steam-headless:develop"
+    josh5/steam-headless:${tag}"
 echo ${cmd}
 bash -c "${cmd}"
 

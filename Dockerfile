@@ -1,4 +1,5 @@
 FROM debian:bullseye-slim
+LABEL maintainer="Josh.5 <jsunnex@gmail.com>"
 
 # Update package repos
 ARG DEBIAN_FRONTEND=noninteractive
@@ -16,7 +17,6 @@ RUN \
     echo "**** Install and configure locals ****" \
         && apt-get install -y --no-install-recommends \
             locales \
-            procps \
         && echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen \
         && locale-gen \
     && \
@@ -59,26 +59,32 @@ RUN \
         && apt-get update \
     && \
     echo "**** Install tools ****" \
-        && apt-get install -y --reinstall \
+        && apt-get install -y --no-install-recommends \
             bash \
             bash-completion \
             curl \
-            gcc \
             git \
-            kmod \
             less \
-            make \
+            man-db \
+            mlocate \
             nano \
-            python3 \
-            python3-numpy \
-            python3-pip \
-            python3-setuptools \
+            net-tools \
+            patch \
+            pciutils \
+            procps \
             rsync \
             sudo \
             unzip \
             vim \
             wget \
             xz-utils \
+    && \
+    echo "**** Install python ****" \
+        && apt-get install -y --no-install-recommends \
+            python3 \
+            python3-numpy \
+            python3-pip \
+            python3-setuptools \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -109,6 +115,42 @@ RUN \
     && \
     echo
 
+# Install mesa requirements
+RUN \
+    echo "**** Update apt database ****" \
+        && dpkg --add-architecture i386 \
+        && apt-get update \
+    && \
+    echo "**** Install mesa and vulkan requirements ****" \
+        && apt-get install -y --no-install-recommends \
+            libegl1 \
+            libgl1-mesa-dri \
+            libgl1-mesa-dri:i386 \
+            libgl1-mesa-glx \
+            libglu1-mesa \
+            libglx-mesa0:i386 \
+            libgtk-3-0 \
+            libgtk2.0-0 \
+            libsdl2-2.0-0 \
+            libvulkan1 \
+            libvulkan1:i386 \
+            mesa-utils \
+            mesa-utils-extra \
+            mesa-vulkan-drivers \
+            mesa-vulkan-drivers:i386 \
+            vainfo \
+            vulkan-tools \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
 # Install X Server requirements
 RUN \
     echo "**** Update apt database ****" \
@@ -118,17 +160,8 @@ RUN \
         && apt-get install -y --no-install-recommends \
             avahi-utils \
             dbus-x11 \
-            libgl1-mesa-dri \
-            libgl1-mesa-glx \
-            libglu1-mesa \
             libxcomposite-dev \
             libxcursor1 \
-            man-db \
-            mesa-utils \
-            mesa-utils-extra \
-            mlocate \
-            net-tools \
-            pciutils \
             pkg-config \
             x11-xfs-utils \
             x11vnc \
@@ -245,28 +278,22 @@ RUN \
             /tmp/websockify-* \
             /tmp/websockify.tar.gz
 
-# Install Steam
+# Add support for flatpaks
 RUN \
-    echo "**** Install steam ****" \
-        && dpkg --add-architecture i386 \
+    echo "**** Update apt database ****" \
         && apt-get update \
-        && echo steam steam/question select "I AGREE" | debconf-set-selections \
-        && echo steam steam/license note '' | debconf-set-selections \
+    && \
+    echo "**** Install flatpak support ****" \
         && apt-get install -y \
-            libegl1 \
-            libgl1-mesa-dri:i386 \
-            libglx-mesa0:i386 \
-            libgtk-3-0 \
-            libgtk2.0-0 \
-            libsdl2-2.0-0 \
-            libvulkan1 \
-            libvulkan1:i386 \
-            mesa-vulkan-drivers \
-            mesa-vulkan-drivers:i386 \
-            vulkan-tools \
-        && apt-get install -y \
-            steam \
-            steam-devices \
+            bridge-utils \
+            flatpak \
+            libpam-cgfs \
+            libvirt0 \
+            lxc \
+            uidmap \
+    && \
+    echo "**** Configure flatpak ****" \
+        && chmod u+s /usr/bin/bwrap \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -290,6 +317,28 @@ RUN \
             msttcorefonts \
             fonts-vlgothic \
             gedit \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
+# Install Steam
+RUN \
+    echo "**** Install steam ****" \
+        && dpkg --add-architecture i386 \
+        && apt-get update \
+        && echo steam steam/question select "I AGREE" | debconf-set-selections \
+        && echo steam steam/license note '' | debconf-set-selections \
+        && apt-get install -y \
+        && apt-get install -y \
+            steam \
+            steam-devices \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -397,6 +446,7 @@ ENV \
 
 # Be sure that the noVNC port is exposed
 EXPOSE 8083
+EXPOSE 5901
 EXPOSE 32123
 
 # Set entrypoint
