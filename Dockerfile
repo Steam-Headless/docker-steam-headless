@@ -71,8 +71,10 @@ RUN \
             net-tools \
             patch \
             pciutils \
+            pkg-config \
             procps \
             rsync \
+            screen \
             sudo \
             unzip \
             vim \
@@ -162,7 +164,6 @@ RUN \
             dbus-x11 \
             libxcomposite-dev \
             libxcursor1 \
-            pkg-config \
             x11-xfs-utils \
             x11vnc \
             xauth \
