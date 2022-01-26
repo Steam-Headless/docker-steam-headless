@@ -8,6 +8,8 @@ mkdir -p /run/sshd
 chmod 744 /run/sshd
 
 echo "**** Configure SSH service ****";
-echo 'Port 2222' > /etc/ssh/ssh_config.d/port.conf
+
+sed -i 's|^#   Port 22.*$|Port 2222|' /etc/ssh/ssh_config
+#echo 'Port 2222' > /etc/ssh/ssh_config.d/port.conf
 
 echo "DONE"
