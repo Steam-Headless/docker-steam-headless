@@ -51,19 +51,24 @@ function configure_x_server {
         mkdir -p /tmp/.X11-unix
     fi
 
+    # Ensure X-windows session path is owned by root 
+    mkdir -p /tmp/.ICE-unix
+    chown root:root /tmp/.ICE-unix/
+    chmod 1777 /tmp/.ICE-unix/
+
     # Check if this container is being run as a secondary instance
     if [ "${MODE}" == "p" ] | [ "${MODE}" == "primary" ]; then
         echo "Configure container as primary the X server"
         # Enable supervisord script
-        sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor/conf.d/xorg.conf
+        sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xorg.ini
     elif [ "${MODE}" == "fb" ] | [ "${MODE}" == "framebuffer" ]; then
         echo "Configure container to use a virtual framebuffer as the X server"
         # Disable supervisord script
-        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/xorg.conf
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
     else
         echo "Configure container as secondary and do not run an X server"
         # Disable supervisord script
-        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/xorg.conf
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
     fi
     # Make startup script executable
     chmod +x /usr/bin/start-xorg.sh

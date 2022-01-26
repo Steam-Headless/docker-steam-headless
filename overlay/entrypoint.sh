@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 7:08:46 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Monday, 17th January 2022 11:40:27 pm
+# Last Modified: Saturday, 22nd January 2022 8:03:33 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -63,4 +63,4 @@ echo "Logging all user services to '/home/${USER}/.cache/log/'"
 echo
 mkdir -p /var/log/supervisor
 chmod a+rw /var/log/supervisor
-exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon --user root
+exec /usr/bin/supervisord -c /etc/supervisord.conf --nodaemon --user root

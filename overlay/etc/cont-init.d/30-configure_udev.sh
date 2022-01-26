@@ -5,8 +5,8 @@
 # File Created: Friday, 12th January 2022 8:54:01 am
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Friday, 14th January 2022 9:21:11 am
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Saturday, 22nd January 2022 8:20:34 pm
+# Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
 # Running udev only works in privileged container
@@ -25,14 +25,16 @@ rm -rf "${tmp_mount}"
 if [[ "${is_privileged}" == "true" ]]; then
     echo "**** Configure container to run udev management ****";
     # Enable supervisord script
-    sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor/conf.d/udev.conf
+    sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
     # Make startup script executable
     chmod +x /usr/bin/start-udev.sh
     # Configure udev permissions
-    sed -i 's/MODE="0660"/MODE="0666"/' /lib/udev/rules.d/60-steam-input.rules
+    if [[ -f /lib/udev/rules.d/60-steam-input.rules ]]; then
+        sed -i 's/MODE="0660"/MODE="0666"/' /lib/udev/rules.d/60-steam-input.rules
+    fi
 else
     # Disable supervisord script
-    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor/conf.d/udev.conf
+    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
 fi
 
 

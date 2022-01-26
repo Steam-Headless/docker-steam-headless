@@ -5,13 +5,13 @@
 # File Created: Tuesday, 11th January 2022 8:28:52 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Tuesday, 11th January 2022 9:38:51 pm
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Monday, 24th January 2022 6:01:38 pm
+# Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
 DISPLAY=${DISPLAY:-:55}
 DISPLAY_DPI=${DPI:-:96}
-XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/tmp/.X11-unix}
+XDG_RUNTIME_DIR=/run/user/$(id -u ${USER})
 
 
 # Clear out old lock files
