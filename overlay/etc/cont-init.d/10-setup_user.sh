@@ -19,8 +19,8 @@ echo "Setting umask to ${UMASK}";
 umask ${UMASK}
 
 
-echo "Create the user XDG_RUNTIME_DIR"
 XDG_RUNTIME_DIR=/run/user/${PUID}
+echo "Create the user XDG_RUNTIME_DIR path '${XDG_RUNTIME_DIR}'"
 mkdir -p ${XDG_RUNTIME_DIR}
 chown -R ${PUID}:${PGID} ${XDG_RUNTIME_DIR}
 export XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${USER}/.local/share/flatpak/exports/share"
