@@ -11,6 +11,10 @@ groupmod -o -g "${PGID}" ${USER}
 usermod -o -u "${PUID}" ${USER}
 
 
+echo "Adding run user to video, input and audio groups"
+usermod -a -G video,input,audio ${USER}
+
+
 echo "Setting umask to ${UMASK}";
 umask ${UMASK}
 
