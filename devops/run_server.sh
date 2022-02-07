@@ -5,7 +5,7 @@
 # File Created: Saturday, 8th January 2022 2:34:23 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Wednesday, 26th January 2022 3:55:24 pm
+# Last Modified: Tuesday, 8th February 2022 8:00:29 am
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -25,11 +25,11 @@ for ARG in ${@}; do
         *nvidia)
             nvidia="true";
             ;;
-        *hostx)
-            hostx="true";
-            ;;
         *fb)
             framebuffer="true";
+            ;;
+        *br0)
+            network="br0";
             ;;
         stop)
             script_mode="stop"
@@ -57,25 +57,22 @@ if [[ "${primary}" == "true" ]]; then
     container_name="${container_name}-p"
     additional_docker_params="${additional_docker_params} -e MODE=primary"
     hostx="false"
+elif [[ "${framebuffer}" == "true" ]]; then
+    # TODO: Enable xvfb
+    container_name="${container_name}-fb"
+    additional_docker_params="${additional_docker_params} -e MODE=framebuffer"
 else
     container_name="${container_name}-s"
     additional_docker_params="${additional_docker_params} -e MODE=secondary"
-    framebuffer="false"
-fi
-if [[ "${hostx}" == "true" ]]; then
-    container_name="${container_name}-hx"
-    additional_docker_params="${additional_docker_params} -e MODE=secondary"
-    nvidia="false"
-    framebuffer="false"
 fi
 if [[ "${nvidia}" == "true" ]]; then
     container_name="${container_name}-hw"
     additional_docker_params="${additional_docker_params} --runtime=nvidia"
-    framebuffer="false"
 fi
-if [[ "${framebuffer}" == "true" ]]; then
-    # TODO: Enable xvfb
-    container_name="${container_name}-fb"
+if [[ "${network}" == "br0" ]]; then
+    additional_docker_params="${additional_docker_params} --network=br0 --ip='192.168.1.208'"
+else
+    additional_docker_params="${additional_docker_params} --network=host"
 fi
 if [[ -e /dev/dri ]]; then
     additional_docker_params="${additional_docker_params} --device=/dev/dri"
@@ -108,8 +105,6 @@ sleep 1
 # Run
 cmd="docker run -d --name='${container_name}' \
     --privileged=true \
-    --network=host \
-    --ipc='host' \
     -e PUID='99'  \
     -e PGID='100'  \
     -e UMASK='000'  \

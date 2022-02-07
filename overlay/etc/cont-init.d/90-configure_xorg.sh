@@ -63,8 +63,10 @@ function configure_x_server {
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xorg.ini
     elif [ "${MODE}" == "fb" ] | [ "${MODE}" == "framebuffer" ]; then
         echo "Configure container to use a virtual framebuffer as the X server"
-        # Disable supervisord script
+        # Disable xorg supervisord script
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
+        # Enable xvfb supervisord script
+        sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xvfb.ini
     fi
     # Make startup script executable
     chmod +x /usr/bin/start-xorg.sh
