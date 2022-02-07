@@ -1,12 +1,6 @@
 
 echo "**** Configure VNC audio ****"
 
-echo "Configure pulseaudio to pipe audio to a socket"
-sed -i 's|^; default-server.*$|default-server = unix:/tmp/pulseaudio.socket|' /etc/pulse/client.conf
-sed -i 's|^load-module module-native-protocol-unix.*$|load-module module-native-protocol-unix socket=/tmp/pulseaudio.socket auth-anonymous=1|' \
-    /etc/pulse/default.pa
-chown -R ${USER} /etc/pulse
-
 if [[ "${ENABLE_VNC_AUDIO}" == "true" ]]; then
     # Credits for this audio patch:
     #   - https://github.com/novnc/noVNC/issues/302

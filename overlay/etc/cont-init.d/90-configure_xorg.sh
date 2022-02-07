@@ -65,23 +65,20 @@ function configure_x_server {
         echo "Configure container to use a virtual framebuffer as the X server"
         # Disable supervisord script
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
-    else
-        echo "Configure container as secondary and do not run an X server"
-        # Disable supervisord script
-        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
     fi
     # Make startup script executable
     chmod +x /usr/bin/start-xorg.sh
 }
 
-
-if [[ -z ${nvidia_gpu_hex_id} ]]; then
-    echo "**** Generate default xorg.conf ****";
-    configure_x_server
-else
-    echo "**** Generate NVIDIA xorg.conf ****";
-    configure_x_server
-    configure_nvidia_x_server
+if [ "${MODE}" != "s" ] & [ "${MODE}" != "secondary" ]; then
+    if [[ -z ${nvidia_gpu_hex_id} ]]; then
+        echo "**** Generate default xorg.conf ****";
+        configure_x_server
+    else
+        echo "**** Generate NVIDIA xorg.conf ****";
+        configure_x_server
+        configure_nvidia_x_server
+    fi
 fi
 
 echo "DONE"
