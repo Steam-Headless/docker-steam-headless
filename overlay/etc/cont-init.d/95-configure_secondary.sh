@@ -12,6 +12,13 @@ if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
     # Disable vnc
     echo " - Disable vnc"
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc.ini
+    # Disable vnc
+    echo " - Disable vnc"
+    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc.ini
+    # Disable vnc-audio
+    echo " - Disable vnc audio stream"
+    echo " - Disable vnc audio websock"
+    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc-audio.ini
     # Disable xorg
     echo " - Disable xorg"
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
@@ -26,3 +33,5 @@ if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
     echo " - Enable udev"
     sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
 fi
+
+echo "DONE"
