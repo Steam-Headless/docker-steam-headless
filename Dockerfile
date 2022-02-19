@@ -443,9 +443,19 @@ ENV \
     MODE="primary" \
     ENABLE_VNC_AUDIO="true"
 
-# Be sure that the noVNC port is exposed
-EXPOSE 8083
+# Configure required ports
+ENV \
+    PORT_SSH="2222" \
+    PORT_VNC="5900" \
+    PORT_AUDIO_STREAM="5901" \
+    PORT_NOVNC_WEB="8083" \
+    PORT_AUDIO_WEBSOCKET="32123"
+
+# Expose the required ports
+EXPOSE 2222
+EXPOSE 5900
 EXPOSE 5901
+EXPOSE 8083
 EXPOSE 32123
 
 # Set entrypoint

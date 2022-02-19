@@ -9,6 +9,9 @@ if [ "${MODE}" != "s" ] & [ "${MODE}" != "secondary" ]; then
         #   - https://github.com/calebj/noVNC
         if [ -f /opt/noVNC/audio.patch ]; then
             echo "Patching noVNC with audio websocket"
+            # Enable supervisord script
+            sed -i "s|32123|${PORT_AUDIO_WEBSOCKET}|" /opt/noVNC/audio.patch
+            # Apply patch
             pushd /opt/noVNC/ &> /dev/null
             patch -p1 --input=/opt/noVNC/audio.patch --batch --quiet
             popd &> /dev/null
