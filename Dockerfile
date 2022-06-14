@@ -446,9 +446,9 @@ ENV \
 # Configure required ports
 ENV \
     PORT_SSH="2222" \
-    PORT_VNC="5900" \
-    PORT_AUDIO_STREAM="5901" \
-    PORT_NOVNC_WEB="8083" \
+    PORT_VNC="5904" \
+    PORT_AUDIO_STREAM="5905" \
+    PORT_NOVNC_WEB="18083" \
     PORT_AUDIO_WEBSOCKET="32123"
 
 # Expose the required ports
