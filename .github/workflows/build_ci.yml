@@ -102,6 +102,7 @@ jobs:
       with:
         context: .
         file: Dockerfile
+        pull: true
         platforms: ${{ steps.prepare.outputs.docker_platforms }}
         push: ${{ steps.prepare.outputs.docker_push }}
         tags: |
