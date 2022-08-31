@@ -9,7 +9,6 @@ chmod 744 /run/sshd
 
 echo "**** Configure SSH service ****";
 
-sed -i 's|^#   Port 22.*$|Port 2222|' /etc/ssh/ssh_config
-#echo 'Port 2222' > /etc/ssh/ssh_config.d/port.conf
+sed -i "s|^#   Port 22.*$|Port ${PORT_SSH}|" /etc/ssh/ssh_config
 
 echo "DONE"
