@@ -30,7 +30,7 @@ export XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${US
 echo "Adding default home directory template"
 mkdir -p ${USER_HOME}
 chown -R ${PUID}:${PGID} /etc/home_directory_template
-rsync -aq /etc/home_directory_template/ ${USER_HOME}/
+rsync -aq --ignore-existing /etc/home_directory_template/ ${USER_HOME}/
 chmod +x /usr/bin/start-desktop.sh
 
 
