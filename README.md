@@ -48,7 +48,8 @@ For a development environment, I have created a script in the devops directory.
 
 ---
 ## TODO:
-- Configure xorg.conf with no NVIDIA GPU
 - Lock SSH access to user only (remove root access)
 - Require user to enter password for sudo
 - Document how to run this container
+    - Create docker-compose configuration
+    - Create docker run example
