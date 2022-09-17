@@ -102,14 +102,14 @@ index cb6a9fd..4d599e1 100644
          UI.rfb.focus();
 +
 +        let audio_url;
-+        let host = window.location.hostname; 
-+        let port = 32123;
++        // let host = window.location.hostname; 
++        // let port = '<PORT_AUDIO_WEBSOCKET>';
 +        if (window.location.protocol === "https:") {
 +            audio_url = 'wss';
 +        } else {
 +            audio_url = 'ws';
 +        }
-+        audio_url += '://' + host + ':' + port;
++        audio_url += '://' + window.location.host + '/audiowebsock';
 +
 +        UI.webaudio = new WebAudio(audio_url);
 +        UI.toggleAudio();
@@ -326,14 +326,14 @@ index 8e2f5cb..d3cf6ab 100644
          // successfully connected to a server
          function connectedToServer(e) {
 +            let audio_url;
-+            let host = window.location.hostname; 
-+            let port = 32123;
++            // let host = window.location.hostname; 
++            // let port = '<PORT_AUDIO_WEBSOCKET>';
 +            if (window.location.protocol === "https:") {
 +                audio_url = 'wss';
 +            } else {
 +                audio_url = 'ws';
 +            }
-+            audio_url += '://' + host + ':' + port;
++            audio_url += '://' + window.location.host + '/audiowebsock';
 +
 +            wa = new WebAudio(audio_url);
 +            document.getElementById('toggleAudioButton').style.display = "block";
@@ -360,7 +360,7 @@ index 8e2f5cb..d3cf6ab 100644
 +            if (wa.connected) {
 +                console.log('Stopping audio...')
 +                wa.stop();
-+                document.getElementById('toggleAudioButton').innerText = "Enable Audio (requires access to port 32123)";
++                document.getElementById('toggleAudioButton').innerText = "Enable Audio";
 +            } else {
 +                console.log('Starting audio websocket on: ' + audio_url)
 +                wa.start();
@@ -410,7 +410,7 @@ index 8e2f5cb..d3cf6ab 100644
  
  <body>
      <div id="top_bar">
-+        <div id="toggleAudioButton">Enable Audio (requires access to port 32123)</div>
++        <div id="toggleAudioButton">Enable Audio</div>
          <div id="status">Loading</div>
          <div id="sendCtrlAltDelButton">Send CtrlAltDel</div>
      </div>

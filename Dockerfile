@@ -254,8 +254,18 @@ RUN \
         && sed -i '/    document.title =/c\    document.title = "Steam Headless - noVNC";' \
             /opt/noVNC/app/ui.js \
     && \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install nginx support ****" \
+        && apt-get install -y \
+            nginx \
+    && \
     echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
         && rm -rf \
+            /var/lib/apt/lists/* \
             /tmp/noVNC* \
             /tmp/novnc.tar.gz
 
@@ -464,18 +474,12 @@ ENV \
 # Configure required ports
 ENV \
     PORT_SSH="2222" \
-    PORT_VNC="5900" \
-    PORT_AUDIO_STREAM="5901" \
     PORT_NOVNC_WEB="8083" \
-    PORT_AUDIO_WEBSOCKET="32123" \
     NEKO_NAT1TO1=""
 
 # Expose the required ports
 EXPOSE 2222
-EXPOSE 5900
-EXPOSE 5901
 EXPOSE 8083
-EXPOSE 32123
 
 # Set entrypoint
 RUN chmod +x /entrypoint.sh

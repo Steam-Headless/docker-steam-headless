@@ -194,6 +194,7 @@ RUN \
     echo
 
 # Install noVNC
+# TODO: Add nginx
 ARG NOVNC_VERSION=1.2.0
 RUN \
     echo "**** Fetch noVNC ****" \
@@ -415,17 +416,11 @@ ENV \
 # Configure required ports
 ENV \
     PORT_SSH="2222" \
-    PORT_VNC="5900" \
-    PORT_AUDIO_STREAM="5901" \
-    PORT_NOVNC_WEB="8083" \
-    PORT_AUDIO_WEBSOCKET="32123"
+    PORT_NOVNC_WEB="8083"
 
 # Expose the required ports
 EXPOSE 2222
-EXPOSE 5900
-EXPOSE 5901
 EXPOSE 8083
-EXPOSE 32123
 
 # Set entrypoint
 RUN chmod +x /entrypoint.sh
