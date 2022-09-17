@@ -426,9 +426,6 @@ RUN \
         && chown -R ${USER} \
             ${USER_HOME} \
         && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
-        && adduser ${USER} audio \
-        && adduser ${USER} video \
-        && adduser ${USER} pulse \
     && \
     echo
 
