@@ -26,7 +26,7 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         # Note: Ports 32035-32248 are unallocated port ranges. We should be able to find something in here that we can use
         #   REF: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?&page=130
         export PORT_VNC=$(get_unused_port 32035)
-        echo "Configure VNC service port '${PORT_NOVNC_SERVICE}'"
+        echo "Configure VNC service port '${PORT_VNC}'"
         export PORT_NOVNC_SERVICE=$(get_unused_port ${PORT_VNC})
         echo "Configure noVNC service port '${PORT_NOVNC_SERVICE}'"
         export PORT_AUDIO_WEBSOCKET=$(get_unused_port ${PORT_NOVNC_SERVICE})
@@ -35,6 +35,7 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         echo "Configure pulseaudio encoded stream port '${PORT_AUDIO_STREAM}'"
         
         # Configure Nginx proxy for the websocket and VNC
+        cp -f /opt/noVNC/nginx.template.conf /opt/noVNC/nginx.conf
         sed -i "s|<USER>|${USER}|" /opt/noVNC/nginx.conf
         sed -i "s|<PORT_NOVNC_WEB>|${PORT_NOVNC_WEB}|" /opt/noVNC/nginx.conf
         sed -i "s|<PORT_NOVNC_SERVICE>|${PORT_NOVNC_SERVICE}|" /opt/noVNC/nginx.conf
