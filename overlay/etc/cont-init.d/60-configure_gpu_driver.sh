@@ -17,7 +17,11 @@ export nvidia_gpu_name=$(nvidia-smi --format=csv --query-gpu=name --id="${gpu_se
 export nvidia_host_driver_version="$(nvidia-smi 2> /dev/null | grep NVIDIA-SMI | cut -d ' ' -f3)"
 
 # Intel params
-export intel_cpu_model="$(lscpu | grep 'Model name:' | grep Intel | cut -d':' -f2 | xargs)"
+export intel_cpu_model="$(lscpu | grep 'Model name:' | grep -i intel | cut -d':' -f2 | xargs)"
+
+# AMD params
+export amd_cpu_model="$(lscpu | grep 'Model name:' | grep -i amd | cut -d':' -f2 | xargs)"
+export amd_gpu_model="$(lspci | grep -i vga | grep -i amd)"
 
 function download_driver {
     mkdir -p ${USER_HOME}/Downloads
@@ -69,41 +73,64 @@ function install_nvidia_driver {
         > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
 }
 
-function install_amd_driver {
+function install_amd_gpu_driver {
+    echo "Install AMD vulkan driver"
     if command -v pacman &> /dev/null; then
-        echo "Install AMD vulkan driver" \
-        && pacman -Syu --noconfirm --needed \
+        pacman -Syu --noconfirm --needed \
             lib32-mesa \
             lib32-vulkan-icd-loader \
             lib32-vulkan-radeon \
             vulkan-icd-loader \
-            vulkan-radeon \
-        && echo
+            vulkan-radeon
+    elif command -v apt-get &> /dev/null; then
+        [[ "${APT_UPDATED:-false}" == 'false' ]] && apt-get update && export APT_UPDATED=true
+        apt-get install -y \
+            libvulkan1 \
+            libvulkan1:i386 \
+            mesa-vulkan-drivers \
+            mesa-vulkan-drivers:i386
     fi
 }
 
-function install_intel_driver {
+function install_intel_gpu_driver {
+    echo "Install Intel vulkan driver"
     if command -v pacman &> /dev/null; then
-        echo "Install Intel vulkan driver" \
-        && pacman -Syu --noconfirm --needed \
+        pacman -Syu --noconfirm --needed \
             lib32-mesa \
             lib32-vulkan-icd-loader \
             lib32-vulkan-intel \
             vulkan-icd-loader \
-            vulkan-intel \
-        && echo
+            vulkan-intel
+    elif command -v apt-get &> /dev/null; then
+        [[ "${APT_UPDATED:-false}" == 'false' ]] && apt-get update && export APT_UPDATED=true
+        apt-get install -y \
+            libvulkan1 \
+            libvulkan1:i386 \
+            mesa-vulkan-drivers \
+            mesa-vulkan-drivers:i386
     fi
 }
 
-
+# NVIDIA GPU
 if [[ ! -z ${nvidia_pci_address} ]]; then
     echo "**** Found NVIDIA device '${nvidia_gpu_name}' ****";
     install_nvidia_driver
-elif [[ ! -z ${intel_cpu_model} ]]; then
-    echo "**** Found Intel device '${intel_cpu_model}' ****";
-    install_intel_driver
 else
     echo "**** No NVIDIA device found ****";
+fi
+# Intel GPU
+if [[ ! -z ${intel_cpu_model} ]]; then
+    echo "**** Found Intel device '${intel_cpu_model}' ****";
+    install_intel_gpu_driver
+else
+    echo "**** No Intel device found ****";
+fi
+# AMD GPU
+if [[ ! -z ${amd_gpu_model} ]]; then
+    echo "**** Found AMD device '${amd_gpu_model}' ****";
+    install_amd_gpu_driver
+else
+    echo "**** No AMD device found ****";
 fi
 
 echo "DONE"
