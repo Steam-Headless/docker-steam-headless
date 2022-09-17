@@ -224,6 +224,10 @@ RUN \
     && \
     echo
 
+# Install Neko server
+COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
+COPY --from=m1k1o/neko:base /var/www /var/www
+
 # Install noVNC
 ARG NOVNC_VERSION=1.2.0
 RUN \
@@ -421,7 +425,12 @@ RUN \
         && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
         && chown -R ${USER} \
             ${USER_HOME} \
-        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+        && adduser ${USER} audio \
+        && adduser ${USER} video \
+        && adduser ${USER} pulse \
+    && \
+    echo
 
 # Add FS overlay
 COPY overlay /
@@ -442,6 +451,9 @@ ENV \
 ENV \
     MODE="primary" \
     WEB_UI_MODE="vnc" \
+    ENABLE_VNC_AUDIO="true" \
+    NEKO_PASSWORD=neko \
+    NEKO_PASSWORD_ADMIN=admin
 
 # Configure required ports
 ENV \
@@ -449,7 +461,8 @@ ENV \
     PORT_VNC="5900" \
     PORT_AUDIO_STREAM="5901" \
     PORT_NOVNC_WEB="8083" \
-    PORT_AUDIO_WEBSOCKET="32123"
+    PORT_AUDIO_WEBSOCKET="32123" \
+    NEKO_NAT1TO1=""
 
 # Expose the required ports
 EXPOSE 2222
