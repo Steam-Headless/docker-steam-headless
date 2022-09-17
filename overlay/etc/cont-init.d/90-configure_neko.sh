@@ -6,6 +6,11 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
     if [ ${WEB_UI_MODE} = "neko" ]; then
         echo "Enable Neko server"
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/neko.ini
+
+        # Make directories for neko
+        mkdir -p /var/log/neko
+        chmod 1777 /var/log/neko
+        chown ${USER} /var/log/neko
         
         # Configure nat1to1 if it is not already set
         if [[ -z ${NEKO_NAT1TO1} ]]; then
