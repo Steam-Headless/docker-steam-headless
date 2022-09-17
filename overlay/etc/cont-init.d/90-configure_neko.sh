@@ -21,11 +21,18 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         fi
 
         # Configure hardware acceleration if it is not already set
-        if [[ -z ${NEKO_HWENC} ]]; then
-            # Enable VAAPI if device available
-            if [[ ! -z $(stat -c "%g" /dev/dri/render* | tail -n 1) ]]; then
-                export NEKO_HWENC=vaapi
-            fi
+        # if [[ -z ${NEKO_HWENC} ]]; then
+        #     # Enable VAAPI if device available
+        #     if [[ ! -z $(stat -c "%g" /dev/dri/render* | tail -n 1) ]]; then
+        #         echo "Setting Neko to use VAAPI encoder"
+        #         export NEKO_HWENC="VAAPI"
+        #         # Check for vp8 vaapi encoder
+        #         echo "Setting Neko to use 264 encoding"
+        #         # export NEKO_VP8="false"
+        #         # export NEKO_VP9="false"
+        #         export NEKO_H264="true"
+        #     fi
+        # fi
         fi
     else
         echo "Disable Neko server"
