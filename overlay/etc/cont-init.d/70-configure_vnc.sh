@@ -2,10 +2,8 @@
 echo "**** Configure VNC ****"
 
 if ([ ${WEB_UI_MODE} = "vnc" ] && [ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
-    
     echo "Enable VNC server"
     sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/vnc.ini
-
     if [[ "${ENABLE_VNC_AUDIO}" == "true" ]]; then
         # Credits for this audio patch:
         #   - https://github.com/novnc/noVNC/issues/302
@@ -34,7 +32,8 @@ if ([ ${WEB_UI_MODE} = "vnc" ] && [ "${MODE}" != "s" ] && [ "${MODE}" != "second
         # Disable supervisord script
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc-audio.ini
     fi
-
+else
+    echo "Disable VNC server"
 fi
 
 echo "DONE"
