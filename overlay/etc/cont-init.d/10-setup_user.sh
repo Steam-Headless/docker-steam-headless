@@ -15,6 +15,18 @@ echo "Adding run user to video, audio, input and pulse groups"
 usermod -a -G video,audio,input,pulse ${USER}
 
 
+echo "Adding run user to render group (for HW accelerated encoding)"
+render_guid=$(stat -c "%g" /dev/dri/render* | tail -n 1)
+if [[ ! -z ${render_guid} ]]; then
+    render_group=$(getent group "${render_guid}" | cut -d: -f1)
+    if [[ -z ${render_group} ]]; then
+        groupadd -g "${render_guid}" "videorender"
+        render_group="videorender"
+    fi
+    usermod -a -G ${render_group} ${USER}
+fi
+
+
 echo "Setting umask to ${UMASK}";
 umask ${UMASK}
 
