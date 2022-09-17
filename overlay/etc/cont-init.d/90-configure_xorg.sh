@@ -72,7 +72,7 @@ function configure_x_server {
     chmod +x /usr/bin/start-xorg.sh
 }
 
-if [ "${MODE}" != "s" ] & [ "${MODE}" != "secondary" ]; then
+if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
     if [[ -z ${nvidia_gpu_hex_id} ]]; then
         echo "**** Generate default xorg.conf ****";
         configure_x_server

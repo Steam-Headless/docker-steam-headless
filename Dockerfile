@@ -441,7 +441,7 @@ ENV \
 # Set container configuration environment variables
 ENV \
     MODE="primary" \
-    ENABLE_VNC_AUDIO="true"
+    WEB_UI_MODE="vnc" \
 
 # Configure required ports
 ENV \
