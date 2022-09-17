@@ -33,6 +33,10 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         #         export NEKO_H264="true"
         #     fi
         # fi
+
+        # Configure screen size if it is not already set
+        if [[ -z ${NEKO_SCREEN} ]]; then
+            export NEKO_SCREEN="${DISPLAY_SIZEW}x${DISPLAY_SIZEH}@${DISPLAY_REFRESH}"
         fi
     else
         echo "Disable Neko server"
