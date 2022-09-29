@@ -4,11 +4,11 @@ PGID=${PGID:-100}
 UMASK=${UMASK:-000}
 USER_PASSWORD=${USER_PASSWORD:-password}
 
-echo "**** Configure default user  ****"
+echo "**** Configure default user ****"
 
-echo "Setting run user uid=${PGID}(${USER}) gid=${PUID}(${USER})"
-groupmod -o -g "${PGID}" ${USER}
+echo "Setting run user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
 usermod -o -u "${PUID}" ${USER}
+groupmod -o -g "${PGID}" ${USER}
 
 
 echo "Adding run user to video, input and audio groups"
