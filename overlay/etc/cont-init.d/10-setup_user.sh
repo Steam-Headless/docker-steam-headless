@@ -4,9 +4,9 @@ PGID=${PGID:-100}
 UMASK=${UMASK:-000}
 USER_PASSWORD=${USER_PASSWORD:-password}
 
-echo "**** Configure default user  ****"
+echo "**** Configure default user ****"
 
-echo "Setting run user uid=${PGID}(${USER}) gid=${PUID}(${USER})"
+echo "Setting run user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
 groupmod -o -g "${PGID}" ${USER}
 usermod -o -u "${PUID}" ${USER}
 
