@@ -37,7 +37,7 @@ function download_driver {
 function install_nvidia_driver {
     # Check here if the currently installed version matches using nvidia-settings
     nvidia_settings_version=$(nvidia-settings --version 2> /dev/null | grep version | cut -d ' ' -f 4)
-    [[ "${nvidia_settings_version}x" == "${nvidia_host_driver_version}x" ]] && return 0;
+    [[ "${nvidia_settings_version}x" == "${nvidia_host_driver_version}x" ]] && echo "Nvidia driver version matches the host" && return 0;
 
     # Download the driver (if it does not yet exist locally)
     download_driver

@@ -353,8 +353,7 @@ RUN \
         && \
         useradd -d ${USER_HOME} -s /bin/bash ${USER} \
         && \
-        chown -R ${USER} \
-            ${USER_HOME} \
+        chown -R ${USER} ${USER_HOME} \
         && \
         echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
