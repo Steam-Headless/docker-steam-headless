@@ -39,7 +39,7 @@ groups=$(join_by "," "${!group_map[@]}")
 if [ "$groups" != "" ]; then
     echo "Adding user '${USER}' to groups: $groups"
 
-    usermod -G $groups ${USER}
+    usermod -a -G $groups ${USER}
 else
     echo "Not modifying user groups ($groups)"
 fi
