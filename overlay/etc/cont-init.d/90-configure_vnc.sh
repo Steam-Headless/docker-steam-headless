@@ -17,22 +17,23 @@ export PORT_NOVNC_SERVICE
 export PORT_AUDIO_WEBSOCKET
 export PORT_AUDIO_STREAM
 
+# Configure random ports for VNC service, pulseaudio socket, noVNC service and audio transport websocket
+# Note: Ports 32035-32248 are unallocated port ranges. We should be able to find something in here that we can use
+#   REF: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?&page=130
+export PORT_VNC=$(get_unused_port 32035)
+echo "Configure VNC service port '${PORT_VNC}'"
+export PORT_NOVNC_SERVICE=$(get_unused_port ${PORT_VNC})
+echo "Configure noVNC service port '${PORT_NOVNC_SERVICE}'"
+export PORT_AUDIO_WEBSOCKET=$(get_unused_port ${PORT_NOVNC_SERVICE})
+echo "Configure audio websocket port '${PORT_AUDIO_WEBSOCKET}'"
+export PORT_AUDIO_STREAM=$(get_unused_port ${PORT_AUDIO_WEBSOCKET})
+echo "Configure pulseaudio encoded stream port '${PORT_AUDIO_STREAM}'"
+
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
+
     if [ ${WEB_UI_MODE} = "vnc" ]; then
         echo "Enable VNC server"
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/vnc.ini
-
-        # Configure random ports for VNC service, pulseaudio socket, noVNC service and audio transport websocket
-        # Note: Ports 32035-32248 are unallocated port ranges. We should be able to find something in here that we can use
-        #   REF: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?&page=130
-        export PORT_VNC=$(get_unused_port 32035)
-        echo "Configure VNC service port '${PORT_VNC}'"
-        export PORT_NOVNC_SERVICE=$(get_unused_port ${PORT_VNC})
-        echo "Configure noVNC service port '${PORT_NOVNC_SERVICE}'"
-        export PORT_AUDIO_WEBSOCKET=$(get_unused_port ${PORT_NOVNC_SERVICE})
-        echo "Configure audio websocket port '${PORT_AUDIO_WEBSOCKET}'"
-        export PORT_AUDIO_STREAM=$(get_unused_port ${PORT_AUDIO_WEBSOCKET})
-        echo "Configure pulseaudio encoded stream port '${PORT_AUDIO_STREAM}'"
         
         # Configure Nginx proxy for the websocket and VNC
         cp -f /opt/noVNC/nginx.template.conf /opt/noVNC/nginx.conf
@@ -42,7 +43,6 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         sed -i "s|<PORT_AUDIO_WEBSOCKET>|${PORT_AUDIO_WEBSOCKET}|" /opt/noVNC/nginx.conf
         mkdir -p /var/log/vncproxy
         chown -R ${USER} /var/log/vncproxy
-
 
         if [[ "${ENABLE_VNC_AUDIO}" == "true" ]]; then
             # Credits for this audio patch:
