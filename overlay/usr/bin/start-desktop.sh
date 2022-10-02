@@ -12,7 +12,15 @@
 # I made this wrapper script so that I could easily try a range of desktop environments
 #
 
-XDG_RUNTIME_DIR=/run/user/$(id -u ${USER})
+# CATCH TERM SIGNAL:
+_term() {
+    kill -TERM "$desktop_pid" 2>/dev/null
+}
+trap _term SIGTERM
+
+
+# CONFIGURE:
+XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-:/tmp/.X11-unix/run}
 #XAUTHORITY=${XDG_RUNTIME_DIR:-/home/${USER}/.xauthority}
 XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${USER}/.local/share/flatpak/exports/share"
 export $(dbus-launch)
@@ -21,13 +29,23 @@ export $(dbus-launch)
 mkdir -p /etc/alternatives
 ln -sf /usr/share/backgrounds/steam.jpg /etc/alternatives/desktop-background
 
+
+# EXECUTE PROCESS:
 # Run the desktop environment in order of priority
 if [[ -e /usr/bin/cinnamon-session ]]; then
-    /usr/bin/cinnamon-session --display=${DISPLAY}
+    /usr/bin/cinnamon-session --display=${DISPLAY} &
+    desktop_pid=$!
 elif [[ -e /usr/bin/mate-session ]]; then
-    /usr/bin/mate-session
+    /usr/bin/mate-session &
+    desktop_pid=$!
 elif [[ -e /usr/bin/startplasma-x11 ]]; then
-    /usr/bin/startplasma-x11
+    /usr/bin/startplasma-x11 &
+    desktop_pid=$!
 elif [[ -e /usr/bin/startxfce4 ]]; then
-    /usr/bin/startxfce4
+    /usr/bin/startxfce4 &
+    desktop_pid=$!
 fi
+
+
+# WAIT FOR CHILD PROCESS:
+wait "$desktop_pid"
