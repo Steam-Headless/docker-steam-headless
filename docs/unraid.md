@@ -1,3 +1,7 @@
+# Unraid
+
+Follow these instructions to install Steam Headless on Unraid
+
 ## CONTAINER TEMPLATE:
 
 1. Navigate to "**APPS**" tab.

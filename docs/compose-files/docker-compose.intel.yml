@@ -1,0 +1,38 @@
+---
+services:
+  steam-headless:
+    image: josh5/steam-headless:latest
+    restart: unless-stopped
+    runtime: ${DOCKER_RUNTIME}
+    ## NOTE: Requires privileged access to host to be able to access the required devices
+    privileged: true
+    shm_size: ${SHM_SIZE}
+    ipc: host # Could also be set to 'shareable'
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 524288
+
+    # NETWORK:
+    ## NOTE: Steam headless always required the use of the host network
+    network_mode: host
+    hostname: ${HOSTNAME}
+    extra_hosts:
+      - "${HOSTNAME}:127.0.0.1"
+    
+    # ENVIRONMENT:
+    ## Read all config variables from the .env file
+    env_file: .env
+
+    # VOLUMES:
+    volumes:
+      # The location of your home directory.
+      - /opt/container-data/steam-headless/home/:/home/default/:rw
+      # The location where all games should be installed.
+      - /mnt/Games/:/mnt/games/:rw
+      # Input devices used for mouse and joypad support inside the container.
+      - /dev/input/:/dev/input/:ro
+      # The Xorg socket. This will be shared with other containers so they can access the X server.
+      - /opt/container-data/steam-headless/.X11-unix/:/tmp/.X11-unix/:rw
+      # Pulse audio socket. This will be shared with other containers so they can access the audio sink.
+      - /opt/container-data/steam-headless/pulse/:/tmp/pulse/:rw
