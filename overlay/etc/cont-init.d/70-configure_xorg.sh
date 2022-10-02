@@ -47,8 +47,14 @@ function configure_x_server {
     fi
 
     # Ensure the X socket path exists
-    if [ ! -d /tmp/.X11-unix ]; then
-        mkdir -p /tmp/.X11-unix
+    mkdir -p /tmp/.X11-unix
+
+    # Clear out old lock files
+    display_file=/tmp/.X11-unix/X${DISPLAY#:}
+    if [ -S ${display_file} ]; then
+        echo "Removing ${display_file} before starting"
+        rm -f /tmp/.X${DISPLAY#:}-lock
+        rm ${display_file}
     fi
 
     # Ensure X-windows session path is owned by root 
@@ -68,8 +74,6 @@ function configure_x_server {
         # Enable xvfb supervisord script
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xvfb.ini
     fi
-    # Make startup script executable
-    chmod +x /usr/bin/start-xorg.sh
 }
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then

@@ -31,7 +31,9 @@ echo "Setting umask to ${UMASK}";
 umask ${UMASK}
 
 
-export XDG_RUNTIME_DIR=/run/user/${PUID}
+# Configure the 'XDG_RUNTIME_DIR' to something that is easily shared between containers
+export XDG_RUNTIME_DIR=/tmp/.X11-unix/run
+# export XDG_RUNTIME_DIR=/run/user/${PUID}
 echo "Create the user XDG_RUNTIME_DIR path '${XDG_RUNTIME_DIR}'"
 mkdir -p ${XDG_RUNTIME_DIR}
 chown -R ${PUID}:${PGID} ${XDG_RUNTIME_DIR}
@@ -44,6 +46,12 @@ mkdir -p ${USER_HOME}
 chown -R ${PUID}:${PGID} /etc/home_directory_template
 rsync -aq --ignore-existing /etc/home_directory_template/ ${USER_HOME}/
 chmod +x /usr/bin/start-desktop.sh
+
+
+# Setup services log path
+echo "Setting ownership of all log files in '${USER_HOME}/.cache/log'"
+mkdir -p "${USER_HOME}/.cache/log"
+chown -R ${PUID}:${PGID} "${USER_HOME}/.cache/log"
 
 
 # Set the root and user password
