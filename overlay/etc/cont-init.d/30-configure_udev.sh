@@ -5,8 +5,8 @@
 # File Created: Friday, 12th January 2022 8:54:01 am
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Saturday, 22nd January 2022 8:20:34 pm
-# Modified By: Console and webGui login account (jsunnex@gmail.com)
+# Last Modified: Tuesday, 4th October 2022 11:20:48 am
+# Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
 # Running udev only works in privileged container
@@ -38,6 +38,7 @@ else
 fi
 
 
-echo "**** Ensure the default user has the correct permissions on input devices ****";
-chmod +x /usr/bin/ensure-groups
-/usr/bin/ensure-groups /dev/uinput /dev/input/event*
+if [[ -e /dev/uinput ]]; then
+    echo "**** Ensure the default user has permission to r/w on input devices ****";
+    chmod 0666 /dev/uinput
+fi
