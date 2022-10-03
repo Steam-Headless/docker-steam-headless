@@ -1,30 +1,56 @@
+#!/usr/bin/env bash
+###
+# File: 10-setup_user.sh
+# Project: cont-init.d
+# File Created: Friday, 12th January 2022 8:54:01 am
+# Author: Josh.5 (jsunnex@gmail.com)
+# -----
+# Last Modified: Tuesday, 4th October 2022 11:27:10 am
+# Modified By: Josh.5 (jsunnex@gmail.com)
+###
 
 PUID=${PUID:-99}
 PGID=${PGID:-100}
 UMASK=${UMASK:-000}
 USER_PASSWORD=${USER_PASSWORD:-password}
 
-echo "**** Configure default user  ****"
+echo "**** Configure default user ****"
 
-echo "Setting run user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
+echo "Setting default user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
 usermod -o -u "${PUID}" ${USER}
 groupmod -o -g "${PGID}" ${USER}
 
 
-echo "Adding run user to video, audio, input and pulse groups"
+echo "Adding default user to video, audio, input and pulse groups"
 usermod -a -G video,audio,input,pulse ${USER}
 
 
-echo "Adding run user to render group (for HW accelerated encoding)"
-render_guid=$(stat -c "%g" /dev/dri/render* | tail -n 1)
-if [[ ! -z ${render_guid} ]]; then
-    render_group=$(getent group "${render_guid}" | cut -d: -f1)
-    if [[ -z ${render_group} ]]; then
-        groupadd -g "${render_guid}" "videorender"
-        render_group="videorender"
+echo "Adding default user to any additional required device groups"
+device_nodes=( /dev/input/event* /dev/dri/render* )
+added_groups=""
+for dev in "${device_nodes[@]}"; do
+    # Only process $dev if it's a character device
+    if [[ ! -c "${dev}" ]]; then
+        continue
     fi
-    usermod -a -G ${render_group} ${USER}
-fi
+
+    # Get group name and ID
+    dev_group=$(stat -c "%G" "${dev}")
+    dev_gid=$(stat -c "%g" "${dev}")
+
+    # Create a name for the group ID if it does not yet already exist
+    if [[ "${dev_group}" = "UNKNOWN" ]]; then
+        dev_group="user-gid-${dev_gid}"
+        groupadd -g $dev_gid "${dev_group}"
+    fi
+
+    # Add group to user
+    if [[ "${added_groups}" != *"${dev_group}"* ]]; then
+        echo "Adding user '${USER}' to group: '${dev_group}'"
+        usermod -a -G ${dev_group} ${USER}
+        added_groups=" ${added_groups} ${dev_group} "
+    fi
+done
 
 
 echo "Setting umask to ${UMASK}";
@@ -45,6 +71,7 @@ echo "Adding default home directory template"
 mkdir -p ${USER_HOME}
 chown -R ${PUID}:${PGID} /etc/home_directory_template
 rsync -aq --ignore-existing /etc/home_directory_template/ ${USER_HOME}/
+# TODO: Move this to its own init script. It does not really belong here
 chmod +x /usr/bin/start-desktop.sh
 
 
