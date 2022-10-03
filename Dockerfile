@@ -473,12 +473,11 @@ ENV \
 
 # Configure required ports
 ENV \
-    PORT_SSH="2222" \
+    PORT_SSH="" \
     PORT_NOVNC_WEB="8083" \
     NEKO_NAT1TO1=""
 
 # Expose the required ports
-EXPOSE 2222
 EXPOSE 8083
 
 # Set entrypoint

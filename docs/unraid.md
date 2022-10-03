@@ -49,10 +49,10 @@ Unraid's Linux kernel by default does not have the modules required to support c
 
     > __Warning__
     >
-    > Be aware that, by default, this container requires at least 8083 and 2222 available for the WebUI and SSH to work. It will also require any ports that Steam requires for Steam Remote Play.
+    > Be aware that, by default, this container requires at least 8083 available for the WebUI to work. It will also require any ports that Steam requires for Steam Remote Play.
 
     You can override the default ports used by the container with these variables:
-    - PORT_SSH (Default: 2222)
     - PORT_NOVNC_WEB (Default: 8083)
+    - WEB_UI_MODE (Default: 'vnc' - Set to 'none' to disable the WebUI)
 
 3. No server restart is required, however. Ensure that the **steam-headless** Docker container is recreated after installing the **uinput** plugin for it to be able to detect the newly added module.
