@@ -193,6 +193,9 @@ RUN \
     echo "**** Install X Server requirements ****" \
         && apt-get install -y --no-install-recommends \
             pulseaudio \
+            alsa-utils \
+            libasound2 \
+            libasound2-plugins \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
