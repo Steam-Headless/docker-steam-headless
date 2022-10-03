@@ -10,23 +10,20 @@ function get_unused_port() {
     echo ${__check_port}
 }
 
-# Export empty values to start
-# Without this, supervisor will not be able to parse the ini configs
-export PORT_VNC
-export PORT_NOVNC_SERVICE
-export PORT_AUDIO_WEBSOCKET
-export PORT_AUDIO_STREAM
-
 # Configure random ports for VNC service, pulseaudio socket, noVNC service and audio transport websocket
 # Note: Ports 32035-32248 are unallocated port ranges. We should be able to find something in here that we can use
 #   REF: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?&page=130
-export PORT_VNC=$(get_unused_port 32035)
+DYNAMIC_PORT_VNC=$(get_unused_port 32035)
+DYNAMIC_PORT_NOVNC_SERVICE=$(get_unused_port ${DYNAMIC_PORT_VNC})
+DYNAMIC_PORT_AUDIO_WEBSOCKET=$(get_unused_port ${DYNAMIC_PORT_NOVNC_SERVICE})
+DYNAMIC_PORT_AUDIO_STREAM=$(get_unused_port ${DYNAMIC_PORT_AUDIO_WEBSOCKET})
+export PORT_VNC=${PORT_VNC:-$DYNAMIC_PORT_VNC}
 echo "Configure VNC service port '${PORT_VNC}'"
-export PORT_NOVNC_SERVICE=$(get_unused_port ${PORT_VNC})
+export PORT_NOVNC_SERVICE=${PORT_NOVNC_SERVICE:-$DYNAMIC_PORT_NOVNC_SERVICE}
 echo "Configure noVNC service port '${PORT_NOVNC_SERVICE}'"
-export PORT_AUDIO_WEBSOCKET=$(get_unused_port ${PORT_NOVNC_SERVICE})
+export PORT_AUDIO_WEBSOCKET=${PORT_AUDIO_WEBSOCKET:-$DYNAMIC_PORT_AUDIO_WEBSOCKET}
 echo "Configure audio websocket port '${PORT_AUDIO_WEBSOCKET}'"
-export PORT_AUDIO_STREAM=$(get_unused_port ${PORT_AUDIO_WEBSOCKET})
+export PORT_AUDIO_STREAM=${PORT_AUDIO_STREAM:-$DYNAMIC_PORT_AUDIO_STREAM}
 echo "Configure pulseaudio encoded stream port '${PORT_AUDIO_STREAM}'"
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
