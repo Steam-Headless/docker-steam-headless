@@ -16,9 +16,9 @@ services:
     # NETWORK:
     ## NOTE: Steam headless always required the use of the host network
     network_mode: host
-    hostname: ${HOSTNAME}
+    hostname: ${NAME}
     extra_hosts:
-      - "${HOSTNAME}:127.0.0.1"
+      - "${NAME}:127.0.0.1"
     
     # ENVIRONMENT:
     ## Read all config variables from the .env file
@@ -29,7 +29,7 @@ services:
       # The location of your home directory.
       - /opt/container-data/steam-headless/home/:/home/default/:rw
       # The location where all games should be installed.
-      - /mnt/Games/:/mnt/games/:rw
+      - /mnt/games/:/mnt/games/:rw
       # Input devices used for mouse and joypad support inside the container.
       - /dev/input/:/dev/input/:ro
       # The Xorg socket. This will be shared with other containers so they can access the X server.
