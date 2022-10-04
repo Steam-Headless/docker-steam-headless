@@ -9,7 +9,6 @@ Play your games in the browser with audio. Connect another device and use it wit
 - AMD GPU support
 - Full video/audio noVNC web access to a Xfce4 Desktop
 - Root access
-- SSH server for remote terminal access
 
 
 ---
@@ -47,7 +46,9 @@ If your host is already running X, you can just use that. To do this, be sure to
 
 ---
 ## Installation:
+- [Docker Compose](./docs/docker-compose.md)
 - [Unraid](./docs/unraid.md)
+- [Ubuntu Server](./docs/ubuntu-server.md)
 
 
 ---
@@ -58,7 +59,7 @@ For a development environment, I have created a script in the devops directory.
 
 ---
 ## TODO:
-- Lock SSH access to user only (remove root access)
+- Remove SSH
 - Require user to enter password for sudo
 - Document how to run this container
     - Create docker-compose configuration

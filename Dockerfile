@@ -17,11 +17,9 @@ ENV USER="default" \
     DISPLAY_SIZEH="900" \
     DISPLAY_SIZEW="1600" \
     DISPLAY_VIDEO_PORT="DFP" \
-    PORT_SSH="2222" \
-    PORT_VNC="5900" \
-    PORT_AUDIO_STREAM="5901" \
+    PORT_SSH="" \
     PORT_NOVNC_WEB="8083" \
-    PORT_AUDIO_WEBSOCKET="32123"
+    NEKO_NAT1TO1=""
 
 WORKDIR /tmp
 COPY /docker /tmp
@@ -45,7 +43,7 @@ RUN rm -rf /tmp
 COPY overlay /
 
 # Expose the required ports
-EXPOSE 2222 5900 5901 8083 32123
+EXPOSE 8083
 
 # Set entrypoint
 RUN chmod +x /entrypoint.sh
