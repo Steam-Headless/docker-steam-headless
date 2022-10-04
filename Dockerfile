@@ -395,6 +395,7 @@ RUN \
     echo "**** Install Intel media drivers and VAAPI ****" \
         && apt-get install -y --no-install-recommends \
             intel-media-va-driver-non-free \
+            i965-va-driver-shaders \
             libva2 \
             vainfo \
     && \
@@ -422,6 +423,30 @@ RUN \
             libsdl1.2debian \
             libsndfile1 \
             ucspi-tcp \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
+# Install sunshine
+ARG SUNSHINE_VERSION=0.11.1
+RUN \
+    echo "**** Fetch Sunshine deb package ****" \
+        && cd /tmp \
+        && wget -O /tmp/sunshine-debian.deb \
+            https://github.com/loki-47-6F-64/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian.deb \
+    && \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install Sunshine ****" \
+        && apt-get install -y /tmp/sunshine-debian.deb \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -472,7 +497,8 @@ ENV \
     WEB_UI_MODE="vnc" \
     ENABLE_VNC_AUDIO="true" \
     NEKO_PASSWORD=neko \
-    NEKO_PASSWORD_ADMIN=admin
+    NEKO_PASSWORD_ADMIN=admin \
+    ENABLE_SUNSHINE="false"
 
 # Configure required ports
 ENV \
