@@ -74,6 +74,14 @@ function configure_x_server {
         # Enable xvfb supervisord script
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xvfb.ini
     fi
+
+    # Enable KB/Mouse input capture with Xorg if configured
+    if [ ${ENABLE_EVDEV_INPUTS:-} = "true" ]; then
+        echo "Enabling evdev input class on pointers, keyboards, touchpads, touch screens, etc."
+        cp -fv /usr/share/X11/xorg.conf.d/10-evdev.conf /etc/X11/xorg.conf.d/10-evdev.conf
+    else
+        echo "Leaving evdev inputs disabled"
+    fi
 }
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then

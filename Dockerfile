@@ -170,6 +170,7 @@ RUN \
             xfonts-base \
             xorg \
             xserver-xorg-core \
+            xserver-xorg-input-evdev \
             xserver-xorg-input-libinput \
             xserver-xorg-legacy \
             xserver-xorg-video-all \
@@ -498,7 +499,8 @@ ENV \
     ENABLE_VNC_AUDIO="true" \
     NEKO_PASSWORD=neko \
     NEKO_PASSWORD_ADMIN=admin \
-    ENABLE_SUNSHINE="false"
+    ENABLE_SUNSHINE="false" \
+    ENABLE_EVDEV_INPUTS="false"
 
 # Configure required ports
 ENV \
