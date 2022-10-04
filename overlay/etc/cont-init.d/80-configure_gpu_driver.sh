@@ -42,21 +42,12 @@ function install_nvidia_driver {
     # Download the driver (if it does not yet exist locally)
     download_driver
 
-    # if command -v pacman &> /dev/null; then
-    #     echo "Install NVIDIA vulkan utils" \
-    #         && pacman -Syu --noconfirm --needed \
-    #             lib32-nvidia-utils \
-    #             lib32-vulkan-icd-loader
-    #             nvidia-utils \
-    #             vulkan-icd-loader \
-    #         && echo
-    # fi
-
     echo "Installing NVIDIA driver v${nvidia_host_driver_version} to match what is running on the host"
     chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
-    ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
+    sudo ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
         --silent \
         --accept-license \
+        --ui=none \
         --no-kernel-module \
         --install-compat32-libs \
         --no-nouveau-check \
@@ -67,6 +58,9 @@ function install_nvidia_driver {
         --no-libglx-indirect \
         --no-install-libglvnd \
         > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
+
+    # Cleanup  
+    # rm -rf ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
 }
 
 function install_amd_driver {
