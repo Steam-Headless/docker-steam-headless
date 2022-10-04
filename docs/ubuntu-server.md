@@ -1,10 +1,12 @@
-# Unraid
+# Ubuntu Server
 
 Follow these instructions to install Steam Headless on Ubuntu Server.
 
 > __Note__
 >
 > This assumes that your Ubuntu Server has not be configured to run any desktop environment!
+> 
+> This will not work with Ubuntu Desktop.
 
 
 ## INSTALL DOCKER:
