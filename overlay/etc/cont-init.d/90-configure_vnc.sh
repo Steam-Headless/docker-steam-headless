@@ -26,6 +26,8 @@ echo "Configure audio websocket port '${PORT_AUDIO_WEBSOCKET}'"
 export PORT_AUDIO_STREAM=${PORT_AUDIO_STREAM:-$DYNAMIC_PORT_AUDIO_STREAM}
 echo "Configure pulseaudio encoded stream port '${PORT_AUDIO_STREAM}'"
 
+chown -R root:root /opt/noVNC
+
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
 
     if [ ${WEB_UI_MODE} = "vnc" ]; then

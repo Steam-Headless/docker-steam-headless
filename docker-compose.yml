@@ -5,32 +5,30 @@ services:
       context: /mnt/user/appdata/docker-steam-headless-holo
       dockerfile: Dockerfile
     env_file: .env
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
-      - USER_PASSWORD=${USER_PASSWORD}
-      - TZ=${TZ}
-      - USER_LOCALES=${USER_LOCALES}
-      - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES}
-      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES}
-      - DISPLAY=${DISPLAY}
-      - MODE=${MODE}
-      - ENABLE_VNC_AUDIO=${ENABLE_VNC_AUDIO}
+    # environment:
+    #   - PUID=${PUID}
+    #   - PGID=${PGID}
+    #   - UMASK=${UMASK}
+    #   - USER_PASSWORD=${USER_PASSWORD}
+    #   - TZ=${TZ}
+    #   - USER_LOCALES=${USER_LOCALES}
+    #   - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES}
+    #   - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES}
+    #   - DISPLAY=${DISPLAY}
+    #   - MODE=${MODE}
+    #   - WEB_UI_MODE=${WEB_UI_MODE}
+    #   - ENABLE_VNC_AUDIO=${ENABLE_VNC_AUDIO}
     volumes:
       - ${APPDATA_DIR}:/home/default
       - ${GAMES_DIR}:/mnt/games
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /dev/input:/dev/input
     ports:
-      - '${PORT_SSH}:2222'
-      - '${PORT_VNC}:5900'
       - '${PORT_NOVNC_WEB}:8083'
-      - '${PORT_AUDIO_STREAM}:5901'
-      - '${PORT_AUDIO_WEBSOCKET}:32123'
     deploy:
       resources:
         reservations:
           devices:
             - capabilities: [ gpu ]
     network_mode: "host"
+    

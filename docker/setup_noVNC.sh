@@ -28,22 +28,4 @@ setup_noVNC () {
             /tmp/novnc.tar.gz
 }
 
-setup_websockify () {
-    echo "**** Fetch Websockify ****"
-        wget -O /tmp/websockify.tar.gz https://github.com/novnc/websockify/archive/v${WEBSOCKETIFY_VERSION}.tar.gz
-    echo "**** Extract Websockify ****"
-        tar -xvf /tmp/websockify.tar.gz -C /tmp
-    echo "**** Install Websockify to noVNC path ****"
-        mv -v /tmp/websockify-${WEBSOCKETIFY_VERSION} /opt/noVNC/utils/websockify
-    echo "**** Install Websockify to main ****"
-        cd /opt/noVNC/utils/websockify
-        python ./setup.py install
-    echo "**** Section cleanup ****"
-        rm -rf \
-            /tmp/websockify-* \
-            /tmp/websockify.tar.gz
-
-}
-
 setup_noVNC
-# setup_websockify

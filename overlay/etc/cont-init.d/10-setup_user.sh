@@ -22,6 +22,7 @@ groupmod -o -g "${PGID}" ${USER}
 
 
 echo "Adding default user to video, audio, input and pulse groups"
+groupadd -r pulse # Not sure why pulse group doesnt exist
 usermod -a -G video,audio,input,pulse ${USER}
 
 

@@ -114,13 +114,14 @@ if [[ ! -z ${nvidia_pci_address} ]]; then
 else
     echo "**** No NVIDIA device found ****";
 fi
-# Intel GPU
-if [[ ! -z ${intel_cpu_model} ]]; then
-    echo "**** Found Intel device '${intel_cpu_model}' ****";
-    install_intel_gpu_driver
-else
-    echo "**** No Intel device found ****";
-fi
+# Intel GPU 
+## WTF IS THIS DOING GPU? CPU?
+# if [[ ! -z ${intel_cpu_model} ]]; then
+#     echo "**** Found Intel device '${intel_cpu_model}' ****";
+#     install_intel_gpu_driver
+# else
+#     echo "**** No Intel device found ****";
+# fi
 # AMD GPU
 if [[ ! -z ${amd_gpu_model} ]]; then
     echo "**** Found AMD device '${amd_gpu_model}' ****";

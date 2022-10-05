@@ -12,6 +12,8 @@ set -o errtrace
 update_repo() {
     echo "**** Update package manager ****"
     sed -i 's/^NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
+    echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+    sudo chmod 755 /etc # to fix permissions issues from arch base
     pacman -Syu --noconfirm
     pacman-key --init
     pacman-key --populate archlinux
@@ -19,15 +21,14 @@ update_repo() {
 
 set_locales() {
     echo "**** Configure locales ****"
-    echo -e "${USER_LOCALES}" > "/etc/locale.gen"
+    echo -e ${USER_LOCALES} > /etc/locale.gen
     locale-gen
 }
 
-# Batch install from list ~85s
+# Batch install from list
 paclist_build() {
     echo "**** Install packages from backup list ****"
-    pacman -S --needed --noconfirm - < /tmp/pkglist.txt
-
+    sed -e "/^#/d" -e "s/#.*//" /tmp/pkglist.txt | pacman -S --needed --noconfirm -
     echo "Done installing packages, cleaning up"
     pacman -Scc --noconfirm
     echo ""

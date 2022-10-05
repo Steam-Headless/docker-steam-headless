@@ -32,7 +32,6 @@ done
 
 # Write permissions fix attempt
 su
-chown -R /opt/noVNC/utils
 
 # Execute any user generated init scripts
 mkdir -p ${USER_HOME}/init.d

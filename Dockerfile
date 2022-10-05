@@ -2,7 +2,7 @@
 # (WIP) An Arch variant of the steam-headless image
 #   using holoiso package
 #
-FROM archlinux:latest
+FROM lscr.io/linuxserver/webtop:amd64-arch-xfce
 LABEL maintainer="YourJelly <steam_holo@yourjelly.dev>"
 
 # Set static variables
@@ -18,7 +18,6 @@ ENV USER="default" \
     DISPLAY_SIZEW="1600" \
     DISPLAY_VIDEO_PORT="DFP" \
     PORT_SSH="" \
-    PORT_NOVNC_WEB="8083" \
     NEKO_NAT1TO1=""
 
 WORKDIR /tmp
@@ -26,15 +25,14 @@ COPY /docker /tmp
 RUN /bin/bash -c 'chmod +x /tmp/*.sh'
 
 # Install core packages
-RUN /bin/bash /tmp/setup.sh
+RUN /tmp/setup.sh
 
-# Install noVNC & Websocketify
+# Install noVNC
 ARG NOVNC_VERSION=1.3.0
-ARG WEBSOCKETIFY_VERSION=0.10.0
-RUN /bin/bash /tmp/setup_noVNC.sh
+RUN /tmp/setup_noVNC.sh
 
 # Setup User
-RUN /bin/bash /tmp/setup_user.sh
+RUN /tmp/setup_user.sh
 
 # Cleanup
 RUN rm -rf /tmp
