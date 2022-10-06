@@ -14,7 +14,9 @@ services:
         hard: 524288
 
     # NETWORK:
-    ## NOTE: Steam headless always required the use of the host network
+    ## NOTE:  Steam headless always requires the use of the host network.
+    ##        If we do not use the host network, then device input is not possible
+    ##        and your controllers will not work in steam games.
     network_mode: host
     hostname: ${NAME}
     extra_hosts:

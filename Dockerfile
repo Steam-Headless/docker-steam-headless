@@ -117,31 +117,36 @@ RUN \
     && \
     echo
 
-# Install mesa requirements
+# Install mesa and vulkan requirements
 RUN \
     echo "**** Update apt database ****" \
         && dpkg --add-architecture i386 \
         && apt-get update \
     && \
-    echo "**** Install mesa and vulkan requirements ****" \
+    echo "**** Install mesa requirements ****" \
         && apt-get install -y --no-install-recommends \
-            libegl1 \
             libgl1-mesa-dri \
-            libgl1-mesa-dri:i386 \
             libgl1-mesa-glx \
+            libgles2-mesa \
             libglu1-mesa \
-            libglx-mesa0:i386 \
+            mesa-utils \
+            mesa-utils-extra \
+    && \
+    echo "**** Install vulkan requirements ****" \
+        && apt-get install -y --no-install-recommends \
+            libvulkan1 \
+            libvulkan1:i386 \
+            mesa-vulkan-drivers \
+            mesa-vulkan-drivers:i386 \
+            vulkan-tools \
+    && \
+    echo "**** Install desktop requirements ****" \
+        && apt-get install -y --no-install-recommends \
+            libdbus-1-3 \
+            libegl1 \
             libgtk-3-0 \
             libgtk2.0-0 \
             libsdl2-2.0-0 \
-            libvulkan1 \
-            libvulkan1:i386 \
-            mesa-utils \
-            mesa-utils-extra \
-            mesa-vulkan-drivers \
-            mesa-vulkan-drivers:i386 \
-            vainfo \
-            vulkan-tools \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -388,17 +393,10 @@ RUN \
     && \
     echo
 
-# Setup video/audio streaming deps
+# Setup audio streaming deps
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
-    && \
-    echo "**** Install Intel media drivers and VAAPI ****" \
-        && apt-get install -y --no-install-recommends \
-            intel-media-va-driver-non-free \
-            i965-va-driver-shaders \
-            libva2 \
-            vainfo \
     && \
     echo "**** Install audio streaming deps ****" \
         && apt-get install -y --no-install-recommends \
@@ -459,6 +457,28 @@ RUN \
     && \
     echo
 
+# Setup video streaming deps
+RUN \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install Intel media drivers and VAAPI ****" \
+        && apt-get install -y --no-install-recommends \
+            intel-media-va-driver-non-free \
+            i965-va-driver-shaders \
+            libva2 \
+            vainfo \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
 # Configure default user and set env
 ENV \
     USER="default" \
@@ -490,7 +510,8 @@ ENV \
     DISPLAY_VIDEO_PORT="DFP" \
     DISPLAY=":55" \
     NVIDIA_DRIVER_CAPABILITIES="all" \
-    NVIDIA_VISIBLE_DEVICES="all"
+    NVIDIA_VISIBLE_DEVICES="all" \
+    XDG_RUNTIME_DIR="/tmp/.X11-unix/run"
 
 # Set container configuration environment variables
 ENV \

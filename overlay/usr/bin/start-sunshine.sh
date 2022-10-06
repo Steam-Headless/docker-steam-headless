@@ -24,8 +24,18 @@ mkdir -p /home/${USER}/sunshine
 if [[ ! -f /home/${USER}/sunshine/sunshine.conf ]]; then
     cp -vf /templates/sunshine/* /home/${USER}/sunshine/
     # TODO: Set the default encoder '# encoder = nvenc'
-    # TODO: Enable the vaapi device if not using nvenc
-    #       vainfo --display drm --device /dev/dri/renderD128 2> /dev/null | grep -E "((VAProfileH264High|VAProfileHEVCMain|VAProfileHEVCMain10).*VAEntrypointEncSlice)"
+    # nvidia_gpu_id=$(get_nvidia_gpu_id)
+    # if [[ "X${nvidia_gpu_id:-}" != "X" ]]; then
+    #     if [[ "all video" == *"${NVIDIA_DRIVER_CAPABILITIES}"* ]]; then
+    #         # Check if we have a nvidia GPU available
+    #         sed -i 's|^# encoder.*=.*$|encoder = nvenc|' /home/${USER}/sunshine/sunshine.conf 
+    #     fi
+    # else
+    #     # TODO: Enable the vaapi device if not using nvenc
+    #     #       vainfo --display drm --device /dev/dri/renderD128 2> /dev/null | grep -E "((VAProfileH264High|VAProfileHEVCMain|VAProfileHEVCMain10).*VAEntrypointEncSlice)"
+    #     # Loop over any render devices
+    #     echo 
+    # fi
 fi
 
 # Reset the default username/password
@@ -38,7 +48,7 @@ fi
 # Wait for the X server to start
 wait_for_x
 # Start the sunshine server
-sunshine min_log_level=info /home/${USER}/sunshine/sunshine.conf &
+sunshine /home/${USER}/sunshine/sunshine.conf &
 sunshine_pid=$!
 
 

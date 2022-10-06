@@ -57,9 +57,7 @@ echo "Setting umask to ${UMASK}";
 umask ${UMASK}
 
 
-# Configure the 'XDG_RUNTIME_DIR' to something that is easily shared between containers
-export XDG_RUNTIME_DIR=/tmp/.X11-unix/run
-# export XDG_RUNTIME_DIR=/run/user/${PUID}
+# Configure the 'XDG_RUNTIME_DIR' path
 echo "Create the user XDG_RUNTIME_DIR path '${XDG_RUNTIME_DIR}'"
 mkdir -p ${XDG_RUNTIME_DIR}
 chown -R ${PUID}:${PGID} ${XDG_RUNTIME_DIR}

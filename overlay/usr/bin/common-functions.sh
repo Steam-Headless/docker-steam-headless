@@ -23,3 +23,19 @@ wait_for_x() {
         fi
     done
 }
+
+
+get_nvidia_gpu_id() {
+    # Fech NVIDIA GPU device (if one exists)
+    if [ "${NVIDIA_VISIBLE_DEVICES:-}" == "all" ]; then
+        gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
+    elif [ -z "${NVIDIA_VISIBLE_DEVICES:-}" ]; then
+        gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
+    else
+        gpu_select=$(nvidia-smi --format=csv --id=$(echo "${NVIDIA_VISIBLE_DEVICES:-}" | cut -d ',' -f1) --query-gpu=uuid | sed -n 2p)
+        if [ -z "$gpu_select" ]; then
+            gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
+        fi
+    fi
+    echo ${gpu_select}
+}
