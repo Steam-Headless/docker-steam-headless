@@ -46,6 +46,9 @@ function configure_x_server {
         sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
     fi
 
+    # Remove previous Xorg config
+    rm -f /etc/X11/xorg.conf
+
     # Ensure the X socket path exists
     mkdir -p /tmp/.X11-unix
 
@@ -82,10 +85,6 @@ function configure_x_server {
     else
         echo "Leaving evdev inputs disabled"
     fi
-
-    # Run initial X server configuration
-    echo "Runing intial X configuration."
-    X -configure && cp -fv /root/xorg.conf.new /etc/X11/xorg.conf
 }
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
