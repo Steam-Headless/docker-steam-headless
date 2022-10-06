@@ -1,0 +1,89 @@
+## tools
+#bash
+bash-completion
+#curl
+git
+#less
+man-db
+nano
+net-tools
+#patch
+#pkgconf
+rsync
+screen
+#sudo
+unzip
+vim
+wget
+#xz
+
+## python
+#python
+python-numpy
+python-pip
+python-setuptools
+
+## supervisor
+supervisor
+
+## xfs requirements
+xfsdump
+xfsprogs
+
+## mesa requirements
+glu
+libva-mesa-driver
+mesa-utils
+mesa-vdpau
+opencl-mesa
+#pciutils
+vulkan-mesa-layers
+
+## X server requirements
+#avahi
+#dbus   # conflicts with dbus-x11
+lib32-fontconfig
+ttf-liberation
+x11vnc
+xorg# group default all ##need?
+xorg-apps# group default all ##need?
+#xorg-font-util
+xorg-fonts-misc
+xorg-fonts-type1
+#xorg-server
+xorg-server-xephyr
+xorg-server-xvfb
+#xorg-xauth
+xorg-xbacklight
+xorg-xhost
+#xorg-xinit
+xorg-xinput
+xorg-xkill
+xorg-xprop
+#xorg-xrandr
+xorg-xsetroot
+xorg-xwininfo
+
+## pulseaudio
+#pulseaudio
+pulseaudio-alsa
+
+## openssh
+#openssh
+
+## desktop environment
+gedit
+xfce4
+#xfce4-terminal
+
+## flatpak
+flatpak
+xdg-desktop-portal-gtk
+
+## nvidia
+lib32-nvidia-utils
+lib32-vulkan-icd-loader
+nvidia
+#vulkan-icd-loader
+
+## steam
