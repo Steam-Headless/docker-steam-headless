@@ -1,8 +1,8 @@
 
 # Fech NVIDIA GPU device (if one exists)
-if [ "$NVIDIA_VISIBLE_DEVICES" == "all" ]; then
+if [ "${NVIDIA_VISIBLE_DEVICES:-}" == "all" ]; then
     export gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
-elif [ -z "$NVIDIA_VISIBLE_DEVICES" ]; then
+elif [ -z "${NVIDIA_VISIBLE_DEVICES:-}" ]; then
     export gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
 else
     export gpu_select=$(nvidia-smi --format=csv --id=$(echo "$NVIDIA_VISIBLE_DEVICES" | cut -d ',' -f1) --query-gpu=uuid | sed -n 2p)
@@ -45,6 +45,9 @@ function configure_x_server {
         echo "Configure Xwrapper.config"
         sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
     fi
+
+    # Remove previous Xorg config
+    rm -f /etc/X11/xorg.conf
 
     # Ensure the X socket path exists
     mkdir -p /tmp/.X11-unix

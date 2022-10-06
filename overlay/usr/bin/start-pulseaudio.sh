@@ -13,7 +13,7 @@
 _term() {
     kill -TERM "$pulseaudio_pid" 2>/dev/null
 }
-trap _term SIGTERM
+trap _term SIGTERM SIGINT
 
 
 # EXECUTE PROCESS:

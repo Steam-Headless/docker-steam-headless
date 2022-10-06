@@ -59,7 +59,8 @@ ENV \
     DISPLAY_VIDEO_PORT="DFP" \
     DISPLAY=":55" \
     NVIDIA_DRIVER_CAPABILITIES="all" \
-    NVIDIA_VISIBLE_DEVICES="all"
+    NVIDIA_VISIBLE_DEVICES="all" \
+    XDG_RUNTIME_DIR="/tmp/.X11-unix/run"
 
 # Set container configuration environment variables
 ENV \

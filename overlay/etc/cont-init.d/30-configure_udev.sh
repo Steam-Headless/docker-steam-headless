@@ -42,3 +42,5 @@ if [[ -e /dev/uinput ]]; then
     echo "**** Ensure the default user has permission to r/w on input devices ****";
     chmod 0666 /dev/uinput
 fi
+
+echo "DONE"

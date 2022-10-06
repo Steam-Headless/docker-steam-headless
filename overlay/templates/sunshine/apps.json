@@ -1,0 +1,15 @@
+{
+    "env": {
+        "PATH": "$(PATH):$(HOME)\/.local\/bin"
+    },
+    "apps": [
+        {
+            "name": "Steam BigPicture",
+            "output": "steam.txt",
+            "cmd": "",
+            "detached": [
+                "\/usr\/games\/steam steam:\/\/open\/bigpicture"
+            ]
+        }
+    ]
+}
