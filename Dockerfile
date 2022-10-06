@@ -1,9 +1,5 @@
-# Steam Headless (Arch Linux)
-# (WIP) An Arch variant of the steam-headless image
-#   using holoiso package
-#
-FROM lscr.io/linuxserver/webtop:amd64-arch-xfce
-LABEL maintainer="YourJelly <steam_holo@yourjelly.dev>"
+FROM debian:bullseye-slim
+LABEL maintainer="Josh.5 <jsunnex@gmail.com>"
 
 WORKDIR /docker
 COPY /docker/debian /docker
@@ -78,27 +74,8 @@ ENV \
 # Configure required ports
 ENV \
     PORT_SSH="" \
+    PORT_NOVNC_WEB="8083" \
     NEKO_NAT1TO1=""
-
-WORKDIR /tmp
-COPY /docker /tmp
-RUN /bin/bash -c 'chmod +x /tmp/*.sh'
-
-# Install core packages
-RUN /tmp/setup.sh
-
-# Install noVNC
-ARG NOVNC_VERSION=1.3.0
-RUN /tmp/setup_noVNC.sh
-
-# Setup User
-RUN /tmp/setup_user.sh
-
-# Cleanup
-RUN rm -rf /tmp
-
-# Add FS overlay
-COPY overlay /
 
 # Expose the required ports
 EXPOSE 8083

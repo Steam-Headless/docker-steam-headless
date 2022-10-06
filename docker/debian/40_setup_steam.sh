@@ -43,7 +43,7 @@ install_firefox() {
     echo "**** Update apt database ****"
         apt-get update
 
-    echo "**** Install firefox ****" \
+    echo "**** Install firefox ****"
         apt-get install -y \
             firefox-esr
 

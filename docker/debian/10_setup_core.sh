@@ -158,7 +158,6 @@ install_X_server() {
             xfonts-base \
             xorg \
             xserver-xorg-core \
-            xserver-xorg-input-evdev \
             xserver-xorg-input-libinput \
             xserver-xorg-legacy \
             xserver-xorg-video-all \

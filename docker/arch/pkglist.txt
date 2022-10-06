@@ -1,24 +1,24 @@
 ## tools
-bash
+#bash
 bash-completion
-curl
+#curl
 git
-less
+#less
 man-db
 nano
 net-tools
-patch
-pkgconf
+#patch
+#pkgconf
 rsync
 screen
-sudo
+#sudo
 unzip
 vim
 wget
-xz
+#xz
 
 ## python
-python
+#python
 python-numpy
 python-pip
 python-setuptools
@@ -36,45 +36,45 @@ libva-mesa-driver
 mesa-utils
 mesa-vdpau
 opencl-mesa
-pciutils
+#pciutils
 vulkan-mesa-layers
 
 ## X server requirements
-avahi
-dbus-x11
+#avahi
+#dbus   # conflicts with dbus-x11
 lib32-fontconfig
 ttf-liberation
 x11vnc
 xorg# group default all ##need?
 xorg-apps# group default all ##need?
-xorg-font-util
+#xorg-font-util
 xorg-fonts-misc
 xorg-fonts-type1
-xorg-server
+#xorg-server
 xorg-server-xephyr
 xorg-server-xvfb
-xorg-xauth
+#xorg-xauth
 xorg-xbacklight
 xorg-xhost
-xorg-xinit
+#xorg-xinit
 xorg-xinput
 xorg-xkill
 xorg-xprop
-xorg-xrandr
+#xorg-xrandr
 xorg-xsetroot
 xorg-xwininfo
 
 ## pulseaudio
-pulseaudio
+#pulseaudio
 pulseaudio-alsa
 
 ## openssh
-openssh
+#openssh
 
 ## desktop environment
 gedit
 xfce4
-xfce4-terminal
+#xfce4-terminal
 
 ## flatpak
 flatpak
@@ -84,6 +84,6 @@ xdg-desktop-portal-gtk
 lib32-nvidia-utils
 lib32-vulkan-icd-loader
 nvidia
-vulkan-icd-loader
+#vulkan-icd-loader
 
 ## steam

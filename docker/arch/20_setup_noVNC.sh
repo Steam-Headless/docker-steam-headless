@@ -7,16 +7,11 @@ set -o errtrace
 # Enable tracing of what gets executed
 #set -o xtrace
 
-NOVNC_VERSION=1.3.0
-
 setup_noVNC () {
-    cd /tmp
     echo "**** Fetch noVNC ****"
         wget -O /tmp/novnc.tar.gz https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz
-
     echo "**** Extract noVNC ****"
         tar -xvf /tmp/novnc.tar.gz
-
     echo "**** Configure noVNC ****"
         mkdir -p /opt
         rm -rf /opt/noVNC
@@ -24,11 +19,9 @@ setup_noVNC () {
         cd /opt/noVNC
         ln -s vnc.html index.html
         chmod -R 755 /opt/noVNC
-
     echo "**** Modify noVNC ****"
         sed -i 's/credentials: { password: password } });/credentials: { password: password },\n                           wsProtocols: ["'"binary"'"] });/g' app/ui.js
-        sed -i '/    desktopName: "",/c\    desktopName: "Steam Headless - noVNC",' app/ui.js #Is this right?
-
+        # sed -i '/    desktopName: "",/c\    desktopName: "Steam Headless - noVNC",' app/ui.js
     echo "**** Section cleanup ****"
         rm -rf \
             /tmp/noVNC* \
