@@ -82,6 +82,10 @@ function configure_x_server {
     else
         echo "Leaving evdev inputs disabled"
     fi
+
+    # Run initial X server configuration
+    echo "Runing intial X configuration."
+    X -configure && cp -fv /root/xorg.conf.new /etc/X11/xorg.conf
 }
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
