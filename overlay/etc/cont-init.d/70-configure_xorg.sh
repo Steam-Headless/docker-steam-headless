@@ -1,8 +1,8 @@
 
 # Fech NVIDIA GPU device (if one exists)
-if [ "$NVIDIA_VISIBLE_DEVICES" == "all" ]; then
+if [ "${NVIDIA_VISIBLE_DEVICES:-}" == "all" ]; then
     export gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
-elif [ -z "$NVIDIA_VISIBLE_DEVICES" ]; then
+elif [ -z "${NVIDIA_VISIBLE_DEVICES:-}" ]; then
     export gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
 else
     export gpu_select=$(nvidia-smi --format=csv --id=$(echo "$NVIDIA_VISIBLE_DEVICES" | cut -d ',' -f1) --query-gpu=uuid | sed -n 2p)

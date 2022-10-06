@@ -8,15 +8,14 @@
 # Last Modified: Wednesday, 26th January 2022 5:38:23 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
-#
-# I made this wrapper script so that I could easily try a range of desktop environments
-#
+
+source /usr/bin/common-functions.sh
 
 # CATCH TERM SIGNAL:
 _term() {
     kill -TERM "$desktop_pid" 2>/dev/null
 }
-trap _term SIGTERM
+trap _term SIGTERM SIGINT
 
 
 # CONFIGURE:
@@ -31,6 +30,8 @@ ln -sf /usr/share/backgrounds/steam.jpg /etc/alternatives/desktop-background
 
 
 # EXECUTE PROCESS:
+# Wait for the X server to start
+wait_for_x
 # Run the desktop environment in order of priority
 if [[ -e /usr/bin/cinnamon-session ]]; then
     /usr/bin/cinnamon-session --display=${DISPLAY} &

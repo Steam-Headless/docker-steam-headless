@@ -9,11 +9,13 @@
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
+source /usr/bin/common-functions.sh
+
 # CATCH TERM SIGNAL:
 _term() {
     kill -TERM "$sunshine_pid" 2>/dev/null
 }
-trap _term SIGTERM
+trap _term SIGTERM SIGINT
 
 
 # CONFIGURE:
@@ -25,18 +27,9 @@ fi
 
 
 # EXECUTE PROCESS:
-# Wait for X server to start
-#   (Credit: https://gist.github.com/tullmann/476cc71169295d5c3fe6)
-MAX=60 # About 30 seconds
-CT=0
-while ! xdpyinfo >/dev/null 2>&1; do
-    sleep 0.50s
-    CT=$(( CT + 1 ))
-    if [ "$CT" -ge "$MAX" ]; then
-        LOG "FATAL: $0: Gave up waiting for X server $DISPLAY"
-        exit 11
-    fi
-done
+# Wait for the X server to start
+wait_for_x
+# Start the sunshine server
 sunshine min_log_level=info /home/${USER}/sunshine/sunshine.conf &
 sunshine_pid=$!
 
