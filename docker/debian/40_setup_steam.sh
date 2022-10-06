@@ -93,6 +93,26 @@ install_streaming() {
     echo
 }
 
+# Install sunshine
+SUNSHINE_VERSION=0.11.1
+install_sunshine() {
+    echo "**** Fetch Sunshine deb package ****"
+        cd /tmp
+        wget -O /tmp/sunshine-debian.deb \
+            https://github.com/loki-47-6F-64/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian.deb
+
+    echo "**** Update apt database ****"
+        apt-get update
+
+    echo "**** Install Sunshine ****"
+        apt-get install -y /tmp/sunshine-debian.deb
+
+    echo "**** Section cleanup ****"
+        section_cleanup
+    echo
+}
+
 install_steam
 install_firefox
 install_streaming
+install_sunshine

@@ -31,30 +31,6 @@ RUN /docker/30_setup_desktop.sh
 # Install desktop environment ##split from desktop because timing out
 RUN /docker/40_setup_steam.sh
 
-# Install sunshine
-ARG SUNSHINE_VERSION=0.11.1
-RUN \
-    echo "**** Fetch Sunshine deb package ****" \
-        && cd /tmp \
-        && wget -O /tmp/sunshine-debian.deb \
-            https://github.com/loki-47-6F-64/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian.deb \
-    && \
-    echo "**** Update apt database ****" \
-        && apt-get update \
-    && \
-    echo "**** Install Sunshine ****" \
-        && apt-get install -y /tmp/sunshine-debian.deb \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
 # Configure default user and set env
 ENV \
     USER="default" \
