@@ -110,31 +110,36 @@ install_supervisor() {
     echo
 }
 
-# Install mesa requirements
+# Install mesa and vulkan requirements
 install_mesa() {
     echo "**** Update apt database ****"
         dpkg --add-architecture i386
         apt-get update
     
-    echo "**** Install mesa and vulkan requirements ****"
+    echo "**** Install mesa requirements ****"
         apt-get install -y --no-install-recommends \
-            libegl1 \
             libgl1-mesa-dri \
-            libgl1-mesa-dri:i386 \
             libgl1-mesa-glx \
+            libgles2-mesa \
             libglu1-mesa \
-            libglx-mesa0:i386 \
-            libgtk-3-0 \
-            libgtk2.0-0 \
-            libsdl2-2.0-0 \
+            mesa-utils \
+            mesa-utils-extra
+
+    echo "**** Install vulkan requirements ****"
+        apt-get install -y --no-install-recommends \
             libvulkan1 \
             libvulkan1:i386 \
-            mesa-utils \
-            mesa-utils-extra \
             mesa-vulkan-drivers \
             mesa-vulkan-drivers:i386 \
-            vainfo \
-            vulkan-tools 
+            vulkan-tools
+
+    echo "**** Install desktop requirements ****"
+        apt-get install -y --no-install-recommends \
+            libdbus-1-3 \
+            libegl1 \
+            libgtk-3-0 \
+            libgtk2.0-0 \
+            libsdl2-2.0-0
     
     echo "**** Section cleanup ****"
         section_cleanup

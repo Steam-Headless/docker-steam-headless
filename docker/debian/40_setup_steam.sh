@@ -52,16 +52,10 @@ install_firefox() {
     echo
 }
 
-# Setup video/audio streaming deps
-install_streaming() {
+# Setup audio streaming deps
+install_audio() {
     echo "**** Update apt database ****"
         apt-get update
-
-    echo "**** Install Intel media drivers and VAAPI ****"
-        apt-get install -y --no-install-recommends \
-            intel-media-va-driver-non-free \
-            libva2 \
-            vainfo
 
     echo "**** Install audio streaming deps ****"
         apt-get install -y --no-install-recommends \
@@ -93,6 +87,23 @@ install_streaming() {
     echo
 }
 
+# Setup video streaming deps
+install_video() {
+    echo "**** Update apt database ****"
+        apt-get update \
+
+    echo "**** Install Intel media drivers and VAAPI ****"
+        apt-get install -y --no-install-recommends \
+            intel-media-va-driver-non-free \
+            i965-va-driver-shaders \
+            libva2 \
+            vainfo
+
+    echo "**** Section cleanup ****"
+        section_cleanup
+    echo
+}
+
 # Install sunshine
 SUNSHINE_VERSION=0.11.1
 install_sunshine() {
@@ -114,5 +125,6 @@ install_sunshine() {
 
 install_steam
 install_firefox
-install_streaming
+install_audio
+install_video
 install_sunshine
