@@ -19,7 +19,15 @@ trap _term SIGTERM SIGINT
 
 
 # CONFIGURE:
-# TODO: Install default configurations
+# Install default configurations
+mkdir -p /home/${USER}/sunshine
+if [[ ! -f /home/${USER}/sunshine/sunshine.conf ]]; then
+    cp -vf /templates/sunshine/* /home/${USER}/sunshine/
+    # TODO: Set the default encoder '# encoder = nvenc'
+    # TODO: Enable the vaapi device if not using nvenc
+    #       vainfo --display drm --device /dev/dri/renderD128 2> /dev/null | grep -E "((VAProfileH264High|VAProfileHEVCMain|VAProfileHEVCMain10).*VAEntrypointEncSlice)"
+fi
+
 # Reset the default username/password
 if ([ "X${SUNSHINE_USER:-}" != "X" ] && [ "X${SUNSHINE_PASS:-}" != "X" ]); then
     sunshine /home/${USER}/sunshine/sunshine.conf --creds ${SUNSHINE_USER:-} ${SUNSHINE_PASS:-}
