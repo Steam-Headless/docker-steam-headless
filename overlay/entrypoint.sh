@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 ###
 # File: entrypoint.sh
 # Project: docker-steam-headless
@@ -30,6 +30,9 @@ for init_script in /etc/cont-init.d/*.sh ; do
     source "${init_script}"
 done
 
+# Write permissions fix attempt
+su
+
 # Execute any user generated init scripts
 mkdir -p ${USER_HOME}/init.d
 chown -R ${USER} ${USER_HOME}/init.d
@@ -59,7 +62,7 @@ chmod a+rwx /opt/scripts/*.sh
 echo
 echo "**** Starting supervisord ****";
 echo "Logging all root services to '/var/log/supervisor/'"
-echo "Logging all user services to '/home/${USER}/.cache/log/'"
+echo "Logging all user services to '${USER_HOME}/.cache/log/'"
 echo
 mkdir -p /var/log/supervisor
 chmod a+rw /var/log/supervisor

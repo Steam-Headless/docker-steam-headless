@@ -1,0 +1,21 @@
+services:
+  steam-headless-holo:
+    container_name: steam-headless-holo
+    build:
+      context: /mnt/user/appdata/docker-steam-headless-holo
+      dockerfile: Dockerfile
+    env_file: .env
+    volumes:
+      - ${APPDATA_DIR}:/home/default
+      - ${GAMES_DIR}:/mnt/games
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/input:/dev/input
+    ports:
+      - '${PORT_NOVNC_WEB}:8083'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    network_mode: "host"
+    
