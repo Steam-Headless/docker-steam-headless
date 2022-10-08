@@ -479,6 +479,41 @@ RUN \
     && \
     echo
 
+# Setup dind
+# Mostly taken from https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
+ARG DOCKER_VERSION=20.10.18
+ARG DOCKER_COMPOSE_VERSION=v2.11.2
+ARG DIND_COMMIT=42b1175eda071c0e9121e1d64345928384a93df1
+RUN \
+    echo "**** Fetch Docker static binary package ****" \
+        && cd /tmp \
+        && wget -O /tmp/docker-${DOCKER_VERSION}.tgz \
+            https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
+    && \
+    echo "**** Extract static binaries ****" \
+        && mkdir -p /usr/local/bin \
+        && tar --extract \
+            --file /tmp/docker-${DOCKER_VERSION}.tgz \
+            --strip-components 1 \
+            --directory /usr/local/bin/ \
+            --no-same-owner \
+    && \
+    echo "**** Install dind hack ****" \
+        && wget -O /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-Linux-x86_64" \
+        && chmod +x /usr/local/bin/docker-compose \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+VOLUME /var/lib/docker
+
+
 # Configure default user and set env
 ENV \
     USER="default" \

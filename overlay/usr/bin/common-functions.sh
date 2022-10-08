@@ -9,24 +9,52 @@
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
+# Wait for X server to start
+#   (Credit: https://gist.github.com/tullmann/476cc71169295d5c3fe6)
 wait_for_x() {
-    # Wait for X server to start
-    #   (Credit: https://gist.github.com/tullmann/476cc71169295d5c3fe6)
     MAX=60 # About 30 seconds
     CT=0
     while ! xdpyinfo >/dev/null 2>&1; do
         sleep 0.50s
         CT=$(( CT + 1 ))
         if [ "$CT" -ge "$MAX" ]; then
-            LOG "FATAL: $0: Gave up waiting for X server $DISPLAY"
+            echo "FATAL: $0: Gave up waiting for X server $DISPLAY"
             exit 11
         fi
     done
 }
 
+# Wait for udev init to complete
+wait_for_udev() {
+    MAX=10
+    CT=0
+    while [ ! -f /tmp/.udev-started ]; do
+        sleep 1
+        CT=$(( CT + 1 ))
+        if [ "$CT" -ge "$MAX" ]; then
+            echo "FATAL: $0: Gave up waiting for udev server to start"
+            exit 11
+        fi
+    done
+}
 
+# Wait for dockerd to start
+wait_for_docker() {
+    MAX=10
+    CT=0
+    while ! docker system info >/dev/null 2>&1; do
+        sleep 1
+        CT=$(( CT + 1 ))
+        if [ "$CT" -ge "$MAX" ]; then
+            echo "FATAL: $0: Gave up waiting for dockerd service to start"
+            exit 11
+        fi
+    done
+    echo "DOCKERD RUNNING!"
+}
+
+# Fech NVIDIA GPU device (if one exists)
 get_nvidia_gpu_id() {
-    # Fech NVIDIA GPU device (if one exists)
     if [ "${NVIDIA_VISIBLE_DEVICES:-}" == "all" ]; then
         gpu_select=$(nvidia-smi --format=csv --query-gpu=uuid 2> /dev/null | sed -n 2p)
     elif [ -z "${NVIDIA_VISIBLE_DEVICES:-}" ]; then

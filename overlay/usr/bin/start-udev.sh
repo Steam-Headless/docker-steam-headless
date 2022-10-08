@@ -8,6 +8,7 @@
 # Last Modified: Friday, 14th January 2022 9:21:00 am
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
+set -e
 
 # CATCH TERM SIGNAL:
 _term() {
