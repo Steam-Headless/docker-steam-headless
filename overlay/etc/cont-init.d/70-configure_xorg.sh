@@ -50,10 +50,10 @@ function configure_x_server {
     rm -f /etc/X11/xorg.conf
 
     # Ensure the X socket path exists
-    mkdir -p /tmp/.X11-unix
+    mkdir -p ${XORG_SOCKET_DIR}
 
     # Clear out old lock files
-    display_file=/tmp/.X11-unix/X${DISPLAY#:}
+    display_file=${XORG_SOCKET_DIR}/X${DISPLAY#:}
     if [ -S ${display_file} ]; then
         echo "Removing ${display_file} before starting"
         rm -f /tmp/.X${DISPLAY#:}-lock
