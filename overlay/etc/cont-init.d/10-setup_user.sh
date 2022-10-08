@@ -26,7 +26,7 @@ usermod -a -G video,audio,input,pulse ${USER}
 
 
 echo "Adding default user to any additional required device groups"
-device_nodes=( /dev/input/event* /dev/dri/render* )
+device_nodes=( /dev/uinput /dev/input/event* /dev/dri/* )
 added_groups=""
 for dev in "${device_nodes[@]}"; do
     # Only process $dev if it's a character device
@@ -38,6 +38,11 @@ for dev in "${device_nodes[@]}"; do
     dev_group=$(stat -c "%G" "${dev}")
     dev_gid=$(stat -c "%g" "${dev}")
 
+    # Dont add root
+    if [[ "${dev_gid}" = 0 ]]; then
+        continue
+    fi
+
     # Create a name for the group ID if it does not yet already exist
     if [[ "${dev_group}" = "UNKNOWN" ]]; then
         dev_group="user-gid-${dev_gid}"
@@ -46,7 +51,7 @@ for dev in "${device_nodes[@]}"; do
 
     # Add group to user
     if [[ "${added_groups}" != *"${dev_group}"* ]]; then
-        echo "Adding user '${USER}' to group: '${dev_group}'"
+        echo "Adding user '${USER}' to group: '${dev_group}' for device: ${dev}"
         usermod -a -G ${dev_group} ${USER}
         added_groups=" ${added_groups} ${dev_group} "
     fi
