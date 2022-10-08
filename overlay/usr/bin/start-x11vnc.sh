@@ -8,7 +8,7 @@
 # Last Modified: Tuesday, 6th October 2022 9:30:00 pm
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
-
+set -e
 source /usr/bin/common-functions.sh
 
 # CATCH TERM SIGNAL:

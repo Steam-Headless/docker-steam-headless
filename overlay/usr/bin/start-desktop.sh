@@ -8,7 +8,7 @@
 # Last Modified: Wednesday, 26th January 2022 5:38:23 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
-
+set -e
 source /usr/bin/common-functions.sh
 
 # CATCH TERM SIGNAL:
@@ -21,10 +21,6 @@ trap _term SIGTERM SIGINT
 # CONFIGURE:
 XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${USER}/.local/share/flatpak/exports/share"
 export $(dbus-launch)
-
-# Set the default background for gnome based desktop
-mkdir -p /etc/alternatives
-ln -sf /usr/share/backgrounds/steam.jpg /etc/alternatives/desktop-background
 
 
 # EXECUTE PROCESS:
