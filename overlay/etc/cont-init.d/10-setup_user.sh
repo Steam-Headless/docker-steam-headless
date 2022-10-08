@@ -93,4 +93,8 @@ echo "root:${USER_PASSWORD}" | chpasswd
 echo "Setting user password"
 echo "${USER}:${USER_PASSWORD}" | chpasswd
 
+# Set root XDG_RUNTIME_DIR path
+mkdir -p /tmp/runtime-root
+chown root:root /tmp/runtime-root
+
 echo "DONE"
