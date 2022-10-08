@@ -525,6 +525,9 @@ VOLUME /var/lib/docker
 
 # Configure default user and set env
 ENV \
+    PUID=99 \
+    PGID=100 \
+    UMASK=000 \
     USER="default" \
     USER_PASSWORD="password" \
     USER_HOME="/home/default" \
@@ -555,7 +558,13 @@ ENV \
     DISPLAY=":55" \
     NVIDIA_DRIVER_CAPABILITIES="all" \
     NVIDIA_VISIBLE_DEVICES="all" \
+    XORG_SOCKET_DIR="/tmp/.X11-unix" \
     XDG_RUNTIME_DIR="/tmp/.X11-unix/run"
+
+# Set pulseaudio environment variables
+ENV \
+    PULSE_SOCKET_DIR="/tmp/pulse" \
+    PULSE_SERVER="unix:/tmp/pulse/pulse-socket"
 
 # Set container configuration environment variables
 ENV \
