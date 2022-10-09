@@ -57,13 +57,19 @@ body:
     id: platform
     attributes:
       label: Platform
-      description: Detail the host OS platform, version and software versions.
+      description: |
+        Detail the host OS platform, version and software versions.
+          - Distribution: `$(. /etc/os-release; echo "${NAME} - ${VERSION}")`
+          - Linux Kernel: `$(uname -rpio)`
+          - GPU Driver versions: `$(nvidia-smi | grep 'Version:')`
+          - Docker: `$(docker -v)`
+          - Docker-compose: `$(docker compose -v)`
       placeholder: |
-          - Distribution: $(. /etc/os-release; echo "${NAME} - ${VERSION}")
-          - Linux Kernel: $(uname -rpio)
-          - GPU Driver versions: $(nvidia-smi | grep 'Version:')
-          - Docker: $(docker -v)
-          - Docker-compose: $(docker compose -v)
+        - Distribution:
+        - Linux Kernel:
+        - GPU Driver versions:
+        - Docker:
+        - Docker-compose:
     validations:
       required: true
   - type: textarea
