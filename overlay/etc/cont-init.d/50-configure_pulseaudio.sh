@@ -14,7 +14,7 @@ else
 
     # Configure the palse audio socket
     sed -i "s|^; default-server.*$|default-server = ${PULSE_SERVER}|" /etc/pulse/client.conf
-    sed -i 's|^load-module module-native-protocol-unix.*$|load-module module-native-protocol-unix socket=${PULSE_SOCKET_DIR}/pulse-socket auth-anonymous=1|' \
+    sed -i "s|^load-module module-native-protocol-unix.*$|load-module module-native-protocol-unix socket=${PULSE_SOCKET_DIR}/pulse-socket auth-anonymous=1|" \
         /etc/pulse/default.pa
 
     # Disable pulseaudio from respawning (https://unix.stackexchange.com/questions/204522/how-does-pulseaudio-start)
