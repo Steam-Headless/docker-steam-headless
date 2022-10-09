@@ -1,0 +1,17 @@
+---
+
+name: Documentation Improvement
+description: Suggest an update to documentation.
+labels: ['status:awaiting-triage', 'type:documentation']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help improve!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a description of the proposed changes.
+    validations:
+      required: true
