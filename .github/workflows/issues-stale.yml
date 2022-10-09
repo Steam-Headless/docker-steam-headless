@@ -21,8 +21,8 @@ jobs:
           days-before-stale: 60
           days-before-close: 10
           exempt-all-assignees: true
-          exempt-issue-labels: 'added,fixed'
-          exempt-pr-labels: 'dependencies,l10n'
+          exempt-issue-labels: 'added,fixed,type:enhancement,status:awaiting-triage,status:in-progress'
+          exempt-pr-labels: 'type:dependencies,status:in-progress,status:in-review'
           stale-issue-label: 'stale'
           stale-issue-message: >
             This issue is stale because it has been open for 30 days with no activity.
@@ -41,7 +41,7 @@ jobs:
             This PR was closed because the the template was not completed after 5 days.
           days-before-stale: 0
           days-before-close: 5
-          exempt-pr-labels: 'dependencies,l10n'
+          exempt-pr-labels: 'type:dependencies,status:in-progress,status:in-review'
           only-labels: 'invalid:template-incomplete'
           stale-issue-label: 'invalid:template-incomplete'
           stale-issue-message: >
