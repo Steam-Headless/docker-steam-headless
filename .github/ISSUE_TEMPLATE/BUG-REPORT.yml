@@ -53,10 +53,10 @@ body:
       placeholder: 'Build: [10/08/22 03:09:26] [master] [477e25f82c2612b6345ca0c9777345e6b5129965]'
     validations:
       required: true
-  - type: input
+  - type: textarea
     id: platform
     attributes:
-      label: Platform and Version
+      label: Platform
       description: Detail the host OS platform, version and software versions.
       placeholder: |
           - Distribution: $(. /etc/os-release; echo "${NAME} - ${VERSION}")
