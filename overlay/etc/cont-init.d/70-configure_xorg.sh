@@ -85,6 +85,13 @@ function configure_x_server {
     else
         echo "Leaving evdev inputs disabled"
     fi
+
+    monitor_connected=$(cat /sys/class/drm/card*/status | awk '/^connected/ { print $1; }' | head -n1)
+    if [[ "X${monitor_connected}" == "X" ]]; then
+        echo "No monitors connected. Installing dummy xorg.conf"
+        # Use a dummy display input
+        cp -fv /templates/xorg/xorg.dummy.conf /etc/X11/xorg.conf
+    fi
 }
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then

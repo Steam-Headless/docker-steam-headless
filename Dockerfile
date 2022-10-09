@@ -179,6 +179,7 @@ RUN \
             xserver-xorg-input-libinput \
             xserver-xorg-legacy \
             xserver-xorg-video-all \
+            xserver-xorg-video-dummy \
             xvfb \
     && \
     echo "**** Section cleanup ****" \
