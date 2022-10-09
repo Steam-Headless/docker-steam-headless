@@ -1,0 +1,10 @@
+---
+
+blank_issues_enabled: false
+contact_links:
+  - name: Discord support
+    url: https://unmanic.app/discord
+    about: Ask questions in Discord.
+  - name: Unraid Forum
+    url: https://forums.unraid.net/topic/118390-support-josh5-steam-headless/
+    about: For Unraid users, please check the forums to see if your question has already been answered.

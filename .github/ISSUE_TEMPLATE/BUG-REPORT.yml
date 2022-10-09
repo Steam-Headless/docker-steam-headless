@@ -1,0 +1,81 @@
+---
+
+name: Bug Report
+description: Please do not use bug reports for support issues.
+title: "[Bug]: "
+labels: ['status:awaiting-triage', 'type:bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **THIS IS NOT THE PLACE TO ASK FOR SUPPORT!** Please use [Discord](https://unmanic.app/discord) for support issues.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: List each action required in order to reproduce the issue.
+      placeholder: |
+        1. First Step '...'
+        2. Second Step '...'
+        3. So on '...'
+        4. See error
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Provide screenshots to help explain your problem.
+  - type: textarea
+    id: relevant
+    attributes:
+      label: Relevant Settings
+      description: Include all settings/configuration that are relevant to your setup.
+      placeholder: |
+        - eg. Configuration of your Docker container.
+        - eg. Configurations within the application/container.
+        - eg. External processes that you have connected to or communicating with the application/container.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The version is the first line printed in the Docker log.
+      placeholder: 'Build: [10/08/22 03:09:26] [master] [477e25f82c2612b6345ca0c9777345e6b5129965]'
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform and Version
+      description: Detail the host OS platform, version and software versions.
+      placeholder: |
+          - Distribution: $(. /etc/os-release; echo "${NAME} - ${VERSION}")
+          - Linux Kernel: $(uname -rpio)
+          - GPU Driver versions: $(nvidia-smi | grep 'Version:')
+          - Docker: $(docker -v)
+          - Docker-compose: $(docker compose -v)
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Please copy and paste any relevant log output. 
+        This will be automatically formatted into code, so no need for backticks.
+        Note: Most relevant logs are found either in the docker logs or inside the container in /home/default/.cache/log/
+      render: Shell
+  - type: markdown
+    attributes:
+      value: |
+        Make sure to close your issue when it's solved! If you found the solution yourself please comment so that others benefit from it.
