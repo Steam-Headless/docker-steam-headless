@@ -1,11 +1,12 @@
 
 echo "**** Configure VNC ****"
 
-function get_unused_port() {
-    __start_port=${1}
-    __start_port=$((__start_port+1))
+function get_next_unused_port() {
+    local __start_port=${1}
+    local __start_port=$((__start_port+1))
+    local __netstat_report=$(netstat -atulnp 2> /dev/null)
     for __check_port in $(seq ${__start_port} 65000); do
-        [[ -z $(netstat -ap 2> /dev/null | grep ${__check_port}) ]] && break;
+        [[ -z $(echo "${__netstat_report}" | grep ${__check_port}) ]] && break;
     done
     echo ${__check_port}
 }
@@ -13,10 +14,10 @@ function get_unused_port() {
 # Configure random ports for VNC service, pulseaudio socket, noVNC service and audio transport websocket
 # Note: Ports 32035-32248 are unallocated port ranges. We should be able to find something in here that we can use
 #   REF: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?&page=130
-DYNAMIC_PORT_VNC=$(get_unused_port 32035)
-DYNAMIC_PORT_NOVNC_SERVICE=$(get_unused_port ${DYNAMIC_PORT_VNC})
-DYNAMIC_PORT_AUDIO_WEBSOCKET=$(get_unused_port ${DYNAMIC_PORT_NOVNC_SERVICE})
-DYNAMIC_PORT_AUDIO_STREAM=$(get_unused_port ${DYNAMIC_PORT_AUDIO_WEBSOCKET})
+DYNAMIC_PORT_VNC=$(get_next_unused_port 32035)
+DYNAMIC_PORT_NOVNC_SERVICE=$(get_next_unused_port ${DYNAMIC_PORT_VNC})
+DYNAMIC_PORT_AUDIO_WEBSOCKET=$(get_next_unused_port ${DYNAMIC_PORT_NOVNC_SERVICE})
+DYNAMIC_PORT_AUDIO_STREAM=$(get_next_unused_port ${DYNAMIC_PORT_AUDIO_WEBSOCKET})
 export PORT_VNC=${PORT_VNC:-$DYNAMIC_PORT_VNC}
 echo "Configure VNC service port '${PORT_VNC}'"
 export PORT_NOVNC_SERVICE=${PORT_NOVNC_SERVICE:-$DYNAMIC_PORT_NOVNC_SERVICE}
