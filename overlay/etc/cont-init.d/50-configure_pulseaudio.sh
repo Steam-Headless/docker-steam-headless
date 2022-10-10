@@ -9,8 +9,13 @@ if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
     sed -i 's|^; flat-volumes.*$|flat-volumes = yes|' /etc/pulse/daemon.conf
 else
     echo "Configure pulseaudio to pipe audio to a socket"
-    mkdir -p ${PULSE_SOCKET_DIR}
+
+    # Ensure pulseaudio directories have the correct permissions
+    mkdir -p \
+        ${PULSE_SOCKET_DIR} \
+        /home/${USER}/.config/pulse
     chmod -R a+rw ${PULSE_SOCKET_DIR}
+    chown -R ${PUID}:${PGID} /home/${USER}/.config/pulse
 
     # Configure the palse audio socket
     sed -i "s|^; default-server.*$|default-server = ${PULSE_SERVER}|" /etc/pulse/client.conf
