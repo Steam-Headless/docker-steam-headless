@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###
-# File: install_lutris.sh
+# File: install_protonup.sh
 # Project: scripts
 # File Created: Thursday, 1st January 1970 12:45:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
@@ -9,7 +9,7 @@
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
-pkg=protonup
+pkg=protonup-ng
 script_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd );
 script_name=$( basename "${BASH_SOURCE[0]}" )
 
