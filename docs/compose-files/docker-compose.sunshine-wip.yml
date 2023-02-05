@@ -1,0 +1,80 @@
+---
+# --memory='8g' 
+# --ulimit nofile=1024:524288
+services:
+  steam-headless:
+    image: josh5/steam-headless:latest
+    restart: unless-stopped
+    runtime: ${DOCKER_RUNTIME}
+    ## NOTE: Requires privileged access to host to be able to access the required devices
+    privileged: true
+    shm_size: ${SHM_SIZE}
+    ipc: host # Could also be set to 'shareable'
+
+    # NETWORK:
+    ## NOTE: Steam headless always required the use of the host network
+    network_mode: host
+    hostname: ${HOSTNAME}
+    extra_hosts:
+      - "${HOSTNAME}:127.0.0.1"
+    
+    # ENVIRONMENT:
+    ## Read all config variables from the .env file
+    env_file: .env
+
+    # VOLUMES:
+    volumes:
+      # The location of your home directory.
+      # TODO: Make this '/opt/container-data/steam-headless/home/:/home/default/'
+      - ./default/:/home/default/:rw
+      # The location where all games should be installed.
+      - /mnt/Games/:/mnt/games/:rw
+      # Input devices used for mouse and joypad support inside the container.
+      - /dev/input/:/dev/input/:ro
+      # The Xorg socket. This will be shared with other containers so they can access the X server.
+      - /opt/container-data/steam-headless/.X11-unix/:/tmp/.X11-unix/:rw
+      # Pulse audio socket. This will be shared with other containers so they can access the audio sink.
+      - /opt/container-data/steam-headless/pulse/:/tmp/pulse/:rw
+
+  ####################
+  # Sunshine is the heart of the streaming setup; it takes your desktop and
+  # encodes it for delivery over the network
+
+  sunshine:
+    depends_on:
+      - steam-headless
+    image: ghcr.io/games-on-whales/sunshine:edge
+    runtime: ${DOCKER_RUNTIME}
+    ports:
+      - 47984-47990:47984-47990/tcp
+      - 48010:48010
+      - 47998-48000:47998-48000/udp
+    privileged: true
+    volumes:
+      # The location of your homle directory.
+      # TODO: Make this '/opt/container-data/steam-headless/home/:/home/retro/'
+      - ./sunshine/:/home/retro/:rw
+      # The Xorg socket.
+      - /opt/container-data/steam-headless/.X11-unix/:/tmp/.X11-unix/:rw
+      # Pulse audio socket.
+      - /opt/container-data/steam-headless/pulse/:/tmp/pulse/:rw
+      # OPTIONAL: host dbus used by avahi in order to publish Sunshine for auto network discovery
+      - /run/dbus/:/run/dbus/:ro
+    ipc: host
+    
+    # ENVIRONMENT:
+    ## Read all config variables from the .env fie
+    env_file: .env
+    environment:
+      LOG_LEVEL: INFO
+      GOW_REQUIRED_DEVICES: /dev/uinput /dev/input/event* /dev/dri/*
+      # Username and password for the web-ui at https://xxx.xxx.xxx.xxx:47990
+      SUNSHINE_USER: admin
+      SUNSHINE_PASS: admin
+      XDG_RUNTIME_DIR: /tmp/.X11-unix/run
+      # Intel specific config
+      LIBVA_DRIVER_NAME: i965
+      LIBVA_DRIVERS_PATH: /usr/lib/x86_64-linux-gnu/dri/
+      # Configure the pulseaudio socket
+      PULSE_SERVER: unix:/tmp/pulse/pulse-socket
+
