@@ -574,7 +574,7 @@ ENV \
     ENABLE_VNC_AUDIO="true" \
     NEKO_PASSWORD=neko \
     NEKO_PASSWORD_ADMIN=admin \
-    ENABLE_SUNSHINE="false" \
+    ENABLED_PLUGINS="" \
     ENABLE_EVDEV_INPUTS="false"
 
 # Configure required ports
