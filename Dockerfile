@@ -435,12 +435,12 @@ RUN \
     echo
 
 # Install sunshine
-ARG SUNSHINE_VERSION=0.11.1
+ARG SUNSHINE_VERSION=0.18.4
 RUN \
     echo "**** Fetch Sunshine deb package ****" \
         && cd /tmp \
         && wget -O /tmp/sunshine-debian.deb \
-            https://github.com/loki-47-6F-64/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian.deb \
+            https://github.com/LizardByte/Sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian-bullseye-amd64.deb \
     && \
     echo "**** Update apt database ****" \
         && apt-get update \
