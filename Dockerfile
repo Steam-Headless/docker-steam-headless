@@ -440,7 +440,7 @@ RUN \
     echo "**** Fetch Sunshine deb package ****" \
         && cd /tmp \
         && wget -O /tmp/sunshine-debian.deb \
-            https://github.com/LizardByte/sunshine/releases/download/v${SUNSHINE_VERSION}/ sunshine-debian-bullseye-amd64.deb \
+            https://github.com/LizardByte/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian-bullseye-amd64.deb \
     && \
     echo "**** Update apt database ****" \
         && apt-get update \
