@@ -239,7 +239,7 @@ COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
 
 # Install noVNC
-ARG NOVNC_VERSION=1.2.0
+ARG NOVNC_VERSION=1.4.0
 RUN \
     echo "**** Fetch noVNC ****" \
         && cd /tmp \
@@ -280,7 +280,7 @@ RUN \
             /tmp/novnc.tar.gz
 
 # Install Websockify
-ARG WEBSOCKETIFY_VERSION=0.10.0
+ARG WEBSOCKETIFY_VERSION=0.11.0
 RUN \
     echo "**** Fetch Websockify ****" \
         && cd /tmp \
@@ -435,12 +435,12 @@ RUN \
     echo
 
 # Install sunshine
-ARG SUNSHINE_VERSION=0.11.1
+ARG SUNSHINE_VERSION=0.19.1
 RUN \
     echo "**** Fetch Sunshine deb package ****" \
         && cd /tmp \
         && wget -O /tmp/sunshine-debian.deb \
-            https://github.com/loki-47-6F-64/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian.deb \
+            https://github.com/LizardByte/sunshine/releases/download/v${SUNSHINE_VERSION}/ sunshine-debian-bullseye-amd64.deb \
     && \
     echo "**** Update apt database ****" \
         && apt-get update \
@@ -484,8 +484,8 @@ RUN \
 # Ref: 
 #   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
 #   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
-ARG DOCKER_VERSION=20.10.18
-ARG DOCKER_COMPOSE_VERSION=v2.11.2
+ARG DOCKER_VERSION=23.0.5
+ARG DOCKER_COMPOSE_VERSION=v2.17.3
 RUN \
     echo "**** Fetch Docker static binary package ****" \
         && cd /tmp \
