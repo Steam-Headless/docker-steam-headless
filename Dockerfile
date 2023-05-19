@@ -9,6 +9,9 @@ RUN \
     && \
     echo
 
+
+
+
 # Update locale
 RUN \
     echo "**** Update apt database ****" \
@@ -239,7 +242,7 @@ COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
 
 # Install noVNC
-ARG NOVNC_VERSION=1.2.0
+ARG NOVNC_VERSION=1.4.0
 RUN \
     echo "**** Fetch noVNC ****" \
         && cd /tmp \
@@ -280,7 +283,7 @@ RUN \
             /tmp/novnc.tar.gz
 
 # Install Websockify
-ARG WEBSOCKETIFY_VERSION=0.10.0
+ARG WEBSOCKETIFY_VERSION=0.11.0
 RUN \
     echo "**** Fetch Websockify ****" \
         && cd /tmp \
@@ -435,12 +438,12 @@ RUN \
     echo
 
 # Install sunshine
-ARG SUNSHINE_VERSION=0.11.1
+ARG SUNSHINE_VERSION=0.19.1
 RUN \
     echo "**** Fetch Sunshine deb package ****" \
         && cd /tmp \
         && wget -O /tmp/sunshine-debian.deb \
-            https://github.com/loki-47-6F-64/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian.deb \
+            https://github.com/LizardByte/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian-bullseye-amd64.deb \
     && \
     echo "**** Update apt database ****" \
         && apt-get update \
@@ -481,11 +484,11 @@ RUN \
     echo
 
 # Setup dind
-# Ref: 
+# Ref:
 #   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
 #   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
-ARG DOCKER_VERSION=20.10.18
-ARG DOCKER_COMPOSE_VERSION=v2.11.2
+ARG DOCKER_VERSION=23.0.5
+ARG DOCKER_COMPOSE_VERSION=v2.17.3
 RUN \
     echo "**** Fetch Docker static binary package ****" \
         && cd /tmp \
@@ -532,6 +535,7 @@ ENV \
     USER="default" \
     USER_PASSWORD="password" \
     USER_HOME="/home/default" \
+    USER_GAMES="/mnt/games" \
     TZ="Pacific/Auckland" \
     USER_LOCALES="en_US.UTF-8 UTF-8"
 RUN \
@@ -553,8 +557,8 @@ ENV \
     DISPLAY_CDEPTH="24" \
     DISPLAY_DPI="96" \
     DISPLAY_REFRESH="60" \
-    DISPLAY_SIZEH="900" \
-    DISPLAY_SIZEW="1600" \
+    DISPLAY_SIZEH="1080" \
+    DISPLAY_SIZEW="1920" \
     DISPLAY_VIDEO_PORT="DFP" \
     DISPLAY=":55" \
     NVIDIA_DRIVER_CAPABILITIES="all" \
@@ -586,6 +590,36 @@ ENV \
 # Expose the required ports
 EXPOSE 8083
 
+RUN \
+    echo "**** Update apt database ****" \
+        && sed -i 's/bullseye/testing/g' /etc/apt/sources.list \
+        && apt-get clean \
+        && apt-get update \
+    && \
+    echo
+
+RUN \
+    echo "**** Install and configure latest mesa ****" \
+        && apt-get install -y --no-install-recommends -t testing libgl1-mesa-glx \
+        libegl1-mesa \
+        mesa-va-drivers \
+        mesa-vdpau-drivers \
+        mesa-vulkan-drivers \
+        xserver-xorg-video-amdgpu \
+        libdrm-amdgpu1 \
+        cpu-x \
+        htop \
+        geany \
+        xcvt \
+    && \
+    echo
+
+
 # Set entrypoint
+
+RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+#RUN flatpak install -y flathub net.davidotek.pupgui2
+RUN chmod +x /opt/scripts/*.sh
+RUN chmod +x /usr/bin/*.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
