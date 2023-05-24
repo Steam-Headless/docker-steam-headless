@@ -17,7 +17,10 @@ export nvidia_gpu_name=$(nvidia-smi --format=csv --query-gpu=name --id="${gpu_se
 export nvidia_host_driver_version="$(nvidia-smi 2> /dev/null | grep NVIDIA-SMI | cut -d ' ' -f3)"
 
 # Intel params
+# This figures out if it's an intel CPU with integrated GPU
 export intel_cpu_model="$(lscpu | grep 'Model name:' | grep -i intel | cut -d':' -f2 | xargs)"
+# We need to check if the user has an intel ARC GPU as well
+export intel_gpu_model="$(lspci | grep -i "VGA compatible controller: Intel" | cut -d':' -f3 | xargs)"
 
 # AMD params
 export amd_cpu_model="$(lscpu | grep 'Model name:' | grep -i amd | cut -d':' -f2 | xargs)"
@@ -123,6 +126,13 @@ fi
 # Intel GPU
 if [[ ! -z ${intel_cpu_model} ]]; then
     echo "**** Found Intel device '${intel_cpu_model}' ****";
+    install_intel_gpu_driver
+else
+    echo "**** No Intel device found ****";
+fi
+# Intel Arc
+if [[ ! -z ${intel_gpu_model} ]]; then
+    echo "**** Found Intel device '${intel_gpu_model}' ****";
     install_intel_gpu_driver
 else
     echo "**** No Intel device found ****";
