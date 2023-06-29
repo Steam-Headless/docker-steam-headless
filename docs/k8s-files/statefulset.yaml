@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: steam-headless
+spec:
+  serviceName: "steam-headless"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: steam-headless
+  template:
+    metadata:
+      labels:
+        app: steam-headless
+    spec:
+      hostNetwork: true
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: steam-headless
+        securityContext:
+          privileged: true
+        image: josh5/steam-headless:latest
+        resources: #Change CPU and Memory below
+          requests:
+            memory: "24G"
+            cpu: "6"
+          limits:
+            memory: "24G"
+            cpu: "6"
+            nvidia.com/gpu: 1 #If you're using a nvidia GPU, add it here
+        volumeMounts:
+        - name: home-dir
+          mountPath: /home/default/
+        - name: games-dir
+          mountPath: /mnt/games/
+        - name: input-devices
+          mountPath: /dev/input/
+        - name: dshm
+          mountPath: /dev/shm
+        env: #Environmental Vars
+        - name: NAME
+          value: 'SteamHeadless'
+        - name: TZ
+          value: 'America/New_York'
+        - name: USER_LOCALES
+          value: 'en_US.UTF-8 UTF-8'
+        - name: DISPLAY
+          value: ':55'
+        - name: SHM_SIZE
+          value: '2G'
+        - name: DOCKER_RUNTIME
+          value: 'nvidia'
+        - name: PUID
+          value: '1000'
+        - name: PGID
+          value: '1000'
+        - name: UMASK
+          value: '000'
+        - name: USER_PASSWORD
+          value: 'password' #changeme
+        - name: MODE
+          value: 'primary'
+        - name: WEB_UI_MODE
+          value: 'none'
+        - name: ENABLE_VNC_AUDIO
+          value: 'false'
+        - name: PORT_NOVNC_WEB
+          value: '8083'
+        - name: NEKO_NAT1TO1
+          value: ''
+        - name: ENABLE_SUNSHINE
+          value: 'true'
+        - name: SUNSHINE_USER
+          value: 'sam'
+        - name: SUNSHINE_PASS
+          value: 'password'
+        - name: ENABLE_EVDEV_INPUTS
+          value: 'true'
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: 'all'
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: 'all'
+      volumes:
+      - name: home-dir
+        persistentVolumeClaim:
+          claimName: home
+      - name: games-dir
+        persistentVolumeClaim:
+          claimName: games
+      - name: input-devices
+        hostPath:
+          path: /dev/input/
+      - name: dshm
+        emptyDir:
+          medium: Memory
