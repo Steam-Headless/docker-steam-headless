@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: games
+spec:
+  storageClassName: ssd #Adjust your storageclass as needed
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 400Gi
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home        
+spec:
+  volumeMode: Filesystem
+  storageClassName: nvme-replicated #Adjust your storageclass as needed
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
