@@ -64,10 +64,15 @@ function install_nvidia_driver {
     ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
         --silent \
         --accept-license \
-        --no-kernel-module \
+        --skip-depmod \
+        --skip-module-unload \
+        --no-kernel-modules \
+        --no-kernel-module-source \
         --install-compat32-libs \
         --no-nouveau-check \
         --no-nvidia-modprobe \
+        --no-systemd \
+        --no-distro-scripts \
         --no-rpms \
         --no-backup \
         --no-check-for-alternate-installs \
@@ -123,16 +128,12 @@ if [[ ! -z ${nvidia_pci_address} ]]; then
 else
     echo "**** No NVIDIA device found ****";
 fi
-# Intel GPU
-if [[ ! -z ${intel_cpu_model} ]]; then
-    echo "**** Found Intel device '${intel_cpu_model}' ****";
-    install_intel_gpu_driver
-else
-    echo "**** No Intel device found ****";
-fi
-# Intel Arc
+# Intel Arc GPU or Intel CPU with possible iGPU
 if [[ ! -z ${intel_gpu_model} ]]; then
     echo "**** Found Intel device '${intel_gpu_model}' ****";
+    install_intel_gpu_driver
+elif [[ ! -z ${intel_cpu_model} ]]; then
+    echo "**** Found Intel device '${intel_cpu_model}' ****";
     install_intel_gpu_driver
 else
     echo "**** No Intel device found ****";

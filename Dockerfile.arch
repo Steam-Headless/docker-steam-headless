@@ -399,7 +399,6 @@ COPY overlay /
 # Set display environment variables
 ENV \
     DISPLAY_CDEPTH="24" \
-    DISPLAY_DPI="96" \
     DISPLAY_REFRESH="60" \
     DISPLAY_SIZEH="900" \
     DISPLAY_SIZEW="1600" \

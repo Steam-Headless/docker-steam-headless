@@ -13,13 +13,18 @@ fi
 
 export nvidia_gpu_hex_id=$(nvidia-smi --format=csv --query-gpu=pci.bus_id --id="${gpu_select}" 2> /dev/null | sed -n 2p)
 
+export monitor_connected=$(cat /sys/class/drm/card*/status | awk '/^connected/ { print $1; }' | head -n1)
+
 # Fech current configuration (if modified in UI)
 if [ -f "${USER_HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/displays.xml" ]; then
     new_display_sizew=$(cat ${USER_HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/displays.xml | grep Resolution | head -n1 | grep -oP '(?<=value=").*?(?=")' | cut -d'x' -f1)
     new_display_sizeh=$(cat ${USER_HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/displays.xml | grep Resolution | head -n1 | grep -oP '(?<=value=").*?(?=")' | cut -d'x' -f2)
-    if [ "${new_display_sizew}x" != "x" ] && [ "${new_display_sizeh}x" != "x" ]; then
+    new_display_refresh=$(cat ${USER_HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/displays.xml | grep RefreshRate | head -n1 | grep -oP '(?<=value=").*?(?=")' | cut -d'x' -f2)
+    if [ "${new_display_sizew}x" != "x" ] && [ "${new_display_sizeh}x" != "x" ] && [ "${new_display_refresh}x" != "x" ]; then
         export DISPLAY_SIZEW="${new_display_sizew}"
         export DISPLAY_SIZEH="${new_display_sizeh}"
+        # Round refresh rate to closest multiple of 60
+        export DISPLAY_REFRESH="$(echo ${new_display_refresh} | awk '{rounded = int(($1 + 30) / 60) * 60; if (rounded < 30) rounded += 60; print rounded}')"
     fi
 fi
 
@@ -33,9 +38,17 @@ function configure_nvidia_x_server {
     echo "Configuring X11 with PCI bus ID: '${bus_id}'"
     export MODELINE=$(cvt -r "${DISPLAY_SIZEW}" "${DISPLAY_SIZEH}" "${DISPLAY_REFRESH}" | sed -n 2p)
     echo "Writing X11 config with ${MODELINE}"
-    nvidia-xconfig --virtual="${DISPLAY_SIZEW}x${DISPLAY_SIZEH}" --depth="${DISPLAY_CDEPTH}" --mode=$(echo "${MODELINE}" | awk '{print $2}' | tr -d '"') --allow-empty-initial-configuration --no-probe-all-gpus --busid="${bus_id}" --only-one-x-screen --connected-monitor="${DISPLAY_VIDEO_PORT}"
-    sed -i '/Driver\s\+"nvidia"/a\    Option         "ModeValidation" "NoMaxPClkCheck, NoEdidMaxPClkCheck, NoMaxSizeCheck, NoHorizSyncCheck, NoVertRefreshCheck, NoVirtualSizeCheck, NoExtendedGpuCapabilitiesCheck, NoTotalSizeCheck, NoDualLinkDVICheck, NoDisplayPortBandwidthCheck, AllowNon3DVisionModes, AllowNonHDMI3DModes, AllowNonEdidModes, NoEdidHDMI2Check, AllowDpInterlaced"' /etc/X11/xorg.conf
+    connected_monitor="--use-display-device=None"
+    if [[ "X${DISPLAY_VIDEO_PORT:-}" != "X" ]]; then
+        connected_monitor="--connected-monitor=${DISPLAY_VIDEO_PORT:?}"
+    fi
+    nvidia-xconfig --virtual="${DISPLAY_SIZEW:?}x${DISPLAY_SIZEH:?}" --depth="${DISPLAY_CDEPTH:?}" --mode=$(echo "${MODELINE:?}" | awk '{print $2}' | tr -d '"') --allow-empty-initial-configuration --no-probe-all-gpus --busid="${bus_id:?}" --no-multigpu --no-sli --no-base-mosaic --only-one-x-screen ${connected_monitor:?}
+    sed -i '/Driver\s\+"nvidia"/a\    Option         "ModeValidation" "NoMaxPClkCheck, NoEdidMaxPClkCheck, NoMaxSizeCheck, NoHorizSyncCheck, NoVertRefreshCheck, NoVirtualSizeCheck, NoTotalSizeCheck, NoDualLinkDVICheck, NoDisplayPortBandwidthCheck, AllowNon3DVisionModes, AllowNonHDMI3DModes, AllowNonEdidModes, NoEdidHDMI2Check, AllowDpInterlaced"\n    Option         "HardDPMS" "False"' /etc/X11/xorg.conf
     sed -i '/Section\s\+"Monitor"/a\    '"${MODELINE}" /etc/X11/xorg.conf
+    # Prevent interference between GPUs
+    echo -e "Section \"ServerFlags\"\n    Option \"AutoAddGPU\" \"false\"\nEndSection" | sudo tee -a /etc/X11/xorg.conf > /dev/null
+    # Configure primary GPU
+    sed -i '/Driver\s\+"nvidia"/a\    Option "AllowEmptyInitialConfiguration"\n    Option "PrimaryGPU" "yes"' /usr/share/X11/xorg.conf.d/nvidia-drm-outputclass.conf 
 }
 
 # Allow anybody for running x server
@@ -44,13 +57,14 @@ function configure_x_server {
     if grep -Fxq "allowed_users=console" /etc/X11/Xwrapper.config; then
         echo "Configure Xwrapper.config"
         sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
+        echo 'needs_root_rights=yes' >> /etc/X11/Xwrapper.config
     fi
 
     # Remove previous Xorg config
     rm -f /etc/X11/xorg.conf
 
     # Ensure the X socket path exists
-    mkdir -p ${XORG_SOCKET_DIR}
+    mkdir -p ${XORG_SOCKET_DIR:?}
 
     # Clear out old lock files
     display_file=${XORG_SOCKET_DIR}/X${DISPLAY#:}
@@ -85,8 +99,8 @@ function configure_x_server {
     else
         echo "Leaving evdev inputs disabled"
     fi
-
-    monitor_connected=$(cat /sys/class/drm/card*/status | awk '/^connected/ { print $1; }' | head -n1)
+    
+    # Configure dummy config if no monitor is connected (not applicable to NVIDIA)
     if [[ "X${monitor_connected}" == "X" ]]; then
         echo "No monitors connected. Installing dummy xorg.conf"
         # Use a dummy display input
