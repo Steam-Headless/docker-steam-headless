@@ -40,3 +40,11 @@ services:
       - /opt/container-data/steam-headless/.X11-unix/:/tmp/.X11-unix/:rw
       # Pulse audio socket. This will be shared with other containers so they can access the audio sink.
       - /opt/container-data/steam-headless/pulse/:/tmp/pulse/:rw
+      # Store dind var files in a volume
+      - steam-headless-var-lib-docker:/var/lib/docker/:rw
+      # Store flatpak var files in a volume
+      - steam-headless-var-lib-flatpak:/var/lib/flatpak/:rw
+
+volumes:
+  steam-headless-var-lib-docker:
+  steam-headless-var-lib-flatpak:

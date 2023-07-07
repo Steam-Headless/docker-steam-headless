@@ -70,10 +70,7 @@ mkdir -p ${XDG_RUNTIME_DIR}
 chown -R ${PUID}:${PGID} ${XDG_RUNTIME_DIR}
 # Ensure only the 'default' user can access this directory
 chmod 700 ${XDG_RUNTIME_DIR}
-export XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${USER}/.local/share/flatpak/exports/share"
-# Ensure the start-desktop.sh script is executable
-chmod +x /usr/bin/start-desktop.sh
-# Set the default background for gnome based desktop
+# Set the default background
 mkdir -p /etc/alternatives
 ln -sf /usr/share/backgrounds/steam.jpg /etc/alternatives/desktop-background
 chmod a+r /etc/alternatives/desktop-background
