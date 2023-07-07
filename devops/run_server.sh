@@ -114,7 +114,6 @@ cmd="docker run -d --name='${container_name}' \
     -e TZ='Pacific/Auckland' \
     -e USER_LOCALES='en_US.UTF-8 UTF-8' \
     -e DISPLAY_CDEPTH='24' \
-    -e DISPLAY_DPI='96' \
     -e DISPLAY_REFRESH='60' \
     -e DISPLAY_SIZEH='720' \
     -e DISPLAY_SIZEW='1280' \

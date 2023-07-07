@@ -73,6 +73,8 @@ RUN \
             pciutils \
             pkg-config \
             procps \
+            psmisc \
+            psutils \
             rsync \
             screen \
             sudo \
@@ -169,10 +171,19 @@ RUN \
             dbus-x11 \
             libxcomposite-dev \
             libxcursor1 \
+            wmctrl \
+            x11-utils \
             x11-xfs-utils \
+            x11-xkb-utils \
+            x11-xserver-utils \
             x11vnc \
             xauth \
+            xbindkeys \
+            xclip \
+            xdotool \
+            xfishtank \
             xfonts-base \
+            xinit \
             xorg \
             xserver-xorg-core \
             xserver-xorg-input-evdev \
@@ -361,7 +372,6 @@ RUN \
         && echo steam steam/question select "I AGREE" | debconf-set-selections \
         && echo steam steam/license note '' | debconf-set-selections \
         && apt-get install -y \
-        && apt-get install -y \
             steam \
             steam-devices \
     && \
@@ -470,6 +480,7 @@ RUN \
             i965-va-driver-shaders \
             libva2 \
             vainfo \
+            vdpauinfo \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -552,8 +563,7 @@ COPY overlay /
 # Set display environment variables
 ENV \
     DISPLAY_CDEPTH="24" \
-    DISPLAY_DPI="96" \
-    DISPLAY_REFRESH="60" \
+    DISPLAY_REFRESH="120" \
     DISPLAY_SIZEH="900" \
     DISPLAY_SIZEW="1600" \
     DISPLAY_VIDEO_PORT="DFP" \

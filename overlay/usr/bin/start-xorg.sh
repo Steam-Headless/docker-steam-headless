@@ -9,6 +9,7 @@
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 set -e
+source /usr/bin/common-functions.sh
 
 # CATCH TERM SIGNAL:
 _term() {
@@ -19,18 +20,29 @@ trap _term SIGTERM SIGINT
 
 # EXECUTE PROCESS:
 # Wait for udev
-MAX=10
-CT=0
-while [ ! -f /tmp/.udev-started ]; do
-    sleep 1
-    CT=$(( CT + 1 ))
-    if [ "$CT" -ge "$MAX" ]; then
-        LOG "FATAL: $0: Gave up waiting for udev server to start"
-        exit 11
-    fi
-done
+wait_for_udev
 # Run X server
-/usr/bin/Xorg -ac -noreset -novtswitch -sharevts -dpi "${DISPLAY_DPI}" +extension "GLX" +extension "RANDR" +extension "RENDER" vt7 "${DISPLAY}" &
+/usr/bin/Xorg \
+    -ac \
+    -noreset \
+    -novtswitch \
+    -sharevts \
+    +extension RANDR \
+    +extension RENDER \
+    +extension GLX \
+    +extension XVideo \
+    +extension DOUBLE-BUFFER \
+    +extension SECURITY \
+    +extension DAMAGE \
+    +extension X-Resource \
+    -extension XINERAMA -xinerama \
+    +extension Composite +extension COMPOSITE \
+    -dpms \
+    -s off \
+    -nolisten tcp \
+    -iglx \
+    -verbose \
+    vt7 "${DISPLAY:?}" &
 xorg_pid=$!
 
 
