@@ -64,6 +64,7 @@ RUN \
             bash-completion \
             curl \
             git \
+            jq \
             less \
             man-db \
             mlocate \
@@ -225,15 +226,37 @@ RUN \
     && \
     echo
 
-# Install openssh server
+# Install desktop environment
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install openssh server ****" \
+    echo "**** Install desktop environment ****" \
         && apt-get install -y \
-            openssh-server \
-        && echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
+            xfce4 \
+            xfce4-terminal \
+            msttcorefonts \
+            fonts-vlgothic \
+            gedit \
+        # Delete these as they are not needed at all
+        && rm -f \
+            /usr/share/applications/software-properties-drivers.desktop \
+            /usr/share/applications/xfce4-about.desktop \
+            /usr/share/applications/xfce4-session-logout.desktop \
+        # Hide these apps. They can be displayed if a user really wants them.
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-accessibility-settings.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-color-settings.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-mail-reader.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/vim.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar-settings.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/pavucontrol.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/debian-uxterm.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/debian-xterm.desktop \
+        # Force these apps to be "System" Apps rather than "Categories=System;Utility;Core;GTK;Filesystem;"
+        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/xfce4-appfinder.desktop \
+        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/thunar-bulk-rename.desktop \
+        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/org.gnome.gedit.desktop \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
@@ -245,6 +268,79 @@ RUN \
     && \
     echo
 
+# Add support for flatpaks
+RUN \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install flatpak support ****" \
+        && apt-get install -y \
+            bridge-utils \
+            flatpak \
+            gnome-software-plugin-flatpak \
+            libpam-cgfs \
+            libvirt0 \
+            lxc \
+            uidmap \
+    && \
+    echo "**** Configure flatpak ****" \
+        && chmod u+s /usr/bin/bwrap \
+        && flatpak remote-add flathub https://flathub.org/repo/flathub.flatpakrepo \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
+# Setup dind
+# Ref: 
+#   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
+#   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
+ARG DOCKER_VERSION=20.10.18
+ARG DOCKER_COMPOSE_VERSION=v2.11.2
+RUN \
+    echo "**** Fetch Docker static binary package ****" \
+        && cd /tmp \
+        && wget -O /tmp/docker-${DOCKER_VERSION}.tgz \
+            https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
+    && \
+    echo "**** Extract static binaries ****" \
+        && mkdir -p /usr/local/bin \
+        && tar --extract \
+            --file /tmp/docker-${DOCKER_VERSION}.tgz \
+            --strip-components 1 \
+            --directory /usr/local/bin/ \
+            --no-same-owner \
+    && \
+    echo "**** Install docker-compose ****" \
+        && wget -O /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-Linux-x86_64" \
+        && chmod +x /usr/local/bin/docker-compose \
+    && \
+    echo "**** Install nvidia runtime ****" \
+        && distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+        && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - \
+        && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list \
+        && apt-get update \
+        && apt-get install -y \
+            nvidia-container-toolkit \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+VOLUME /var/lib/docker
+
+# TODO: Deprecate neko and noVNC for KasmVNC
 # Install Neko server
 COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
@@ -314,96 +410,6 @@ RUN \
             /tmp/websockify-* \
             /tmp/websockify.tar.gz
 
-# Add support for flatpaks
-RUN \
-    echo "**** Update apt database ****" \
-        && apt-get update \
-    && \
-    echo "**** Install flatpak support ****" \
-        && apt-get install -y \
-            bridge-utils \
-            flatpak \
-            libpam-cgfs \
-            libvirt0 \
-            lxc \
-            uidmap \
-    && \
-    echo "**** Configure flatpak ****" \
-        && chmod u+s /usr/bin/bwrap \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
-# Install desktop environment
-RUN \
-    echo "**** Update apt database ****" \
-        && apt-get update \
-    && \
-    echo "**** Install desktop environment ****" \
-        && apt-get install -y \
-            xfce4 \
-            xfce4-terminal \
-            msttcorefonts \
-            fonts-vlgothic \
-            gedit \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
-# Install Steam
-RUN \
-    echo "**** Install steam ****" \
-        && dpkg --add-architecture i386 \
-        && apt-get update \
-        && echo steam steam/question select "I AGREE" | debconf-set-selections \
-        && echo steam steam/license note '' | debconf-set-selections \
-        && apt-get install -y \
-            steam \
-            steam-devices \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
-# Install firefox
-RUN \
-    echo "**** Update apt database ****" \
-        && apt-get update \
-    && \
-    echo "**** Install firefox ****" \
-        && apt-get install -y \
-            firefox-esr \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
 # Setup audio streaming deps
 RUN \
     echo "**** Update apt database ****" \
@@ -444,31 +450,6 @@ RUN \
     && \
     echo
 
-# Install sunshine
-ARG SUNSHINE_VERSION=0.20.0
-RUN \
-    echo "**** Fetch Sunshine deb package ****" \
-        && cd /tmp \
-        && wget -O /tmp/sunshine-debian.deb \
-            https://github.com/LizardByte/sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine-debian-bullseye-amd64.deb \
-    && \
-    echo "**** Update apt database ****" \
-        && apt-get update \
-    && \
-    echo "**** Install Sunshine ****" \
-        && apt-get install -y /tmp/sunshine-debian.deb \
-        && apt-get install -y libboost-chrono1.74.0 \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
 # Setup video streaming deps
 RUN \
     echo "**** Update apt database ****" \
@@ -491,49 +472,6 @@ RUN \
             /tmp/* \
     && \
     echo
-
-# Setup dind
-# Ref: 
-#   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
-#   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
-ARG DOCKER_VERSION=20.10.18
-ARG DOCKER_COMPOSE_VERSION=v2.11.2
-RUN \
-    echo "**** Fetch Docker static binary package ****" \
-        && cd /tmp \
-        && wget -O /tmp/docker-${DOCKER_VERSION}.tgz \
-            https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
-    && \
-    echo "**** Extract static binaries ****" \
-        && mkdir -p /usr/local/bin \
-        && tar --extract \
-            --file /tmp/docker-${DOCKER_VERSION}.tgz \
-            --strip-components 1 \
-            --directory /usr/local/bin/ \
-            --no-same-owner \
-    && \
-    echo "**** Install docker-compose ****" \
-        && wget -O /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-Linux-x86_64" \
-        && chmod +x /usr/local/bin/docker-compose \
-    && \
-    echo "**** Install nvidia runtime ****" \
-        && distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
-        && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - \
-        && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list \
-        && apt-get update \
-        && apt-get install -y \
-            nvidia-container-toolkit \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-VOLUME /var/lib/docker
 
 
 # Configure default user and set env
@@ -571,7 +509,8 @@ ENV \
     NVIDIA_DRIVER_CAPABILITIES="all" \
     NVIDIA_VISIBLE_DEVICES="all" \
     XORG_SOCKET_DIR="/tmp/.X11-unix" \
-    XDG_RUNTIME_DIR="/tmp/.X11-unix/run"
+    XDG_RUNTIME_DIR="/tmp/.X11-unix/run" \
+    XDG_DATA_DIRS="/home/default/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/"
 
 # Set pulseaudio environment variables
 ENV \

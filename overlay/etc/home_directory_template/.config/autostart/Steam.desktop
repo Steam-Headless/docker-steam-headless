@@ -4,11 +4,10 @@ Version=0.9.4
 Type=Application
 Name=Steam
 Comment=launch steam on login
-Exec=/usr/games/steam %U -silent
+Exec=/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=/app/bin/steam-wrapper --file-forwarding com.valvesoftware.Steam @@u %U @@ -silent
 Icon=steam
 OnlyShowIn=XFCE;
 RunHook=0
 StartupNotify=false
 Terminal=false
 Hidden=false
-

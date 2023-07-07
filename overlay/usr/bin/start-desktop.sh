@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:00:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Wednesday, 26th January 2022 5:38:23 pm
+# Last Modified: Saturday, 8th July 2023 2:34:11 am
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 set -e
@@ -19,27 +19,23 @@ trap _term SIGTERM SIGINT
 
 
 # CONFIGURE:
-XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${USER}/.local/share/flatpak/exports/share"
 export $(dbus-launch)
 
 
 # EXECUTE PROCESS:
+# Install/Upgrade user apps
+if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
+    source /opt/scripts/install_steam.sh
+    source /opt/scripts/install_firefox.sh
+    source /opt/scripts/install_protonup.sh
+    touch /tmp/.desktop-apps-updated.lock
+fi
 # Wait for the X server to start
 wait_for_x
-# Run the desktop environment in order of priority
-if [[ -e /usr/bin/cinnamon-session ]]; then
-    /usr/bin/cinnamon-session --display=${DISPLAY} &
-    desktop_pid=$!
-elif [[ -e /usr/bin/mate-session ]]; then
-    /usr/bin/mate-session &
-    desktop_pid=$!
-elif [[ -e /usr/bin/startplasma-x11 ]]; then
-    /usr/bin/startplasma-x11 &
-    desktop_pid=$!
-elif [[ -e /usr/bin/startxfce4 ]]; then
-    /usr/bin/startxfce4 &
-    desktop_pid=$!
-fi
+# Run the desktop environment
+echo "**** Starting Xfce4 ****"
+/usr/bin/startxfce4 &
+desktop_pid=$!
 
 
 # WAIT FOR CHILD PROCESS:

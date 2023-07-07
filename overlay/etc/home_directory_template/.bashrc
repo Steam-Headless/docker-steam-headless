@@ -12,5 +12,3 @@ PS1='[\u@\h \W]\$ '
 PATH=$PATH:$HOME/.local/bin:$HOME/bin
 # Export /usr/games
 PATH=$PATH:/usr/games
-# Export flatpak data directories
-XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share:/home/${USER}/.local/share/flatpak/exports/share"
