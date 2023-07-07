@@ -13,9 +13,9 @@ else
     # Ensure pulseaudio directories have the correct permissions
     mkdir -p \
         ${PULSE_SOCKET_DIR} \
-        /home/${USER}/.config/pulse
+        ${USER_HOME:?}/.config/pulse
     chmod -R a+rw ${PULSE_SOCKET_DIR}
-    chown -R ${PUID}:${PGID} /home/${USER}/.config/pulse
+    chown -R ${PUID}:${PGID} ${USER_HOME:?}/.config/pulse
 
     # Configure the palse audio socket
     sed -i "s|^; default-server.*$|default-server = ${PULSE_SERVER}|" /etc/pulse/client.conf
@@ -30,9 +30,6 @@ else
     if [ "X${DEBUGGING:-}" == "X" ]; then
         sed -i 's|^; log-level.*$|log-level = debug|' /etc/pulse/daemon.conf
     fi
-
-    # Make startup script executable
-    chmod +x /usr/bin/start-pulseaudio.sh
 fi
 chown -R ${USER} /etc/pulse
 
