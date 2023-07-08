@@ -50,5 +50,28 @@ if [[ ! -f ${USER_HOME:?}/.var/app/com.valvesoftware.Steam/.local/share/Steam/co
     mkdir -p ${USER_HOME:?}/.var/app/com.valvesoftware.Steam/.local/share/Steam/config
     echo "${libraryfolders}" > ${USER_HOME:?}/.var/app/com.valvesoftware.Steam/.local/share/Steam/config/libraryfolders.vdf
 fi
+# Remove old autostart script if pointing to old native debian steam launcher
+if grep "Exec=/usr/games/steam %U" ${USER_HOME:?}/.config/autostart/Steam.desktop &> /dev/null; then
+    rm ${USER_HOME:?}/.config/autostart/Steam.desktop
+fi
+# Create autostart script if missing
+steam_autostart_desktop="$(cat <<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Steam
+Comment=Launch steam on login
+Exec=/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=/app/bin/steam-wrapper --file-forwarding com.valvesoftware.Steam -silent
+Icon=steam
+OnlyShowIn=XFCE;
+RunHook=0
+StartupNotify=false
+Terminal=false
+Hidden=false
+EOF
+)"
+if [[ ! -f "${USER_HOME:?}/.config/autostart/Steam.desktop" ]]; then
+    echo "${steam_autostart_desktop:?}" > "${USER_HOME:?}/.config/autostart/Steam.desktop"
+fi
 
 echo "DONE"
