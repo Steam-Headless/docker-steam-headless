@@ -51,8 +51,9 @@ if [[ ! -f ${USER_HOME:?}/.var/app/com.valvesoftware.Steam/.local/share/Steam/co
     echo "${libraryfolders}" > ${USER_HOME:?}/.var/app/com.valvesoftware.Steam/.local/share/Steam/config/libraryfolders.vdf
 fi
 # Remove old autostart script if pointing to old native debian steam launcher
-if grep "Exec=/usr/games/steam %U" ${USER_HOME:?}/.config/autostart/Steam.desktop &> /dev/null; then
-    rm ${USER_HOME:?}/.config/autostart/Steam.desktop
+mkdir -p "${USER_HOME:?}/.config/autostart"
+if grep "Exec=/usr/games/steam %U" "${USER_HOME:?}/.config/autostart/Steam.desktop" &> /dev/null; then
+    rm -fv  "${USER_HOME:?}/.config/autostart/Steam.desktop"
 fi
 # Create autostart script if missing
 steam_autostart_desktop="$(cat <<EOF
