@@ -4,7 +4,7 @@ echo "**** Installing/upgrading Steam via flatpak ****"
 
 # Install Steam client
 flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 
-flatpak --user install --assumeyes --noninteractive --or-update flathub com.valvesoftware.Steam
+flatpak --user install --assumeyes --or-update flathub com.valvesoftware.Steam
 # Configure any required overrides
 flatpak --user override --filesystem=/mnt/games com.valvesoftware.Steam
 # TODO: Check if we should add /dev/dri here??

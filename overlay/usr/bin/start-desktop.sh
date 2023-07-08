@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:00:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Saturday, 8th July 2023 2:34:11 am
+# Last Modified: Saturday, 8th July 2023 3:52:39 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 set -e
@@ -23,15 +23,18 @@ export $(dbus-launch)
 
 
 # EXECUTE PROCESS:
-# Install/Upgrade user apps
-if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
-    source /opt/scripts/install_steam.sh
-    source /opt/scripts/install_firefox.sh
-    source /opt/scripts/install_protonup.sh
-    touch /tmp/.desktop-apps-updated.lock
-fi
 # Wait for the X server to start
 wait_for_x
+# Install/Upgrade user apps
+if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
+    xterm -geometry 200x50+0+0 -ls -e /bin/bash -c "
+        source /opt/scripts/install_steam.sh;
+        source /opt/scripts/install_firefox.sh;
+        source /opt/scripts/install_protonup.sh;
+        sleep 1;
+    "
+    touch /tmp/.desktop-apps-updated.lock
+fi
 # Run the desktop environment
 echo "**** Starting Xfce4 ****"
 /usr/bin/startxfce4 &
