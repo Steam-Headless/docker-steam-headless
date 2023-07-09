@@ -25,6 +25,7 @@ Terminal=false
 Hidden=false
 EOF
 )"
+mkdir -p "${USER_HOME:?}/.config/autostart"
 if [[ ! -f "${USER_HOME:?}/.config/autostart/Sunshine.desktop" ]]; then
     echo "${sunshine_autostart_desktop:?}" > "${USER_HOME:?}/.config/autostart/Sunshine.desktop"
 fi
@@ -61,6 +62,7 @@ sunshine_apps_json="$(cat <<EOF
 }
 EOF
 )"
+mkdir -p "${USER_HOME:?}/.config/sunshine"
 if [[ ! -f "${USER_HOME:?}/.config/sunshine/apps.json" ]]; then
     echo "${sunshine_apps_json:?}" > "${USER_HOME:?}/.config/sunshine/apps.json"
 fi

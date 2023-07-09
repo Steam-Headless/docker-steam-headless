@@ -85,7 +85,6 @@ function install_amd_gpu_driver {
     echo "Install AMD vulkan driver"
     if command -v pacman &> /dev/null; then
         pacman -Syu --noconfirm --needed \
-            lib32-mesa \
             lib32-vulkan-icd-loader \
             lib32-vulkan-radeon \
             vulkan-icd-loader \
@@ -105,7 +104,6 @@ function install_intel_gpu_driver {
     echo "Install Intel vulkan driver"
     if command -v pacman &> /dev/null; then
         pacman -Syu --noconfirm --needed \
-            lib32-mesa \
             lib32-vulkan-icd-loader \
             lib32-vulkan-intel \
             vulkan-icd-loader \
@@ -121,13 +119,6 @@ function install_intel_gpu_driver {
     fi
 }
 
-# NVIDIA GPU
-if [[ ! -z ${nvidia_pci_address} ]]; then
-    echo "**** Found NVIDIA device '${nvidia_gpu_name}' ****";
-    install_nvidia_driver
-else
-    echo "**** No NVIDIA device found ****";
-fi
 # Intel Arc GPU or Intel CPU with possible iGPU
 if [[ ! -z ${intel_gpu_model} ]]; then
     echo "**** Found Intel device '${intel_gpu_model}' ****";
@@ -144,6 +135,13 @@ if [[ ! -z ${amd_gpu_model} ]]; then
     install_amd_gpu_driver
 else
     echo "**** No AMD device found ****";
+fi
+# NVIDIA GPU
+if [[ ! -z ${nvidia_pci_address} ]]; then
+    echo "**** Found NVIDIA device '${nvidia_gpu_name}' ****";
+    install_nvidia_driver
+else
+    echo "**** No NVIDIA device found ****";
 fi
 
 echo "DONE"

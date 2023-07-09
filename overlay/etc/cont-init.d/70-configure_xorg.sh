@@ -54,7 +54,11 @@ function configure_nvidia_x_server {
 # Allow anybody for running x server
 function configure_x_server {
     # Configure x to be run by anyone
-    if grep -Fxq "allowed_users=console" /etc/X11/Xwrapper.config; then
+    if [[ ! -f /etc/X11/Xwrapper.config ]]; then
+        echo "Create Xwrapper.config"
+        echo 'allowed_users=anybody' > /etc/X11/Xwrapper.config
+        echo 'needs_root_rights=yes' >> /etc/X11/Xwrapper.config
+    elif grep -Fxq "allowed_users=console" /etc/X11/Xwrapper.config; then
         echo "Configure Xwrapper.config"
         sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
         echo 'needs_root_rights=yes' >> /etc/X11/Xwrapper.config
