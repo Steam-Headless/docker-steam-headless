@@ -5,7 +5,7 @@
 # File Created: Thursday, 1st January 1970 12:00:00 pm
 # Author: Console and webGui login account (jsunnex@gmail.com)
 # -----
-# Last Modified: Saturday, 8th July 2023 3:52:39 pm
+# Last Modified: Saturday, 8th July 2023 6:16:47 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 set -e
@@ -31,6 +31,7 @@ if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
         source /opt/scripts/install_steam.sh;
         source /opt/scripts/install_firefox.sh;
         source /opt/scripts/install_protonup.sh;
+        source /opt/scripts/install_sunshine.sh;
         sleep 1;
     "
     touch /tmp/.desktop-apps-updated.lock
