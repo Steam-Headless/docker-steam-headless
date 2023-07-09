@@ -53,6 +53,27 @@ RUN \
     && \
     echo
 
+# Configure default user and set env
+ENV \
+    PUID=99 \
+    PGID=100 \
+    UMASK=000 \
+    USER="default" \
+    USER_PASSWORD="password" \
+    USER_HOME="/home/default" \
+    TZ="Pacific/Auckland" \
+    USER_LOCALES="en_US.UTF-8 UTF-8"
+RUN \
+    echo "**** Configure default user '${USER}' ****" \
+        && mkdir -p \
+            ${USER_HOME} \
+        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
+        && chown -R ${USER} \
+            ${USER_HOME} \
+        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && \
+    echo
+
 # Install core packages
 RUN \
     echo "**** Update apt database ****" \
@@ -251,9 +272,10 @@ RUN \
         && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar-settings.desktop \
         && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar.desktop \
         && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/pavucontrol.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/debian-uxterm.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/debian-xterm.desktop \
         && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/x11vnc.desktop \
+        # These are named specifically for Debain
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/debian-xterm.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/debian-uxterm.desktop \
         # Force these apps to be "System" Apps rather than "Categories=System;Utility;Core;GTK;Filesystem;"
         && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/xfce4-appfinder.desktop \
         && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/thunar-bulk-rename.desktop \
@@ -471,28 +493,6 @@ RUN \
             /var/lib/apt/lists/* \
             /var/tmp/* \
             /tmp/* \
-    && \
-    echo
-
-
-# Configure default user and set env
-ENV \
-    PUID=99 \
-    PGID=100 \
-    UMASK=000 \
-    USER="default" \
-    USER_PASSWORD="password" \
-    USER_HOME="/home/default" \
-    TZ="Pacific/Auckland" \
-    USER_LOCALES="en_US.UTF-8 UTF-8"
-RUN \
-    echo "**** Configure default user '${USER}' ****" \
-        && mkdir -p \
-            ${USER_HOME} \
-        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
-        && chown -R ${USER} \
-            ${USER_HOME} \
-        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && \
     echo
 

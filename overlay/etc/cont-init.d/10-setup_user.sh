@@ -5,8 +5,8 @@
 # File Created: Friday, 12th January 2022 8:54:01 am
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Tuesday, 4th October 2022 11:27:10 am
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Sunday, 9th July 2023 7:43:44 pm
+# Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
 PUID=${PUID:-99}
@@ -19,10 +19,6 @@ echo "**** Configure default user ****"
 echo "Setting default user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
 usermod -o -u "${PUID}" ${USER}
 groupmod -o -g "${PGID}" ${USER}
-
-
-echo "Adding default user to video, audio, input and pulse groups"
-usermod -a -G video,audio,input,pulse ${USER}
 
 
 echo "Adding default user to any additional required device groups"
@@ -52,7 +48,7 @@ for dev in "${device_nodes[@]}"; do
     # Add group to user
     if [[ "${added_groups}" != *"${dev_group}"* ]]; then
         echo "Adding user '${USER}' to group: '${dev_group}' for device: ${dev}"
-        usermod -a -G ${dev_group} ${USER}
+        usermod -aG ${dev_group} ${USER}
         added_groups=" ${added_groups} ${dev_group} "
     fi
 done
@@ -98,5 +94,9 @@ echo "${USER}:${USER_PASSWORD}" | chpasswd
 # Set root XDG_RUNTIME_DIR path
 mkdir -p /tmp/runtime-root
 chown root:root /tmp/runtime-root
+
+# Fix some flatpak quirks (not sure what is happening here)
+mount -t proc none /proc
+flatpak list
 
 echo "DONE"

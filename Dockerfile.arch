@@ -37,19 +37,51 @@ RUN \
     && \
     echo
 
+# Configure default user and set env
+ENV \
+    PUID=99 \
+    PGID=100 \
+    UMASK=000 \
+    USER="default" \
+    USER_PASSWORD="password" \
+    USER_HOME="/home/default" \
+    TZ="Pacific/Auckland" \
+    USER_LOCALES="en_US.UTF-8 UTF-8"
+RUN \
+    echo "**** Configure default user '${USER}' ****" \
+        && mkdir -p \
+            ${USER_HOME} \
+        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
+        && chown -R ${USER} \
+            ${USER_HOME} \
+        && usermod -aG video,audio,input ${USER} \
+        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && \
+    echo
+
 # Install core packages
 RUN \
     echo "**** Install tools ****" \
 	    && pacman -Syu --noconfirm --needed \
+            base-devel \
             bash \
             bash-completion \
             curl \
+            docbook-xml \
+            docbook-xsl \
+            fakeroot \
             git \
+            jq \
             less \
+            locate \
             man-db \
             nano \
             net-tools \
+            pciutils \
             pkg-config \
+            procps \
+            psmisc \
+            psutils \
             rsync \
             screen \
             sudo \
@@ -65,8 +97,13 @@ RUN \
             python-pip \
             python-setuptools \
     && \
+    echo "**** Install Yay ****" \
+	    && su - default -c 'git clone https://aur.archlinux.org/yay.git /tmp/yay && cd /tmp/yay && makepkg --noconfirm --syncdeps --install' \
+    && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -rf \
+            /tmp/yay* \
     && \
     echo
 
@@ -111,8 +148,6 @@ RUN \
     echo
 
 # Install X Server requirements
-# TODO: Remove doubles
-# TODO: Things that are not required
 RUN \
     echo "**** Install X Server requirements ****" \
 	    && pacman -Syu --noconfirm --needed \
@@ -145,19 +180,6 @@ RUN \
     && \
     echo
 
-# pacman -Syu --noconfirm --needed \
-#     xorg-server \
-#     xorg-server-xephyr \
-#     xorg-xwininfo \
-#     xorg-xhost \
-#     xorg-xinit \
-#     xorg-xinput \
-#     xorg-xrandr \
-#     xorg-xprop \
-#     xorg-xkill \
-#     xorg-xbacklight \
-#     xorg-xsetroot
-# s
 # pacman -Syu --noconfirm --needed autorandr xdg-desktop-portal xdg-desktop-portal-gtk wmctrl xbindkeys xdotool xautolock
 # 
 # 
@@ -174,27 +196,89 @@ RUN \
 RUN \
     echo "**** Install X Server requirements ****" \
 	    && pacman -Syu --noconfirm --needed \
+            alsa-utils \
+            pavucontrol \
             pulseaudio \
+            pulseaudio-alsa \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
     && \
     echo
 
-# Install openssh server
+# Install desktop environment
+# TODO: Install equivelent of 'msttcorefonts' and 'fonts-vlgothic'
 RUN \
-    echo "**** Install openssh server ****" \
+    echo "**** Install desktop environment ****" \
 	    && pacman -Syu --noconfirm --needed \
-            openssh \
-        && echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
+            gedit \
+            xfce4 \
+            xfce4-goodies \
+            xfce4-terminal \
+            xterm \
+        # Delete these as they are not needed at all
+        && rm -f \
+            /usr/share/applications/software-properties-drivers.desktop \
+            /usr/share/applications/xfce4-about.desktop \
+            /usr/share/applications/xfce4-session-logout.desktop \
+        # Hide these apps. They can be displayed if a user really wants them.
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-accessibility-settings.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-color-settings.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-mail-reader.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/vim.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar-settings.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/pavucontrol.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/x11vnc.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xterm.desktop \
+        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/uxterm.desktop \
+        # Force these apps to be "System" Apps rather than "Categories=System;Utility;Core;GTK;Filesystem;"
+        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/xfce4-appfinder.desktop \
+        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/thunar-bulk-rename.desktop \
+        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/org.gnome.gedit.desktop \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
     && \
     echo
+
+# Add support for flatpaks
+# Note: Debian Bullseye had bubblewrap v0.4.1 which worked fine in the Nvidia docker runtime
+#   At the moment this is only working beacuse /proc is being mounted again in 10-setup_user.sh
+#   Need to find a better solution for this...
+ARG BUBBLEWRAP_VERSION=0.8.0
+RUN \
+    echo "**** Install flatpak support ****" \
+	    && pacman -Syu --noconfirm --needed \
+            bridge-utils \
+            flatpak \
+            gnome-software \
+            lxc \
+            xdg-desktop-portal-gtk \
+    && \
+    #echo "**** Build and install custom bubblewrap ****" \
+    #    && cd /tmp \
+    #    && wget -O /tmp/bubblewrap-${BUBBLEWRAP_VERSION:?}.tar.xz https://github.com/containers/bubblewrap/releases/download/v${BUBBLEWRAP_VERSION:?}/bubblewrap-${BUBBLEWRAP_VERSION:?}.tar.xz \
+    #    && tar -xvf /tmp/bubblewrap-${BUBBLEWRAP_VERSION:?}.tar.xz \
+    #    && cd /tmp/bubblewrap-${BUBBLEWRAP_VERSION:?} \
+    #    && sed -i 's|die ("Unexpected capabilities but not setuid, old file caps config?");|printf ("Unexpected capabilities but not setuid, old file caps config?");|' ./bubblewrap.c \
+    #    && ./autogen.sh \
+    #    && make clean \
+    #    && make \
+    #    && make install
+    #&& \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+    && \
+    echo
+
+# TODO: Setup dind
+# Ref: 
+#   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
+#   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
 
 # Install noVNC
-# TODO: Add nginx
+# TODO: Add nginx or remove the whole proxy setup and just connect directly for audio (I think that is the better option)
 ARG NOVNC_VERSION=1.2.0
 RUN \
     echo "**** Fetch noVNC ****" \
@@ -220,10 +304,17 @@ RUN \
         && sed -i '/    document.title =/c\    document.title = "Steam Headless - noVNC";' \
             /opt/noVNC/app/ui.js \
     && \
+    echo "**** Install nginx support ****" \
+	    && pacman -Syu --noconfirm --needed \
+            nginx \
+    && \
     echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
         && rm -rf \
             /tmp/noVNC* \
-            /tmp/novnc.tar.gz
+            /tmp/novnc.tar.gz \
+    && \
+    echo
 
 # Install Websockify
 ARG WEBSOCKETIFY_VERSION=0.10.0
@@ -247,151 +338,44 @@ RUN \
     echo "**** Section cleanup ****" \
         && rm -rf \
             /tmp/websockify-* \
-            /tmp/websockify.tar.gz
-
-# Install firefox
-# TODO: MOve under de
-RUN \
-    echo "**** Install firefox ****" \
-	    && pacman -Syu --noconfirm --needed \
-            firefox \
-    && \
-    echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
+            /tmp/websockify.tar.gz \
     && \
     echo
 
-# # Install Steam
-# RUN \
-#     echo "**** Install steam ****" \
-# 	    && pacman -Syu --noconfirm --needed \
-#             lib32-vulkan-icd-loader
-#             steam \
-#             vulkan-icd-loader \
-#     && \
-#     echo "**** Section cleanup ****" \
-# 	    && pacman -Scc --noconfirm \
-#     && \
-#     echo
-
-# Install desktop environment
+# Setup browser audio streaming deps
 RUN \
-    echo "**** Install desktop environment ****" \
-	    && pacman -Syu --noconfirm --needed \
-            gedit \
-            xfce4 \
-            xfce4-terminal \
+    echo "**** Install audio streaming deps ****" \
+        && pacman -Syu --noconfirm --needed \
+            bzip2 \
+            gst-libav \
+            gst-plugins-bad \
+            gst-plugins-base \
+            gst-plugins-good \
+            gst-plugins-ugly \
+    && \
+    echo "**** Fetch ucspi-tcp ****" \
+        && cd /tmp \
+        && wget -O /tmp/ucspi-tcp.tar.gz http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz \
+        && tar -xvf /tmp/ucspi-tcp.tar.gz \
+    && \
+    echo "**** Build and install ucspi-tcp ****" \
+        && cd /tmp/ucspi-tcp-0.88/ \
+        && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.errno.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.errno.patch \
+        && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.a_record.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.a_record.patch \
+        && patch -p1 --input=ucspi-tcp-0.88.errno.patch \
+        && patch -p1 --input=ucspi-tcp-0.88.a_record.patch \
+        && sed -i 's|^/usr/local|/usr|' /tmp/ucspi-tcp-0.88/conf-home \
+        && make \
+	    && for f in tcpserver tcprules tcprulescheck argv0 recordio tcpclient *\@ tcpcat mconnect mconnect-io addcr delcr fixcrio rblsmtpd; do \
+            cp $f /usr/bin/$f; \
+        done \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -rf \
+            /tmp/ucspi-tcp-* \
     && \
     echo
-
-
-# Add support for flatpaks
-RUN \
-    echo "**** Install flatpak support ****" \
-	    && pacman -Syu --noconfirm --needed \
-            flatpak \
-            xdg-desktop-portal-gtk \
-    && \
-    echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
-    && \
-    echo
-
-
-# TODO Append to tools
-RUN \
-    echo "**** Install flatpak support ****" \
-	    && pacman -Syu --noconfirm --needed \
-            patch \
-    && \
-    echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
-    && \
-    echo
-
-
-
-# # Install desktop environment
-# RUN \
-#     echo "**** Install desktop environment ****" \
-# 	    && pacman -Syu --noconfirm --needed \
-#             kde-system-meta \
-#             konsole \
-#             plasma-desktop \
-#     && \
-#     echo "**** Section cleanup ****" \
-# 	    && pacman -Scc --noconfirm \
-#     && \
-#     echo
-
-# # Install desktop environment
-# RUN \
-#     echo "**** Install desktop environment ****" \
-# 	    && pacman -Syu --noconfirm --needed \
-#             cinnamon \
-#             polkit-gnome \
-#             gnome-terminal \
-#     && \
-#     echo "**** Section cleanup ****" \
-# 	    && pacman -Scc --noconfirm \
-#     && \
-#     echo
-
-# # Setup browser audio streaming deps
-# RUN \
-#     echo "**** Update apt database ****" \
-#         && apt-get update \
-#     && \
-#     echo "**** Install audio streaming deps ****" \
-#         && apt-get install -y --no-install-recommends \
-#             bzip2 \
-#             gstreamer1.0-alsa \
-#             gstreamer1.0-gl \
-#             gstreamer1.0-gtk3 \
-#             gstreamer1.0-libav \
-#             gstreamer1.0-plugins-base \
-#             gstreamer1.0-plugins-good \
-#             gstreamer1.0-pulseaudio \
-#             gstreamer1.0-qt5 \
-#             gstreamer1.0-tools \
-#             gstreamer1.0-x \
-#             libgstreamer1.0-0 \
-#             libncursesw5 \
-#             libopenal1 \
-#             libsdl-image1.2 \
-#             libsdl-ttf2.0-0 \
-#             libsdl1.2debian \
-#             libsndfile1 \
-#             ucspi-tcp \
-#     && \
-#     echo "**** Section cleanup ****" \
-#         && apt-get clean autoclean -y \
-#         && apt-get autoremove -y \
-#         && rm -rf \
-#             /var/lib/apt/lists/* \
-#             /var/tmp/* \
-#             /tmp/* \
-#     && \
-#     echo
-
-# Configure default user and set env
-ENV \
-    USER="default" \
-    USER_PASSWORD="password" \
-    USER_HOME="/home/default" \
-    TZ="Pacific/Auckland" \
-    USER_LOCALES="en_US.UTF-8 UTF-8"
-RUN \
-    echo "**** Configure default user '${USER}' ****" \
-        && mkdir -p \
-            ${USER_HOME} \
-        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
-        && chown -R ${USER} \
-            ${USER_HOME} \
-        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Add FS overlay
 COPY overlay /
@@ -399,23 +383,39 @@ COPY overlay /
 # Set display environment variables
 ENV \
     DISPLAY_CDEPTH="24" \
-    DISPLAY_REFRESH="60" \
+    DISPLAY_REFRESH="120" \
     DISPLAY_SIZEH="900" \
     DISPLAY_SIZEW="1600" \
     DISPLAY_VIDEO_PORT="DFP" \
-    DISPLAY=":55" \
+    DISPLAY=":55"
+ENV \
+    XORG_SOCKET_DIR="/tmp/.X11-unix" \
+    XDG_RUNTIME_DIR="/tmp/.X11-unix/run" \
+    XDG_DATA_DIRS="/home/default/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/"
+ENV \
     NVIDIA_DRIVER_CAPABILITIES="all" \
     NVIDIA_VISIBLE_DEVICES="all"
+
+# Set pulseaudio environment variables
+ENV \
+    PULSE_SOCKET_DIR="/tmp/pulse" \
+    PULSE_SERVER="unix:/tmp/pulse/pulse-socket"
 
 # Set container configuration environment variables
 ENV \
     MODE="primary" \
-    ENABLE_VNC_AUDIO="true"
+    WEB_UI_MODE="vnc" \
+    ENABLE_VNC_AUDIO="true" \
+    NEKO_PASSWORD=neko \
+    NEKO_PASSWORD_ADMIN=admin \
+    ENABLE_SUNSHINE="false" \
+    ENABLE_EVDEV_INPUTS="false"
 
 # Configure required ports
 ENV \
     PORT_SSH="" \
-    PORT_NOVNC_WEB="8083"
+    PORT_NOVNC_WEB="8083" \
+    NEKO_NAT1TO1=""
 
 # Expose the required ports
 EXPOSE 8083
