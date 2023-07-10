@@ -18,6 +18,10 @@ jobs:
 
     name: Build Docker Image
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flavour: ["debian", "arch"]
 
     steps:
     # Fetch shallow git repository
@@ -43,28 +47,35 @@ jobs:
       if: success()
       id: prepare
       run: |
-        echo  "GITHUB_REF:${GITHUB_REF}"
-        echo  "GITHUB_REPOSITORY:${GITHUB_REPOSITORY}"
+        FLAVOUR=${{ matrix.flavour }}
+        echo  "FLAVOUR='${FLAVOUR}'"
+        echo  "GITHUB_REF='${GITHUB_REF}'"
+        echo  "GITHUB_REPOSITORY='${GITHUB_REPOSITORY}'"
         DOCKER_IMAGE=docker.io/josh5/steam-headless
         VERSION_TAG=${GITHUB_REF#refs/*/}
-
         DOCKER_TAGS=""
         if [[ ${VERSION_TAG%/merge} == 'master' ]]; then
-          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+          if [[ ${FLAVOUR} == 'debian' ]]; then
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+          fi
+          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR},"
         elif [[ ${VERSION_TAG%/merge} == 'staging' ]]; then
-          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:staging,"
+          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR}-staging,"
         elif [[ ${VERSION_TAG%/merge} =~ "dev-"* ]]; then
-          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${VERSION_TAG%/merge},"
+          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR}-${VERSION_TAG%/merge},"
         fi
         if [[ ${GITHUB_REF} == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/}
           if [[ ${VERSION} =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}[-\w]*$ ]]; then
-            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${VERSION},"
-            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR}-${VERSION},"
+            if [[ ${FLAVOUR} == 'debian' ]]; then
+              DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+            fi
           fi
         fi
+        echo "DOCKER_TAGS='${DOCKER_TAGS}'"
 
-        echo "Build: [$(date +"%F %T")] [${GITHUB_REF_NAME}] [${GITHUB_SHA}]" > ./overlay/version.txt
+        echo "Build: [$(date +"%F %T")] [${GITHUB_REF_NAME}] [${GITHUB_SHA}] [${FLAVOUR}]" > ./overlay/version.txt
 
         DOCKER_PUSH="true"
         if [[ ${DOCKER_IMAGE} != 'docker.io/josh5/steam-headless' ]]; then
@@ -76,11 +87,16 @@ jobs:
         if [[ ${VERSION_TAG%/merge} =~ ^[0-9]+$ ]]; then
           DOCKER_PUSH="false"
         fi
+        if [[ "X${DOCKER_TAGS}" == "X" ]]; then
+          DOCKER_PUSH="false"
+        fi
+        echo "DOCKER_PUSH='${DOCKER_PUSH}'"
+        cat ./overlay/version.txt
 
-        echo ::set-output name=docker_image::${DOCKER_IMAGE}
-        echo ::set-output name=docker_tags::$(echo ${DOCKER_TAGS} | sed 's/,$//')
-        echo ::set-output name=docker_platforms::linux/amd64
-        echo ::set-output name=docker_push::${DOCKER_PUSH}
+        echo "docker_image=${DOCKER_IMAGE}" >> $GITHUB_OUTPUT
+        echo "docker_tags=$(echo ${DOCKER_TAGS} | sed 's/,$//')" >> $GITHUB_OUTPUT
+        echo "docker_platforms=linux/amd64" >> $GITHUB_OUTPUT
+        echo "docker_push=${DOCKER_PUSH}" >> $GITHUB_OUTPUT
 
     # Cache the build
     - name: Cache Docker layers
@@ -88,9 +104,9 @@ jobs:
       id: cache
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ matrix.flavour }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-
+          ${{ runner.os }}-buildx-${{ matrix.flavour }}-
     
     # Login to Docker Hub
     - name: Login to Docker Hub
@@ -106,7 +122,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        file: Dockerfile
+        file: Dockerfile.${{ matrix.flavour }}
         pull: true
         platforms: ${{ steps.prepare.outputs.docker_platforms }}
         push: ${{ steps.prepare.outputs.docker_push }}
