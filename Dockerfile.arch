@@ -34,28 +34,7 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
-    && \
-    echo
-
-# Configure default user and set env
-ENV \
-    PUID=99 \
-    PGID=100 \
-    UMASK=000 \
-    USER="default" \
-    USER_PASSWORD="password" \
-    USER_HOME="/home/default" \
-    TZ="Pacific/Auckland" \
-    USER_LOCALES="en_US.UTF-8 UTF-8"
-RUN \
-    echo "**** Configure default user '${USER}' ****" \
-        && mkdir -p \
-            ${USER_HOME} \
-        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
-        && chown -R ${USER} \
-            ${USER_HOME} \
-        && usermod -aG video,audio,input ${USER} \
-        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
@@ -97,11 +76,41 @@ RUN \
             python-pip \
             python-setuptools \
     && \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
+    && \
+    echo
+
+# Configure default user and set user env
+ENV \
+    PUID=99 \
+    PGID=100 \
+    UMASK=000 \
+    USER="default" \
+    USER_PASSWORD="password" \
+    USER_HOME="/home/default" \
+    TZ="Pacific/Auckland" \
+    USER_LOCALES="en_US.UTF-8 UTF-8"
+RUN \
+    echo "**** Configure default user '${USER}' ****" \
+        && mkdir -p \
+            ${USER_HOME} \
+        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
+        && chown -R ${USER} \
+            ${USER_HOME} \
+        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && \
+    echo
+
+# Install yay
+RUN \
     echo "**** Install Yay ****" \
 	    && su - default -c 'git clone https://aur.archlinux.org/yay.git /tmp/yay && cd /tmp/yay && makepkg --noconfirm --syncdeps --install' \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
         && rm -rf \
             /tmp/yay* \
     && \
@@ -115,6 +124,7 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
@@ -127,6 +137,7 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
@@ -141,9 +152,11 @@ RUN \
             opencl-mesa \
             pciutils \
             vulkan-mesa-layers \
+            vdpauinfo \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
@@ -174,23 +187,13 @@ RUN \
             xorg-xrandr \
             xorg-xsetroot \
             xorg-xwininfo \
+            xterm \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
-
-# pacman -Syu --noconfirm --needed autorandr xdg-desktop-portal xdg-desktop-portal-gtk wmctrl xbindkeys xdotool xautolock
-# 
-# 
-# pacman -Syu --noconfirm --needed gestures
-# pacman -Syu --noconfirm --needed numlockx
-# 
-# echo 'Server = https://mirror.fsmg.org.nz/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-# 
-# Server = https://mirror.pkgbuild.com/$repo/os/$arch
-# Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch
-# Server = https://mirror.leaseweb.net/archlinux/$repo/os/$arch
 
 # Install audio requirements
 RUN \
@@ -203,6 +206,7 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
@@ -215,7 +219,6 @@ RUN \
             xfce4 \
             xfce4-goodies \
             xfce4-terminal \
-            xterm \
         # Delete these as they are not needed at all
         && rm -f \
             /usr/share/applications/software-properties-drivers.desktop \
@@ -239,10 +242,11 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
-# Add support for flatpaks
+# TODO: Add support for flatpaks
 # Note: Debian Bullseye had bubblewrap v0.4.1 which worked fine in the Nvidia docker runtime
 #   At the moment this is only working beacuse /proc is being mounted again in 10-setup_user.sh
 #   Need to find a better solution for this...
@@ -250,10 +254,8 @@ ARG BUBBLEWRAP_VERSION=0.8.0
 RUN \
     echo "**** Install flatpak support ****" \
 	    && pacman -Syu --noconfirm --needed \
-            bridge-utils \
             flatpak \
             gnome-software \
-            lxc \
             xdg-desktop-portal-gtk \
     && \
     #echo "**** Build and install custom bubblewrap ****" \
@@ -269,10 +271,11 @@ RUN \
     #&& \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
 
-# TODO: Setup dind
+# TODO: Add support for dind
 # Ref: 
 #   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
 #   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
@@ -310,6 +313,7 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
         && rm -rf \
             /tmp/noVNC* \
             /tmp/novnc.tar.gz \
@@ -354,12 +358,14 @@ RUN \
             gst-plugins-ugly \
     && \
     echo "**** Fetch ucspi-tcp ****" \
+        && mkdir -p /tmp/ucspi-tcp-0.88 \
         && cd /tmp \
+        #&& wget -O /tmp/ucspi-tcp.tar.gz https://github.com/trafficgate/ucspi-tcp/archive/refs/heads/master.tar.gz \
         && wget -O /tmp/ucspi-tcp.tar.gz http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz \
-        && tar -xvf /tmp/ucspi-tcp.tar.gz \
+        && cd /tmp/ucspi-tcp-0.88 \
+        && tar -xvf /tmp/ucspi-tcp.tar.gz --strip-components=1 \
     && \
     echo "**** Build and install ucspi-tcp ****" \
-        && cd /tmp/ucspi-tcp-0.88/ \
         && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.errno.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.errno.patch \
         && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.a_record.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.a_record.patch \
         && patch -p1 --input=ucspi-tcp-0.88.errno.patch \
@@ -372,6 +378,7 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
         && rm -rf \
             /tmp/ucspi-tcp-* \
     && \
