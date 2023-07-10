@@ -1,11 +1,11 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 LABEL maintainer="Josh.5 <jsunnex@gmail.com>"
 
 # Update package repos
 ARG DEBIAN_FRONTEND=noninteractive
 RUN \
     echo "**** Update apt database ****" \
-        && sed -i '/^.*main/ s/$/ contrib non-free/' /etc/apt/sources.list \
+        && sed -i '/^Components: main/ s/$/ contrib non-free/' /etc/apt/sources.list.d/debian.sources \
     && \
     echo
 
@@ -50,27 +50,6 @@ RUN \
             /var/lib/apt/lists/* \
             /var/tmp/* \
             /tmp/* \
-    && \
-    echo
-
-# Configure default user and set env
-ENV \
-    PUID=99 \
-    PGID=100 \
-    UMASK=000 \
-    USER="default" \
-    USER_PASSWORD="password" \
-    USER_HOME="/home/default" \
-    TZ="Pacific/Auckland" \
-    USER_LOCALES="en_US.UTF-8 UTF-8"
-RUN \
-    echo "**** Configure default user '${USER}' ****" \
-        && mkdir -p \
-            ${USER_HOME} \
-        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
-        && chown -R ${USER} \
-            ${USER_HOME} \
-        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && \
     echo
 
@@ -122,6 +101,27 @@ RUN \
     && \
     echo
 
+# Configure default user and set user env
+ENV \
+    PUID=99 \
+    PGID=100 \
+    UMASK=000 \
+    USER="default" \
+    USER_PASSWORD="password" \
+    USER_HOME="/home/default" \
+    TZ="Pacific/Auckland" \
+    USER_LOCALES="en_US.UTF-8 UTF-8"
+RUN \
+    echo "**** Configure default user '${USER}' ****" \
+        && mkdir -p \
+            ${USER_HOME} \
+        && useradd -d ${USER_HOME} -s /bin/bash ${USER} \
+        && chown -R ${USER} \
+            ${USER_HOME} \
+        && echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && \
+    echo
+
 # Install supervisor
 RUN \
     echo "**** Update apt database ****" \
@@ -142,6 +142,8 @@ RUN \
     echo
 
 # Install mesa and vulkan requirements
+# TODO: Strip this section back to only what is required for all GPU types.
+#       Anything only required for Intel/AMD/NVIDIA should go in the container init.
 RUN \
     echo "**** Update apt database ****" \
         && dpkg --add-architecture i386 \
@@ -183,6 +185,7 @@ RUN \
     echo
 
 # Install X Server requirements
+# TODO: Refine this list of packages to only what is required.
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
@@ -202,6 +205,7 @@ RUN \
             xauth \
             xbindkeys \
             xclip \
+            xcvt \
             xdotool \
             xfishtank \
             xfonts-base \
@@ -248,6 +252,7 @@ RUN \
     echo
 
 # Install desktop environment
+# TODO: Specify all needed packages and add '--no-install-recommends'
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
@@ -292,19 +297,15 @@ RUN \
     echo
 
 # Add support for flatpaks
+# TODO: Remove bridge-utils 
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
     echo "**** Install flatpak support ****" \
-        && apt-get install -y \
-            bridge-utils \
+        && apt-get install -y --no-install-recommends \
             flatpak \
             gnome-software-plugin-flatpak \
-            libpam-cgfs \
-            libvirt0 \
-            lxc \
-            uidmap \
     && \
     echo "**** Configure flatpak ****" \
         && chmod u+s /usr/bin/bwrap \
@@ -344,14 +345,15 @@ RUN \
         && wget -O /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-Linux-x86_64" \
         && chmod +x /usr/local/bin/docker-compose \
     && \
-    echo "**** Install nvidia runtime ****" \
-        && distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
-        && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - \
-        && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list \
-        && apt-get update \
-        && apt-get install -y \
-            nvidia-container-toolkit \
-    && \
+    # TODO: Fix nvidia-container-toolkit. This is not yet offically supported in Bookworm. If we really need it, we can install it with debian11
+    #echo "**** Install nvidia runtime ****" \
+    #    && distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+    #    && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - \
+    #    && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list \
+    #    && apt-get update \
+    #    && apt-get install -y \
+    #        nvidia-container-toolkit \
+    #&& \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
         && apt-get autoremove -y \
@@ -506,12 +508,14 @@ ENV \
     DISPLAY_SIZEH="900" \
     DISPLAY_SIZEW="1600" \
     DISPLAY_VIDEO_PORT="DFP" \
-    DISPLAY=":55" \
-    NVIDIA_DRIVER_CAPABILITIES="all" \
-    NVIDIA_VISIBLE_DEVICES="all" \
+    DISPLAY=":55"
+ENV \
     XORG_SOCKET_DIR="/tmp/.X11-unix" \
     XDG_RUNTIME_DIR="/tmp/.X11-unix/run" \
     XDG_DATA_DIRS="/home/default/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/"
+ENV \
+    NVIDIA_DRIVER_CAPABILITIES="all" \
+    NVIDIA_VISIBLE_DEVICES="all"
 
 # Set pulseaudio environment variables
 ENV \

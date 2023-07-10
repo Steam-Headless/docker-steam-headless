@@ -102,8 +102,4 @@ echo "${USER}:${USER_PASSWORD}" | chpasswd
 mkdir -p /tmp/runtime-root
 chown root:root /tmp/runtime-root
 
-# Fix some flatpak quirks (not sure what is happening here)
-mount -t proc none /proc
-flatpak list
-
 echo "DONE"
