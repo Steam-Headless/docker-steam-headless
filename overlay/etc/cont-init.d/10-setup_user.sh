@@ -5,7 +5,7 @@
 # File Created: Friday, 12th January 2022 8:54:01 am
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Sunday, 9th July 2023 7:43:44 pm
+# Last Modified: Monday, 10th July 2023 5:30:28 pm
 # Modified By: Console and webGui login account (jsunnex@gmail.com)
 ###
 
@@ -22,6 +22,13 @@ groupmod -o -g "${PGID}" ${USER}
 
 
 echo "Adding default user to any additional required device groups"
+additional_groups=( video audio input pulse )
+for group_name in "${additional_groups[@]}"; do
+    if [ $(getent group ${group_name:?}) ]; then
+        echo "Adding user '${USER}' to group: '${group_name}'"
+        usermod -aG ${group_name:?} ${USER}
+    fi
+done
 device_nodes=( /dev/uinput /dev/input/event* /dev/dri/* )
 added_groups=""
 for dev in "${device_nodes[@]}"; do
