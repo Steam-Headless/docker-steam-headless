@@ -310,6 +310,7 @@ RUN \
     echo "**** Configure flatpak ****" \
         && chmod u+s /usr/bin/bwrap \
         && flatpak remote-add flathub https://flathub.org/repo/flathub.flatpakrepo \
+        && dpkg-statoverride --update --add root root 0755 /usr/bin/bwrap \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
