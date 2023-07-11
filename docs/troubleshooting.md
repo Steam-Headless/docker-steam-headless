@@ -14,7 +14,7 @@ Once your Flatpak refresh is complete, everything should work correctly and your
 ![img.png](../images/disk_write_error.png)
 
 1) Stop the container
-2) Verify your mounted /mnt/games volume is owned by UID/GID 1000:1000, and 777 permissions are set.
+2) Verify your mounted /mnt/games volume is owned by the executing UID/GID, and 777 permissions are set.
 3) Verify the `steamapps` directory exists within the library location. 
 
 > __Note__
