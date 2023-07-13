@@ -49,6 +49,7 @@ RUN \
             docbook-xml \
             docbook-xsl \
             fakeroot \
+            fuse \
             git \
             jq \
             less \
