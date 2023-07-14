@@ -69,6 +69,7 @@ RUN \
             vim \
             wget \
             xz \
+            zenity \
     && \
     echo "**** Install python ****" \
 	    && pacman -Syu --noconfirm --needed \
@@ -200,6 +201,21 @@ RUN \
 # Install audio requirements
 RUN \
     echo "**** Install X Server requirements ****" \
+	    && pacman -Syu --noconfirm --needed \
+            alsa-utils \
+            pavucontrol \
+            pulseaudio \
+            pulseaudio-alsa \
+    && \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
+    && \
+    echo
+
+# Install emulation dependencies for EmuDeck
+RUN \
+    echo "**** Install EmuDeck requirements ****" \
 	    && pacman -Syu --noconfirm --needed \
             alsa-utils \
             pavucontrol \
