@@ -31,7 +31,7 @@ if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
     sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
 fi
 
-# TODO: Disabled some stuff for development... re-enable it after Archis working
+# TODO: Disabled some stuff for development... re-enable it after Arch is working
 echo " - DISABLEING dind"
 sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/dind.ini
 #echo " - DISABLEING desktop"

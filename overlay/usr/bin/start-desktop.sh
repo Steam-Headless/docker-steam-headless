@@ -28,7 +28,6 @@ wait_for_x
 # Install/Upgrade user apps
 if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
     xterm -geometry 200x50+0+0 -ls -e /bin/bash -c "
-        source /opt/scripts/install_steam.sh;
         source /opt/scripts/install_firefox.sh;
         source /opt/scripts/install_protonup.sh;
         source /opt/scripts/install_sunshine.sh;

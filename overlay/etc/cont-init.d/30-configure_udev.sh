@@ -26,8 +26,6 @@ if [[ "${is_privileged}" == "true" ]]; then
     echo "**** Configure container to run udev management ****";
     # Enable supervisord script
     sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
-    # Make startup script executable
-    chmod +x /usr/bin/start-udev.sh
     # Configure udev permissions
     if [[ -f /lib/udev/rules.d/60-steam-input.rules ]]; then
         sed -i 's/MODE="0660"/MODE="0666"/' /lib/udev/rules.d/60-steam-input.rules
