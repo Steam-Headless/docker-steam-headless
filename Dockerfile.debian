@@ -542,6 +542,31 @@ ENV \
 # Expose the required ports
 EXPOSE 8083
 
+# add a few usefull package
+RUN \
+echo "**** Update apt database ****" \
+    && apt-get update \
+&& \
+    echo "**** Install and configure latest mesa ****" \
+        && apt-get install -y --no-install-recommends  \
+        libgl1-mesa-glx \
+        libegl1-mesa \
+        mesa-va-drivers \
+        mesa-vdpau-drivers \
+        mesa-vulkan-drivers \
+        xserver-xorg-video-amdgpu \
+        libdrm-amdgpu1 \
+        cpu-x \
+        htop \
+        geany \
+        xcvt \
+        read-edid \
+        edid-decode \
+        libboost-chrono1.74-dev \
+        gamemode \
+    && \
+    echo
+
 # Set entrypoint
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
