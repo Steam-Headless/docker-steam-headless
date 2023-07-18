@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=AddResolution
+Comment=launch resolution on login
+Exec=/opt/scripts/2k_4k_resolution.sh %U -silent
+Icon=steam
+OnlyShowIn=XFCE;
+RunHook=0
+StartupNotify=false
+Terminal=false
+Hidden=false
