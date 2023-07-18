@@ -542,6 +542,10 @@ ENV \
 # Expose the required ports
 EXPOSE 8083
 
+# point to unstable to get the latest mesa
+RUN \
+    echo "deb https://deb.debian.org/debian unstable main" > /etc/apt/sources.list
+
 # Set entrypoint
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
