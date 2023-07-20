@@ -30,19 +30,29 @@ services:
     volumes:
       # The location of your home directory.
       - /opt/container-data/steam-headless/home/:/home/default/:rw
+
       # The location where all games should be installed.
       # This path needs to be set as a library path in Steam after logging in.
       # Otherwise, Steam will store games in the home directory above.
       - /mnt/games/:/mnt/games/:rw
-      # Input devices used for mouse and joypad support inside the container.
-      - /dev/input/:/dev/input/:ro
+
       # The Xorg socket. This will be shared with other containers so they can access the X server.
+      # Select only one option:
+      #   Option #1) Start a X server in the container to share with any other containers.
       - /opt/container-data/steam-headless/.X11-unix/:/tmp/.X11-unix/:rw
+      #   Option #2) Use an existing X server running on the host.
+      #- /tmp/.X11-unix/:/tmp/.X11-unix/:rw
+
       # Pulse audio socket. This will be shared with other containers so they can access the audio sink.
       - /opt/container-data/steam-headless/pulse/:/tmp/pulse/:rw
-      # Store dind var files in a volume
+
+      # Input devices used for mouse and joypad support inside the container.
+      - /dev/input/:/dev/input/:ro
+
+      # Store dind var files in a volume.
       - steam-headless-var-lib-docker:/var/lib/docker/:rw
-      # Store flatpak var files in a volume
+
+      # Store flatpak var files in a volume.
       - steam-headless-var-lib-flatpak:/var/lib/flatpak/:rw
 
 volumes:
