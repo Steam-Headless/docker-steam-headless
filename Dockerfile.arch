@@ -407,6 +407,12 @@ RUN \
 # Add FS overlay
 COPY overlay /
 
+RUN \
+    echo "**** Setup Steam Supervisor ****" \
+            && sed -i 's#/usr/games/steam#/usr/bin/steam#g' /etc/supervisor.d/steam.ini \
+    && \
+    echo
+
 # Set display environment variables
 ENV \
     DISPLAY_CDEPTH="24" \
