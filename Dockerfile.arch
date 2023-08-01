@@ -150,7 +150,6 @@ RUN \
             libva-mesa-driver \
             mesa-utils \
             mesa-vdpau \
-            opencl-mesa \
             pciutils \
             vulkan-mesa-layers \
             vdpauinfo \
