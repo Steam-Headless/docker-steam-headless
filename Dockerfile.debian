@@ -200,6 +200,7 @@ RUN \
             libxcomposite-dev \
             libxcursor1 \
             wmctrl \
+            libfuse2 \
             x11-utils \
             x11-xfs-utils \
             x11-xkb-utils \
