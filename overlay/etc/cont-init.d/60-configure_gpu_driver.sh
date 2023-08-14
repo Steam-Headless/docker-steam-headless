@@ -59,26 +59,49 @@ function install_nvidia_driver {
     #         && echo
     # fi
 
-    echo "Installing NVIDIA driver v${nvidia_host_driver_version} to match what is running on the host"
-    chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
-    ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
-        --silent \
-        --accept-license \
-        --skip-depmod \
-        --skip-module-unload \
-        --no-kernel-modules \
-        --no-kernel-module-source \
-        --install-compat32-libs \
-        --no-nouveau-check \
-        --no-nvidia-modprobe \
-        --no-systemd \
-        --no-distro-scripts \
-        --no-rpms \
-        --no-backup \
-        --no-check-for-alternate-installs \
-        --no-libglx-indirect \
-        --no-install-libglvnd \
-        > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
+    if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) > 500)) then
+        echo "Installing NVIDIA driver v${nvidia_host_driver_version} to match what is running on the host"
+        chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
+        ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
+            --silent \
+            --accept-license \
+            --skip-depmod \
+            --skip-module-unload \
+            --no-kernel-modules \
+            --no-kernel-module-source \
+            --install-compat32-libs \
+            --no-nouveau-check \
+            --no-nvidia-modprobe \
+            --no-systemd \
+            --no-distro-scripts \
+            --no-rpms \
+            --no-backup \
+            --no-check-for-alternate-installs \
+            --no-libglx-indirect \
+            --no-install-libglvnd \
+            > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
+	    else 
+        echo "Installing Legacy NVIDIA driver v${nvidia_host_driver_version} to match what is running on the host"
+        chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
+        ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
+            --silent \
+            --accept-license \
+            --skip-depmod \
+            --skip-module-unload \
+            --no-kernel-module \
+            --no-kernel-module-source \
+            --install-compat32-libs \
+            --no-nouveau-check \
+            --no-nvidia-modprobe \
+            --no-systemd \
+            --no-distro-scripts \
+            --no-rpms \
+            --no-backup \
+            --no-check-for-alternate-installs \
+            --no-libglx-indirect \
+            --no-install-libglvnd \
+            > ${USER_HOME}/Downloads/nvidia_gpu_install.log 2>&1
+    fi
 }
 
 function install_amd_gpu_driver {
