@@ -35,11 +35,16 @@ if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
     "
     touch /tmp/.desktop-apps-updated.lock
 fi
+
 # Run the desktop environment
 echo "**** Starting Xfce4 ****"
 /usr/bin/startxfce4 &
 desktop_pid=$!
 
+if [ "${ENABLE_STEAM:-}" = "true" ]; then
+    echo "Start Steam service"
+    sudo supervisorctl start steam
+fi
 
 # WAIT FOR CHILD PROCESS:
 wait "$desktop_pid"

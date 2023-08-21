@@ -2,8 +2,8 @@
 echo "**** Configure Steam ****"
 
 if [ "${ENABLE_STEAM:-}" = "true" ]; then
-    echo "Enable Steam service"
-    sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/steam.ini
+    # echo "Enable Steam service"
+    # sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/steam.ini
     # Remove old autostart script. We should be starting steam with the supervisor service
     mkdir -p "${USER_HOME:?}/.config/autostart"
     # if grep "Exec=/usr/bin/flatpak" "${USER_HOME:?}/.config/autostart/Steam.desktop" &> /dev/null; then
