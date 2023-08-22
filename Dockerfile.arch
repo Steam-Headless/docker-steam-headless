@@ -225,6 +225,7 @@ RUN \
             xfce4 \
             xfce4-goodies \
             xfce4-terminal \
+            ttf-liberation \
         # Delete these as they are not needed at all
         && rm -f \
             /usr/share/applications/software-properties-drivers.desktop \
