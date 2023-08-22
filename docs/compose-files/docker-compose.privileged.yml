@@ -4,43 +4,26 @@ services:
     image: josh5/steam-headless:latest
     restart: unless-stopped
     runtime: ${DOCKER_RUNTIME}
+    ## NOTE: This config uses privileged to access to host to be able to access the required devices
+    privileged: true
     shm_size: ${SHM_SIZE}
     ipc: host # Could also be set to 'shareable'
     ulimits:
       nofile:
         soft: 1024
         hard: 524288
-    cap_add:
-      - NET_ADMIN
-      - SYS_ADMIN
-      - SYS_NICE
-    security_opt:
-      - seccomp:unconfined
-      - apparmor:unconfined
 
     # NETWORK:
+    ## NOTE:  If we do not use the host network, then physical device input is not possible
+    ##        and your USB connected controllers will not work in steam games.
+    network_mode: host
     hostname: ${NAME}
     extra_hosts:
       - "${NAME}:127.0.0.1"
-    networks:
-      external-macvlan:
-        ipv4_address: ${CONTAINER_IP_ADDRESS}
     
     # ENVIRONMENT:
     ## Read all config variables from the .env file
     env_file: .env
-
-    # DEVICES:
-    devices:
-      # Use the host fuse device.
-      - /dev/fuse
-      # Add the host uinput device.
-      - /dev/uinput
-      # Add AMD/Intel HW accelerated video encoding/decoding devices (optional)
-      #- /dev/dri
-    # Ensure container access to devices 13:*
-    device_cgroup_rules:
-      - 'c 13:* rmw'
 
     # VOLUMES:
     volumes:
@@ -53,7 +36,7 @@ services:
       - /mnt/games/:/mnt/games/:rw
 
       # The Xorg socket. This will be shared with other containers so they can access the X server.
-      # Select only one option or leave commented out to not share the Xorg socket with any other Docker containers.
+      # Select only one option:
       #   Option #1) Start a X server in the container to share with any other containers.
       #- /opt/container-data/steam-headless/.X11-unix/:/tmp/.X11-unix/:rw
       #   Option #2) Use an existing X server running on the host.
@@ -65,16 +48,9 @@ services:
 
       # Input devices used for mouse and joypad support inside the container.
       - /dev/input/:/dev/input/:ro
-      # Host udev data required for input devices
-      - /run/udev/data/:/run/udev/data/:ro
 
       # Store flatpak var files in a volume.
       - steam-headless-var-lib-flatpak:/var/lib/flatpak/:rw
 
 volumes:
   steam-headless-var-lib-flatpak:
-
-networks:
-  external-macvlan:
-    external: true
-    name: ${NETWORK_NAME}
