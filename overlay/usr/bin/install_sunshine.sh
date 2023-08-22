@@ -55,7 +55,7 @@ sunshine_apps_json="$(cat <<EOF
             "image-path": "steam.png",
             "exclude-global-prep-cmd": "false",
             "detached": [
-                "flatpak-spawn --host \/usr\/bin\/flatpak run --branch=stable --arch=x86_64 --command=\/app\/bin\/steam-wrapper com.valvesoftware.Steam steam:\/\/open\/bigpicture"
+                "flatpak-spawn --host \/usr\/games\/steam steam:\/\/open\/bigpicture"
             ]
         }
     ]
