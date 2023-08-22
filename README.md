@@ -2,14 +2,22 @@
 
 ![](./images/banner.jpg)
 
-Play your games in the browser with audio. Connect another device and use it with Steam Remote Play. Easily deploy a Steam Docker instance in seconds.
+Remote Game Streaming Server.
+
+Play your games either in the browser with audio or via Steam Link or Moonlight. Play from another Steam Client with Steam Remote Play.
+
+Easily deploy a Steam Docker instance in seconds.
 
 ## Features:
-- NVIDIA GPU support
-- AMD GPU support
+- Steam Client configured for running on Linux with Proton
+- Moonlight compatible server for easy remote desktop streaming
+- One click installation of EmeDeck, Heroic and Lutris
 - Full video/audio noVNC web access to a Xfce4 Desktop
+- NVIDIA, AMD and Intel GPU support
+- Full controller support
+- Support for Flatpak and Appimage installation
 - Root access
-
+- Based on Debian Bookworm
 
 ---
 ## Notes:
