@@ -52,9 +52,6 @@ for user_init_script in ${USER_HOME}/init.d/*.sh ; do
 
 done
 
-# Ensure all scripts are executable
-chmod a+rwx /opt/scripts/*.sh
-
 # Start supervisord
 echo
 echo "**** Starting supervisord ****";
