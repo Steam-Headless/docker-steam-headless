@@ -23,15 +23,23 @@ rm -rf "${tmp_mount}"
 
 
 if [[ "${is_privileged}" == "true" ]]; then
-    echo "**** Configure container to run udev management ****";
-    # Enable supervisord script
-    sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
-    # Configure udev permissions
-    if [[ -f /lib/udev/rules.d/60-steam-input.rules ]]; then
-        sed -i 's/MODE="0660"/MODE="0666"/' /lib/udev/rules.d/60-steam-input.rules
+    # Since this container may also be run with CAP_SYS_ADMIN, ensure we can actually execute "udevadm trigger"
+    if udevadm trigger &> /dev/null; then
+        echo "**** Configure container to run udev management ****";
+        # Enable supervisord script
+        sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
+        # Configure udev permissions
+        if [[ -f /lib/udev/rules.d/60-steam-input.rules ]]; then
+            sed -i 's/MODE="0660"/MODE="0666"/' /lib/udev/rules.d/60-steam-input.rules
+        fi
+    else
+        # Disable supervisord script since we are not able to execute "udevadm trigger"
+        echo "**** Disable udev service due to privilege restrictions ****";
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
     fi
 else
     # Disable supervisord script
+    echo "**** Disable udev service ****";
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
 fi
 
