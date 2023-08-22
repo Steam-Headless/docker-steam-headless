@@ -277,16 +277,15 @@ RUN \
     #    && make \
     #    && make install
     #&& \
+    echo "**** Configure flatpak ****" \
+        && chmod u-s /usr/bin/bwrap \
+        && flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo \
+    && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
     && \
     echo
-
-# TODO: Add support for dind
-# Ref: 
-#   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
-#   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
 
 # Install noVNC
 # TODO: Add nginx or remove the whole proxy setup and just connect directly for audio (I think that is the better option)

@@ -316,7 +316,6 @@ RUN \
             gnome-software-plugin-flatpak \
     && \
     echo "**** Configure flatpak ****" \
-        && chmod u+s /usr/bin/bwrap \
         && flatpak remote-add flathub https://flathub.org/repo/flathub.flatpakrepo \
         && dpkg-statoverride --update --add root root 0755 /usr/bin/bwrap \
     && \
@@ -329,50 +328,6 @@ RUN \
             /tmp/* \
     && \
     echo
-
-# Setup dind
-# Ref: 
-#   - https://github.com/docker-library/docker/blob/master/20.10/dind/Dockerfile
-#   - https://docs.nvidia.com/ai-enterprise/deployment-guide/dg-docker.html
-ARG DOCKER_VERSION=20.10.18
-ARG DOCKER_COMPOSE_VERSION=v2.11.2
-RUN \
-    echo "**** Fetch Docker static binary package ****" \
-        && cd /tmp \
-        && wget -O /tmp/docker-${DOCKER_VERSION}.tgz \
-            https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
-    && \
-    echo "**** Extract static binaries ****" \
-        && mkdir -p /usr/local/bin \
-        && tar --extract \
-            --file /tmp/docker-${DOCKER_VERSION}.tgz \
-            --strip-components 1 \
-            --directory /usr/local/bin/ \
-            --no-same-owner \
-    && \
-    echo "**** Install docker-compose ****" \
-        && wget -O /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-Linux-x86_64" \
-        && chmod +x /usr/local/bin/docker-compose \
-    && \
-    # TODO: Fix nvidia-container-toolkit. This is not yet offically supported in Bookworm. If we really need it, we can install it with debian11
-    #echo "**** Install nvidia runtime ****" \
-    #    && distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
-    #    && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - \
-    #    && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list \
-    #    && apt-get update \
-    #    && apt-get install -y \
-    #        nvidia-container-toolkit \
-    #&& \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-VOLUME /var/lib/docker
 
 # TODO: Deprecate neko and noVNC for KasmVNC
 # Install Neko server
