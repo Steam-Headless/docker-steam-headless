@@ -59,7 +59,7 @@ function install_nvidia_driver {
     #         && echo
     # fi
 
-    if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) > 500)) then
+    if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) > 500)); then
         echo "Installing NVIDIA driver v${nvidia_host_driver_version} to match what is running on the host"
         chmod +x ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run
         ${USER_HOME}/Downloads/NVIDIA_${nvidia_host_driver_version}.run \
