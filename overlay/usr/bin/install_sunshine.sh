@@ -29,8 +29,8 @@ mkdir -p "${USER_HOME:?}/.config/autostart"
 if [[ ! -f "${USER_HOME:?}/.config/autostart/Sunshine.desktop" ]]; then
     echo "${sunshine_autostart_desktop:?}" > "${USER_HOME:?}/.config/autostart/Sunshine.desktop"
 fi
-# Configure default launchers:
-sunshine_apps_json="$(cat <<EOF
+# Generate default launchers template:
+sunshine_apps_data="$(cat <<EOF
 {
     "env": {
         "PATH": "\$(PATH):\$(HOME)\/.local\/bin"
@@ -62,9 +62,18 @@ sunshine_apps_json="$(cat <<EOF
 }
 EOF
 )"
+# Generate default sunshine configuration template:
+sunshine_config_data="$(cat <<EOF
+global_prep_cmd = [{"do":"","undo":"flatpak-spawn --host /usr/bin/sunshine-stop"}]
+EOF
+)"
+
 mkdir -p "${USER_HOME:?}/.config/sunshine"
 if [[ ! -f "${USER_HOME:?}/.config/sunshine/apps.json" ]]; then
-    echo "${sunshine_apps_json:?}" > "${USER_HOME:?}/.config/sunshine/apps.json"
+    echo "${sunshine_apps_data:?}" > "${USER_HOME:?}/.config/sunshine/apps.json"
+fi
+if [[ ! -f "${USER_HOME:?}/.config/sunshine/sunshine.conf " ]]; then
+    echo "${sunshine_config_data:?}" > "${USER_HOME:?}/.config/sunshine/sunshine.conf "
 fi
 
 echo "DONE"
