@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+###
+# File: xfce4-minimise-all-windows
+# Project: bin
+# File Created: Tuesday, 22nd August 2023 3:28:52 pm
+# Author: Josh.5 (jsunnex@gmail.com)
+# -----
+# Last Modified: Tuesday, 22nd August 2023 3:28:52 pm
+# Modified By: Josh.5 (jsunnex@gmail.com)
+###
+set -e
+
+# Get a list of open windows
+WINDOW_IDS=$(wmctrl -l | grep -vwE "Desktop$|xfce4-panel$" | cut -f1 -d' ')
+# Minimise each window
+for i in ${WINDOW_IDS}; do
+    wmctrl -ir "$i" -b toggle,hidden;
+done
