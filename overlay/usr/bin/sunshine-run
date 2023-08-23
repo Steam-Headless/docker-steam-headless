@@ -24,7 +24,7 @@ trap _term EXIT
 
 
 # RUN CHILD PROCESS
-"${@}" &
+/usr/bin/dumb-init "${@}" &
 proc_pid=$!
 
 

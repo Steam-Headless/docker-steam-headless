@@ -482,6 +482,15 @@ RUN \
     && \
     echo
 
+# Various other tools
+ARG DUMB_INIT_VERSION=1.2.5
+RUN \
+    echo "**** Install dumb-init ****" \
+        && wget -O /usr/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_x86_64 \
+        && chmod +x /usr/bin/dumb-init \
+    && \
+    echo
+
 # Add FS overlay
 COPY overlay /
 
