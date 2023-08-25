@@ -82,6 +82,7 @@ RUN \
             unzip \
             vim \
             wget \
+            xmlstarlet \
             xz-utils \
     && \
     echo "**** Install python ****" \
