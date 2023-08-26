@@ -25,28 +25,32 @@ fi
 # Execute all container init scripts
 for init_script in /etc/cont-init.d/*.sh ; do
     echo
-    echo "[ ${init_script}: executing... ]"
-    sed -i 's/\r$//' "${init_script}"
-    source "${init_script}"
+    echo -e "\e[34m[ ${init_script:?}: executing... ]\e[0m"
+    sed -i 's/\r$//' "${init_script:?}"
+    source "${init_script:?}"
 done
 
 # Execute any user generated init scripts
-mkdir -p ${USER_HOME}/init.d
-chown -R ${USER} ${USER_HOME}/init.d
-for user_init_script in ${USER_HOME}/init.d/*.sh ; do
+mkdir -p ${USER_HOME:?}/init.d
+chown -R ${USER:?} ${USER_HOME:?}/init.d
+for user_init_script in ${USER_HOME:?}/init.d/*.sh ; do
 
     # Check that a file was found 
     # (If no files exist in this directory, then user_init_script will be empty)
-    if [[ -e "${user_init_script}" ]]; then
+    if [[ -e "${user_init_script:?}" ]]; then
         
         echo
-        echo "[ USER:${user_init_script}: executing... ]"
-        sed -i 's/\r$//' "${user_init_script}"
+        echo -e "\e[34m[ USER:${user_init_script:?}: executing... ]\e[0m"
+        sed -i 's/\r$//' "${user_init_script:?}"
 
-        # Execute user script in sub process. 
-        # This way if it is messed up, we dont get caught in an init loop
-        chmod +x "${user_init_script}"
-        cat "${user_init_script}" | bash
+        # Execute user script in sub process with 'set +e'. 
+        # This way if it is messed up, we dont get caught in an init loop.
+        chmod +x "${user_init_script:?}"
+        (
+            set +e
+            "${user_init_script:?}" ||  echo -e "\e[31mERROR: \e[33mFailed to execute user script '${user_init_script:?}'\e[0m" 
+        )
+        echo $?
 
     fi
 
@@ -56,7 +60,7 @@ done
 echo
 echo "**** Starting supervisord ****";
 echo "Logging all root services to '/var/log/supervisor/'"
-echo "Logging all user services to '/home/${USER}/.cache/log/'"
+echo "Logging all user services to '/home/${USER:?}/.cache/log/'"
 echo
 mkdir -p /var/log/supervisor
 chmod a+rw /var/log/supervisor
