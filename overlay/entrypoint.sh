@@ -41,7 +41,7 @@ for user_init_script in ${USER_HOME:?}/init.d/*.sh ; do
         
         echo
         echo -e "\e[34m[ USER:${user_init_script:?}: executing... ]\e[0m"
-        sed -i 's/\r$//' "${user_init_script:?}"
+        sed -i 's/\r$//' "$(readlink -e "${user_init_script:?}")"
 
         # Execute user script in sub process with 'set +e'. 
         # This way if it is messed up, we dont get caught in an init loop.
@@ -50,7 +50,6 @@ for user_init_script in ${USER_HOME:?}/init.d/*.sh ; do
             set +e
             "${user_init_script:?}" ||  echo -e "\e[31mERROR: \e[33mFailed to execute user script '${user_init_script:?}'\e[0m" 
         )
-        echo $?
 
     fi
 
