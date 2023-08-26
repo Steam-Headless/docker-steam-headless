@@ -450,6 +450,26 @@ RUN \
             intel-media-va-driver-non-free \
             i965-va-driver-shaders \
             libva2 \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
+# Install tools for monitoring hardware
+RUN \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install useful HW monitoring tools ****" \
+        && apt-get install -y --no-install-recommends \
+            cpu-x \
+            htop \
             vainfo \
             vdpauinfo \
     && \
