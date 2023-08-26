@@ -63,8 +63,20 @@ sunshine_apps_data="$(cat <<EOF
 EOF
 )"
 # Generate default sunshine configuration template:
+# REF: https://docs.lizardbyte.dev/projects/sunshine/en/latest/about/advanced_usage.html
 sunshine_config_data="$(cat <<EOF
-global_prep_cmd = [{"do":"","undo":"flatpak-spawn --host /usr/bin/sunshine-stop"}]
+# global_prep_cmd
+#   A list of commands to be run before/after all applications.
+#   If any of the prep-commands fail, starting the application is aborted.
+global_prep_cmd = [{"do":"flatpak-spawn --host /usr/bin/xfce4-minimise-all-windows","undo":"flatpak-spawn --host /usr/bin/sunshine-stop"}]
+
+# channels
+#   This will generate distinct video streams, unlike simply broadcasting to multiple Clients.
+#   When multicasting, it could be useful to have different configurations for each connected Client.
+#   For instance:
+#       - Clients connected through WAN and LAN have different bitrate constraints.
+#       - Decoders may require different settings for color.
+channels = 2
 EOF
 )"
 
@@ -73,7 +85,7 @@ if [[ ! -f "${USER_HOME:?}/.config/sunshine/apps.json" ]]; then
     echo "${sunshine_apps_data:?}" > "${USER_HOME:?}/.config/sunshine/apps.json"
 fi
 if [[ ! -f "${USER_HOME:?}/.config/sunshine/sunshine.conf " ]]; then
-    echo "${sunshine_config_data:?}" > "${USER_HOME:?}/.config/sunshine/sunshine.conf "
+    echo "${sunshine_config_data:?}" > "${USER_HOME:?}/.config/sunshine/sunshine.conf"
 fi
 
 echo "DONE"
