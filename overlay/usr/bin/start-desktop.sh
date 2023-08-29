@@ -19,7 +19,12 @@ trap _term SIGTERM SIGINT
 
 
 # CONFIGURE:
-export $(dbus-launch)
+# Remove lockfile
+rm -f /tmp/.started-desktop
+# Start a session bus instance of dbus-daemon
+# Note: This script should be the only one that waits for X after exporting this dbus session
+rm -fv /tmp/.dbus-desktop-session.env
+export_desktop_dbus_session
 
 
 # EXECUTE PROCESS:
@@ -30,7 +35,6 @@ if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
     xterm -geometry 200x50+0+0 -ls -e /bin/bash -c "
         source /usr/bin/install_firefox.sh;
         source /usr/bin/install_protonup.sh;
-        source /usr/bin/install_sunshine.sh;
         sleep 1;
     "
     touch /tmp/.desktop-apps-updated.lock
@@ -40,6 +44,7 @@ fi
 echo "**** Starting Xfce4 ****"
 /usr/bin/startxfce4 &
 desktop_pid=$!
+touch /tmp/.started-desktop
 
 # WAIT FOR CHILD PROCESS:
 wait "$desktop_pid"
