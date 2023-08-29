@@ -28,7 +28,7 @@ wait_for_x() {
 wait_for_udev() {
     MAX=10
     CT=0
-    while [ ! -f /tmp/.udev-started ]; do
+    while [ ! -f /tmp/.started-udev ]; do
         sleep 1
         CT=$(( CT + 1 ))
         if [ "$CT" -ge "$MAX" ]; then
@@ -53,6 +53,20 @@ wait_for_docker() {
     echo "DOCKERD RUNNING!"
 }
 
+# Wait for desktop to start
+wait_for_desktop() {
+    MAX=30
+    CT=0
+    while [ ! -f /tmp/.started-desktop ]; do
+        sleep 1
+        CT=$(( CT + 1 ))
+        if [ "$CT" -ge "$MAX" ]; then
+            echo "FATAL: $0: Gave up waiting for Desktop to start"
+            exit 11
+        fi
+    done
+}
+
 # Fech NVIDIA GPU device (if one exists)
 get_nvidia_gpu_id() {
     if [ "${NVIDIA_VISIBLE_DEVICES:-}" == "all" ]; then
@@ -66,4 +80,25 @@ get_nvidia_gpu_id() {
         fi
     fi
     echo ${gpu_select}
+}
+
+export_desktop_dbus_session() {
+    if [ ! -f /tmp/.dbus-desktop-session.env ]; then
+        echo "$(dbus-launch)" > /tmp/.dbus-desktop-session.env
+    fi
+    export $(cat /tmp/.dbus-desktop-session.env)
+}
+
+# Wait for desktop dbus session to start
+wait_for_desktop_dbus_session() {
+    MAX=10
+    CT=0
+    while [ ! -f /tmp/.dbus-desktop-session.env ]; do
+        sleep 1
+        CT=$(( CT + 1 ))
+        if [ "$CT" -ge "$MAX" ]; then
+            echo "FATAL: $0: Gave up waiting for Desktop dbus-launch session to be created"
+            exit 11
+        fi
+    done
 }

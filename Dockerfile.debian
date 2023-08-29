@@ -483,6 +483,17 @@ RUN \
     && \
     echo
 
+# Install Sunshine
+ARG SUNSHINE_VERSION=0.20.0
+RUN \
+    echo "**** Install Sunshine ****" \
+        && wget -O /usr/bin/sunshine \
+            https://github.com/LizardByte/Sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine.AppImage \
+        && chmod +x /usr/bin/sunshine \
+        && setcap cap_sys_admin+p /usr/bin/sunshine \
+    && \
+    echo
+
 # Install Steam
 RUN \
     echo "**** Update apt database ****" \
@@ -506,7 +517,9 @@ RUN \
 ARG DUMB_INIT_VERSION=1.2.5
 RUN \
     echo "**** Install dumb-init ****" \
-        && wget -O /usr/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_x86_64 \
+        && wget --no-check-certificate --no-cookies --quiet \
+            -O /usr/bin/dumb-init \
+            https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_x86_64 \
         && chmod +x /usr/bin/dumb-init \
     && \
     echo
@@ -535,7 +548,7 @@ ENV \
     NEKO_PASSWORD_ADMIN=admin \
     ENABLE_STEAM="true" \
     STEAM_ARGS="-silent" \
-    ENABLE_SUNSHINE="false" \
+    ENABLE_SUNSHINE="true" \
     ENABLE_EVDEV_INPUTS="false"
 
 # Configure required ports

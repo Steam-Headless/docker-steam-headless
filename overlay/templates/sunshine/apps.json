@@ -4,11 +4,22 @@
     },
     "apps": [
         {
-            "name": "Steam BigPicture",
-            "output": "steam.txt",
-            "cmd": "",
+            "name": "Desktop",
+            "image-path": "desktop.png",
+            "exclude-global-prep-cmd": "true"
+        },
+        {
+            "name": "Steam Big Picture",
+            "image-path": "steam.png",
+            "exclude-global-prep-cmd": "false",
             "detached": [
                 "\/usr\/games\/steam steam:\/\/open\/bigpicture"
+            ],
+            "prep-cmd": [
+                {
+                    "do": "",
+                    "undo": "\/usr\/bin\/xfce4-close-all-windows"
+                }
             ]
         }
     ]

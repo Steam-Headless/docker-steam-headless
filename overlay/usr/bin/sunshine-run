@@ -10,23 +10,40 @@
 ###
 set -e
 
-# CATCH TERM SIGNAL:
+exec >> >(tee -a /tmp/sunshine-exec-run.log) 2>&1
+echo
+echo "-------------------------------"
+echo
+date
+echo
+echo "-------------------------------"
+echo
+echo "**** Execute sunshine-run ****"
+echo
+
+# Trap SIGINT, SIGQUIT, SIGHUP, SIGTERM to forward signals to the child process
 _term() {
-    pkill -P $$
+    if [ -n "${proc_pid}" ]; then
+        echo "  - Forwarding signal $1 to process ${proc_pid}"
+        kill -s "${1}" "${proc_pid}"
+    fi
 }
-for sig in INT QUIT HUP TERM; do
-  trap "
-    _term
-    trap - $sig EXIT
-    kill -s $sig "'"$$"' "$sig"
-done
-trap _term EXIT
+trap '_term INT' SIGINT
+trap '_term QUIT' SIGQUIT
+trap '_term HUP' SIGHUP
+trap '_term TERM' SIGTERM
 
-
-# RUN CHILD PROCESS
+# Run child process
 /usr/bin/dumb-init "${@}" &
 proc_pid=$!
+echo "  - Recording sunshine-run PID '${proc_pid}' in /tmp/sunshine-exec-run.pid"
+echo "${proc_pid}" > /tmp/sunshine-exec-run.pid
 
-
-# WAIT FOR CHILD PROCESS:
+# Wait for child process to exit:
+echo "  - Waiting for PID '${proc_pid}' to exit"
 wait "$proc_pid"
+
+# Clean up PID file
+rm -f /tmp/sunshine-exec-run.pid
+
+echo "DONE"

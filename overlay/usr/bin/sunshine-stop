@@ -10,5 +10,48 @@
 ###
 set -e
 
-# Terminate any running sunshine-run processes:
-kill $(ps aux | grep -v grep | grep sunshine-run | awk '{print $2}')
+exec >> >(tee -a /tmp/sunshine-exec-stop.log) 2>&1
+echo
+echo "-------------------------------"
+echo
+date
+echo
+echo "-------------------------------"
+echo
+echo "**** Execute sunshine-stop ****"
+echo
+
+
+process_pid="$(cat /tmp/sunshine-exec-run.pid)"
+echo "  - Found initial sunshine-run PID '${process_pid}'"
+
+echo "  - Sending SIGINT to PID '${process_pid}'"
+kill -INT "${process_pid}"
+
+echo "  - Checking for other sunshine-run processes '${process_pid}'"
+for process_pid in $(ps aux | grep -v grep | grep sunshine-run | awk '{print $2}'); do
+    echo "  - Sending SIGINT to PID '${process_pid}'"
+    kill -INT "${process_pid}" 2>/dev/null
+    sleep 0.5
+    counter=0
+    while kill -0 "$process_pid" 2>/dev/null; do
+        echo "  - Sending SIGTERM to PID '${process_pid}'"
+        kill -TERM "$process_pid" 2>/dev/null
+        counter=$((counter + 1))
+        [ "$counter" -gt 2 ] && break
+        sleep 2
+    done
+    counter=0
+    while kill -0 "$process_pid" 2>/dev/null; do
+        echo "  - Sending SIGKILL to PID '${process_pid}'"
+        kill -KILL "$process_pid" 2>/dev/null
+        counter=$((counter + 1))
+        [ "$counter" -gt 2 ] && break
+        sleep 1
+    done
+done
+
+# Clean up PID file
+rm -f /tmp/sunshine-exec-run.pid
+
+echo "DONE"

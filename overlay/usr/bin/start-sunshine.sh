@@ -13,42 +13,58 @@ source /usr/bin/common-functions.sh
 
 # CATCH TERM SIGNAL:
 _term() {
-    kill -TERM "$sunshine_pid" 2>/dev/null
+    kill -INT "$sunshine_pid" 2>/dev/null
+    sleep 0.5
+    counter=0
+    while kill -0 "$sunshine_pid"; do
+        kill -TERM "$sunshine_pid" 2>/dev/null
+        counter=$((counter + 1))
+        [ "$counter" -gt 2 ] && break
+        sleep 2
+    done
+    counter=0
+    while kill -0 "$sunshine_pid"; do
+        kill -KILL "$sunshine_pid" 2>/dev/null
+        counter=$((counter + 1))
+        [ "$counter" -gt 2 ] && break
+        sleep 1
+    done
 }
 trap _term SIGTERM SIGINT
 
 
 # CONFIGURE:
 # Install default configurations
-mkdir -p /home/${USER}/sunshine
-if [[ ! -f /home/${USER}/sunshine/sunshine.conf ]]; then
-    cp -vf /templates/sunshine/* /home/${USER}/sunshine/
-    # TODO: Set the default encoder '# encoder = nvenc'
-    # nvidia_gpu_id=$(get_nvidia_gpu_id)
-    # if [[ "X${nvidia_gpu_id:-}" != "X" ]]; then
-    #     if [[ "all video" == *"${NVIDIA_DRIVER_CAPABILITIES}"* ]]; then
-    #         # Check if we have a nvidia GPU available
-    #         sed -i 's|^# encoder.*=.*$|encoder = nvenc|' /home/${USER}/sunshine/sunshine.conf 
-    #     fi
-    # else
-    #     # TODO: Enable the vaapi device if not using nvenc
-    #     #       vainfo --display drm --device /dev/dri/renderD128 2> /dev/null | grep -E "((VAProfileH264High|VAProfileHEVCMain|VAProfileHEVCMain10).*VAEntrypointEncSlice)"
-    #     # Loop over any render devices
-    #     echo 
-    # fi
+mkdir -p "${USER_HOME:?}/.config/sunshine"
+if [ ! -f "${USER_HOME:?}/.config/sunshine/sunshine.conf" ]; then
+    cp -vf /templates/sunshine/sunshine.conf "${USER_HOME:?}/.config/sunshine/sunshine.conf"
 fi
-
+if [ ! -f "${USER_HOME:?}/.config/sunshine/apps.json" ]; then
+    cp -vf /templates/sunshine/apps.json "${USER_HOME:?}/.config/sunshine/apps.json"
+fi
 # Reset the default username/password
 if ([ "X${SUNSHINE_USER:-}" != "X" ] && [ "X${SUNSHINE_PASS:-}" != "X" ]); then
-    sunshine /home/${USER}/sunshine/sunshine.conf --creds ${SUNSHINE_USER:-} ${SUNSHINE_PASS:-}
+    sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" --creds "${SUNSHINE_USER:?}" "${SUNSHINE_PASS:?}"
+fi
+# Remove any auto-start scripts from user's .local dir
+if [ -f "${USER_HOME:?}/.config/autostart/Sunshine.desktop" ]; then
+    rm -fv "${USER_HOME:?}/.config/autostart/Sunshine.desktop"
 fi
 
 
 # EXECUTE PROCESS:
 # Wait for the X server to start
 wait_for_x
+
+# Start a session bus instance of dbus-daemon
+wait_for_desktop_dbus_session
+export_desktop_dbus_session
+
+# Wait for the desktop to start
+wait_for_desktop
+
 # Start the sunshine server
-sunshine /home/${USER}/sunshine/sunshine.conf &
+/usr/bin/dumb-init /usr/bin/sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" &
 sunshine_pid=$!
 
 
