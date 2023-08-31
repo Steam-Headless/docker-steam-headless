@@ -42,9 +42,12 @@ fi
 if [ ! -f "${USER_HOME:?}/.config/sunshine/apps.json" ]; then
     cp -vf /templates/sunshine/apps.json "${USER_HOME:?}/.config/sunshine/apps.json"
 fi
+if [ ! -f "${USER_HOME:?}/.config/sunshine/sunshine_state.json" ]; then
+    echo "{}" > "${USER_HOME:?}/.config/sunshine/sunshine_state.json"
+fi
 # Reset the default username/password
 if ([ "X${SUNSHINE_USER:-}" != "X" ] && [ "X${SUNSHINE_PASS:-}" != "X" ]); then
-    sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" --creds "${SUNSHINE_USER:?}" "${SUNSHINE_PASS:?}"
+    /usr/bin/sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" --creds "${SUNSHINE_USER:?}" "${SUNSHINE_PASS:?}"
 fi
 # Remove any auto-start scripts from user's .local dir
 if [ -f "${USER_HOME:?}/.config/autostart/Sunshine.desktop" ]; then
