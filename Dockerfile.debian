@@ -268,6 +268,7 @@ RUN \
         && apt-get install -y \
             fonts-vlgothic \
             gedit \
+            imagemagick \
             msttcorefonts \
             xdg-utils \
             xfce4 \
