@@ -266,11 +266,12 @@ RUN \
     && \
     echo "**** Install desktop environment ****" \
         && apt-get install -y \
-            xfce4 \
-            xfce4-terminal \
-            msttcorefonts \
             fonts-vlgothic \
             gedit \
+            msttcorefonts \
+            xdg-utils \
+            xfce4 \
+            xfce4-terminal \
         # Delete these as they are not needed at all
         && rm -f \
             /usr/share/applications/software-properties-drivers.desktop \
