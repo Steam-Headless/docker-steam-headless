@@ -44,63 +44,62 @@ function download_driver {
 function install_nvidia_driver {
     # Check here if the currently installed version matches using nvidia-settings
     nvidia_settings_version=$(nvidia-settings --version 2> /dev/null | grep version | cut -d ' ' -f 4)
-    [ "${nvidia_settings_version:-}X" == "${nvidia_host_driver_version:-}X" ] && return 0;
+    if [ "${nvidia_settings_version:-}X" != "${nvidia_host_driver_version:-}X" ]; then
+        # Download the driver (if it does not yet exist locally)
+        download_driver
 
-    # Download the driver (if it does not yet exist locally)
-    download_driver
-
-    # if command -v pacman &> /dev/null; then
-    #     echo "Install NVIDIA vulkan utils" \
-    #         && pacman -Syu --noconfirm --needed \
-    #             lib32-nvidia-utils \
-    #             lib32-vulkan-icd-loader
-    #             nvidia-utils \
-    #             vulkan-icd-loader \
-    #         && echo
-    # fi
-
-    if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) > 500)); then
-        echo "Installing NVIDIA driver v${nvidia_host_driver_version:?} to match what is running on the host"
-        chmod +x "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
-        "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run" \
-            --silent \
-            --accept-license \
-            --skip-depmod \
-            --skip-module-unload \
-            --no-kernel-modules \
-            --no-kernel-module-source \
-            --install-compat32-libs \
-            --no-nouveau-check \
-            --no-nvidia-modprobe \
-            --no-systemd \
-            --no-distro-scripts \
-            --no-rpms \
-            --no-backup \
-            --no-check-for-alternate-installs \
-            --no-libglx-indirect \
-            --no-install-libglvnd \
-            > "${USER_HOME:?}/Downloads/nvidia_gpu_install.log" 2>&1
-    else 
-        echo "Installing Legacy NVIDIA driver v${nvidia_host_driver_version:?} to match what is running on the host"
-        chmod +x "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
-        "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run" \
-            --silent \
-            --accept-license \
-            --skip-depmod \
-            --skip-module-unload \
-            --no-kernel-module \
-            --no-kernel-module-source \
-            --install-compat32-libs \
-            --no-nouveau-check \
-            --no-nvidia-modprobe \
-            --no-systemd \
-            --no-distro-scripts \
-            --no-rpms \
-            --no-backup \
-            --no-check-for-alternate-installs \
-            --no-libglx-indirect \
-            --no-install-libglvnd \
-            > "${USER_HOME:?}/Downloads/nvidia_gpu_install.log" 2>&1
+        # if command -v pacman &> /dev/null; then
+        #     echo "Install NVIDIA vulkan utils" \
+        #         && pacman -Syu --noconfirm --needed \
+        #             lib32-nvidia-utils \
+        #             lib32-vulkan-icd-loader
+        #             nvidia-utils \
+        #             vulkan-icd-loader \
+        #         && echo
+        # fi
+        if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) > 500)); then
+            echo "Installing NVIDIA driver v${nvidia_host_driver_version:?} to match what is running on the host"
+            chmod +x "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
+            "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run" \
+                --silent \
+                --accept-license \
+                --skip-depmod \
+                --skip-module-unload \
+                --no-kernel-modules \
+                --no-kernel-module-source \
+                --install-compat32-libs \
+                --no-nouveau-check \
+                --no-nvidia-modprobe \
+                --no-systemd \
+                --no-distro-scripts \
+                --no-rpms \
+                --no-backup \
+                --no-check-for-alternate-installs \
+                --no-libglx-indirect \
+                --no-install-libglvnd \
+                > "${USER_HOME:?}/Downloads/nvidia_gpu_install.log" 2>&1
+        else 
+            echo "Installing Legacy NVIDIA driver v${nvidia_host_driver_version:?} to match what is running on the host"
+            chmod +x "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
+            "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run" \
+                --silent \
+                --accept-license \
+                --skip-depmod \
+                --skip-module-unload \
+                --no-kernel-module \
+                --no-kernel-module-source \
+                --install-compat32-libs \
+                --no-nouveau-check \
+                --no-nvidia-modprobe \
+                --no-systemd \
+                --no-distro-scripts \
+                --no-rpms \
+                --no-backup \
+                --no-check-for-alternate-installs \
+                --no-libglx-indirect \
+                --no-install-libglvnd \
+                > "${USER_HOME:?}/Downloads/nvidia_gpu_install.log" 2>&1
+        fi
     fi
     # REF: https://github.com/keylase/nvidia-patch#docker-support
     if [ "${NVIDIA_PATCH_VERSION:-}X" != "X" ]; then
