@@ -101,37 +101,48 @@ function install_nvidia_driver {
                 > "${USER_HOME:?}/Downloads/nvidia_gpu_install.log" 2>&1
         fi
     fi
+}
+
+function patch_nvidia_driver {
     # REF: https://github.com/keylase/nvidia-patch#docker-support
     if [ "${NVIDIA_PATCH_VERSION:-}X" != "X" ]; then
-        echo "Patch NVIDIA Driver"
+        # Don't fail boot if something goes wrong here. Set +e
+        (
+            set +e
+            if [ ! -f "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" ]; then
+                echo "Fetch NVIDIA NVENC patch"
+                wget -q --show-progress --progress=bar:force:noscroll \
+                    -O "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" \
+                    "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch.sh"
+            fi
+            if [ ! -f "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh" ]; then
+                echo "Fetch NVIDIA NvFBC patch"
+                wget -q --show-progress --progress=bar:force:noscroll \
+                    -O "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh" \
+                    "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch-fbc.sh"
+            fi
+            chmod +x \
+                "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" \
+                "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh"
 
-        echo "  - Fetch NVIDIA NVENC patch"
-        wget -q --show-progress --progress=bar:force:noscroll \
-            -O /usr/local/bin/patch.sh \
-            "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch.sh"
-        echo "  - Fetch NVIDIA NvFBC patch"
-        wget -q --show-progress --progress=bar:force:noscroll \
-            -O /usr/local/bin/patch-fbc.sh \
-            "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch-fbc.sh"
-        chmod +x \
-            /usr/local/bin/patch.sh \
-            /usr/local/bin/patch-fbc.sh
+            echo "Install NVIDIA driver patches"
+            echo "/patched-lib" > /etc/ld.so.conf.d/000-patched-lib.conf
+            mkdir -p "/patched-lib"
+            PATCH_OUTPUT_DIR="/patched-lib" "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh"
+            PATCH_OUTPUT_DIR="/patched-lib" "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh"
 
-        echo "  - Install Patches"
-        echo "/patched-lib" > /etc/ld.so.conf.d/000-patched-lib.conf
-        mkdir -p "/patched-lib"
-        PATCH_OUTPUT_DIR="/patched-lib" /usr/local/bin/patch.sh
-        PATCH_OUTPUT_DIR="/patched-lib" /usr/local/bin/patch-fbc.sh
-
-        pushd "/patched-lib" &> /dev/null || { echo "Error: Failed to push directory to /patched-lib"; exit 1; }
-        for f in * ; do
-            suffix="${f##*.so}"
-            name="$(basename "$f" "$suffix")"
-            [ -h "$name" ] || ln -sf "$f" "$name"
-            [ -h "$name" ] || ln -sf "$f" "$name.1"
-        done
-        ldconfig
-        popd &> /dev/null || { echo "Error: Failed to pop directory out of /patched-lib"; exit 1; }
+            pushd "/patched-lib" &> /dev/null || { echo "Error: Failed to push directory to /patched-lib"; exit 1; }
+            for f in * ; do
+                suffix="${f##*.so}"
+                name="$(basename "$f" "$suffix")"
+                [ -h "$name" ] || ln -sf "$f" "$name"
+                [ -h "$name" ] || ln -sf "$f" "$name.1"
+            done
+            ldconfig
+            popd &> /dev/null || { echo "Error: Failed to pop directory out of /patched-lib"; exit 1; }
+        )
+    else
+        echo "Leaving NVIDIA driver stock without patching"
     fi
 }
 
@@ -194,6 +205,7 @@ fi
 if [ "${nvidia_pci_address:-}X" != "X" ]; then
     echo "**** Found NVIDIA device '${nvidia_gpu_name:?}' ****"
     install_nvidia_driver
+    patch_nvidia_driver
 else
     echo "**** No NVIDIA device found ****"
 fi
