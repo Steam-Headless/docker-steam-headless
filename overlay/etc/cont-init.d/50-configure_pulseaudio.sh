@@ -1,6 +1,10 @@
 
 echo "**** Configure pulseaudio ****"
 
+# Always enable the pulseaudio service
+echo "Enable pulseaudio service."
+sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/pulseaudio.ini
+
 if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
     echo "Configure pulseaudio as simple dummy audio"
     sed -i 's|^; autospawn.*$|autospawn = no|' /etc/pulse/client.conf

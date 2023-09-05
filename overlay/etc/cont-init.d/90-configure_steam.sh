@@ -25,6 +25,7 @@ if [ "${ENABLE_STEAM:-}" = "true" ]; then
         echo "Enable Steam auto-start script"
         mkdir -p "${USER_HOME:?}/.config/autostart"
         echo "${steam_autostart_desktop:?}" > "${USER_HOME:?}/.config/autostart/Steam.desktop"
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/steam.ini
     fi
 else
     echo "Disable Steam service"

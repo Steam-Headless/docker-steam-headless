@@ -296,6 +296,11 @@ RUN \
         && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/thunar-bulk-rename.desktop \
         && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/org.gnome.gedit.desktop \
     && \
+    echo "**** Install WoL Manager requirements ****" \
+        && apt-get install -y \
+            tcpdump \
+            xprintidle \
+    && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
         && apt-get autoremove -y \
@@ -551,7 +556,8 @@ ENV \
     ENABLE_STEAM="true" \
     STEAM_ARGS="-silent" \
     ENABLE_SUNSHINE="true" \
-    ENABLE_EVDEV_INPUTS="false"
+    ENABLE_EVDEV_INPUTS="false" \
+    ENABLE_WOL_POWER_MANAGER="false"
 
 # Configure required ports
 ENV \

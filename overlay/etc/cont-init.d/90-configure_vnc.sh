@@ -29,7 +29,7 @@ echo "Configure pulseaudio encoded stream port '${PORT_AUDIO_STREAM}'"
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
 
-    if [ ${WEB_UI_MODE} = "vnc" ]; then
+    if [ "${WEB_UI_MODE:-}" = "vnc" ]; then
         echo "Enable VNC server"
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/vnc.ini
         
@@ -72,9 +72,13 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         fi
     else
         echo "Disable VNC server"
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc.ini
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc-audio.ini
     fi
 else
     echo "VNC server not available when container is run in 'secondary' mode"
+    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc.ini
+    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/vnc-audio.ini
 fi
 
 echo "DONE"

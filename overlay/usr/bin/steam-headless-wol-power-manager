@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+###
+# File: steam-headless-wol-power-manager
+# Project: bin
+# File Created: Tuesday, 5th September 2023 5:35:38 pm
+# Author: Josh.5 (jsunnex@gmail.com)
+# -----
+# Last Modified: Tuesday, 5th September 2023 5:35:38 pm
+# Modified By: Josh.5 (jsunnex@gmail.com)
+###
+set -e
+
+# Function to execute restart to WoL monitor
+restart_to_wol_monitor() {
+    # Create WoL monitor lock file. This will be read during the next restart and will trigger a singluar WoL monitor service.
+    touch /tmp/.wol-monitor
+
+    # Stop all processes inside the container by sending a SIGINT to the main supervisord process (PID 1)
+    kill -2 1
+
+    # Exit script
+    exit 0
+}
+
+# Function to execute restart to Desktop
+restart_to_desktop_mode() {
+    # Remove WoL monitor lock file.
+    rm -f /tmp/.wol-monitor
+
+    # Stop all processes inside the container by sending a SIGINT to the main supervisord process (PID 1)
+    kill -2 1
+
+    # Exit script
+    exit 0
+}
+
+# Function to monitor for no user input
+start_idle_monitor() {
+    # Set the idle timeout in milliseconds (60 minutes = 3600000 milliseconds)
+    local idle_timeout=3600000
+
+    # Monitor input. After an hour of no input
+    echo "Starting idle inputs monitor service..."
+    while true; do
+        # Sleep for a short interval (e.g., 1 minute) before checking
+        sleep 60
+
+        # Get the current idle time in milliseconds using xprintidle
+        idle_time=$(xprintidle)
+
+        # Check if the idle time exceeds the specified timeout
+        if [ "${idle_time:?}" -ge "${idle_timeout:?}" ]; then
+            # TODO: Check if any sessions exist in sunshine
+
+            # Execute restart to WoL monitor function
+            echo "No user activity for over 60 minutes. Entering WoL Monitor Mode."
+            restart_to_wol_monitor
+        fi
+    done
+}
+
+# Function to monitor for WoL events
+start_wol_monitor() {
+    # Specify port to listen to (9 is the default WoL port).
+    listen_port=9
+
+    # Start the WoL monitor service
+    echo "Starting WoL monitor service..."
+
+    while true; do
+        # Listen for WoL magic packets on the specified port
+        tcpdump -i any -n -l -c 1 -q "udp port $listen_port and (udp[8:4] = 0xFFFFFFFF)"
+        
+        # Execute restart to desktop function
+        echo "WoL event received. Entering Desktop Mode."
+        restart_to_desktop_mode
+    done
+}
+
+if [ -f "/tmp/.wol-monitor" ]; then
+    start_wol_monitor
+else
+    start_idle_monitor
+fi

@@ -94,6 +94,9 @@ function configure_x_server {
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
         # Enable xvfb supervisord script
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xvfb.ini
+    else
+        echo "Configure container with no X server"
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/xorg.ini
     fi
 
     # Enable KB/Mouse input capture with Xorg if configured
