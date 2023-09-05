@@ -70,6 +70,7 @@ RUN \
             mlocate \
             nano \
             net-tools \
+            p7zip-full \
             patch \
             pciutils \
             pkg-config \
