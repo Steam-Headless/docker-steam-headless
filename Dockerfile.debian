@@ -80,7 +80,7 @@ RUN \
             screen \
             sudo \
             unzip \
-			p7zip-full \
+            p7zip-full \
             vim \
             wget \
             xmlstarlet \
