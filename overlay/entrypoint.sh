@@ -29,6 +29,7 @@ for init_script in /etc/cont-init.d/*.sh ; do
     sed -i 's/\r$//' "${init_script:?}"
     source "${init_script:?}"
 done
+touch /tmp/.first-run-init-scripts
 
 # Execute any user generated init scripts
 mkdir -p ${USER_HOME:?}/init.d
@@ -54,6 +55,7 @@ for user_init_script in ${USER_HOME:?}/init.d/*.sh ; do
     fi
 
 done
+touch /tmp/.first-run-user-init-scripts
 
 # Start supervisord
 echo
