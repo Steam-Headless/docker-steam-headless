@@ -10,7 +10,7 @@
 ###
 set -e
 
-exec >> >(tee -a /tmp/sunshine-exec-stop.log) 2>&1
+exec >> >(tee -a ${USER_HOME:?}/.cache/log/sunshine_stop.log) 2>&1
 echo
 echo "-------------------------------"
 echo
@@ -23,52 +23,81 @@ echo
 
 # Read the run config
 if [ -f /tmp/sunshine-exec-run.conf ]; then
+    echo "  - Reading sunshine-run config."
     . /tmp/sunshine-exec-run.conf
+else
+    echo "  - WARNING: No sunshine-run config found for import."
 fi
 
 # Read the process PID
 process_pid="$(cat /tmp/sunshine-exec-run.pid)"
-echo "  - Found initial sunshine-run PID '${process_pid}'"
+echo "  - Found initial sunshine-run PID '${process_pid}'."
 
 # Send a INT signal to the PID
-echo "  - Sending SIGINT to PID '${process_pid}'"
-kill -INT "${process_pid}"
+echo "  - Sending SIGINT to PID '${process_pid}'."
+kill -INT "${process_pid}" || true
 
 # Run a loop to check for any other "sunshine-run" processes and send them also a INT signal
-echo "  - Checking for other sunshine-run processes '${process_pid}'"
+echo "  - Checking for other sunshine-run processes..."
 for process_pid in $(ps aux | grep -v grep | grep sunshine-run | awk '{print $2}'); do
-    echo "  - Sending SIGINT to PID '${process_pid}'"
-    kill -INT "${process_pid}" 2>/dev/null
+    # Ensure this process is still running
+    if ! kill -0 "$process_pid" 2>/dev/null; then
+        continue
+    fi
+    echo "  - Stopping PID '${process_pid}' - $(ps -p ${process_pid} -o command | awk 'NR>1')"
+    # Send this process a SIGINT
+    echo "      - Sending SIGINT to PID '${process_pid}'."
+    kill -INT "${process_pid}" 2>/dev/null || true
     sleep 0.5
+    # Send this process a SIGTERM every 2 seconds util stopped or until it has sent 3 signals
     counter=0
     while kill -0 "$process_pid" 2>/dev/null; do
-        echo "  - Sending SIGTERM to PID '${process_pid}'"
-        kill -TERM "$process_pid" 2>/dev/null
+        echo "      - Sending SIGTERM to PID '${process_pid}'."
+        kill -TERM "$process_pid" 2>/dev/null || true
         counter=$((counter + 1))
         [ "$counter" -gt 2 ] && break
         sleep 2
     done
+    # Send this process a SIGKILL every second until stopped or until it has sent 3 signals
     counter=0
     while kill -0 "$process_pid" 2>/dev/null; do
-        echo "  - Sending SIGKILL to PID '${process_pid}'"
-        kill -KILL "$process_pid" 2>/dev/null
+        echo "      - Sending SIGKILL to PID '${process_pid}'."
+        kill -KILL "$process_pid" 2>/dev/null || true
         counter=$((counter + 1))
         [ "$counter" -gt 2 ] && break
         sleep 1
     done
+    if ! kill -0 "$process_pid" 2>/dev/null; then
+        echo "      - PID '${process_pid}' stopped."
+    else
+        echo "      - ERROR: Failed to kill PID '${process_pid}'."
+    fi
 done
+echo "  - All sunshine-run related processes stopped."
 
 # Check if the required information was stored for resetting the display resolution and refresh rate
 if ([ "X${primary_output:-}" != "X" ] && [ "X${display_mode:-}" != "X" ] && [ "X${display_rate:-}" != "X" ]); then
     # Reset display resolution and refresh rate
     echo "  - Resetting display resolution to ${display_mode:?} ${display_rate:?}Hz"
     xrandr --output "${primary_output:?}" --mode "${display_mode:?}" --rate "${display_rate:?}"
+else
+    echo "  - WARNING: original display config not found. Resolution will not be reset."
 fi
 
 # Clean up config file
-rm -f /tmp/sunshine-exec-run.conf
+if [ -f /tmp/sunshine-exec-run.conf ]; then
+    echo "  - Removing sunshine-run config."
+    rm -f /tmp/sunshine-exec-run.conf
+else
+    echo "  - WARNING: No sunshine-run config found for removal."
+fi
 
 # Clean up PID file
-rm -f /tmp/sunshine-exec-run.pid
+if [ -f /tmp/sunshine-exec-run.pid ]; then
+    echo "  - Removing sunshine-run pidfile."
+    rm -f /tmp/sunshine-exec-run.pid
+else
+    echo "  - WARNING: No sunshine-run pidfile found for removal."
+fi
 
 echo "DONE"
