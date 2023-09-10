@@ -33,6 +33,46 @@ trap '_term QUIT' SIGQUIT
 trap '_term HUP' SIGHUP
 trap '_term TERM' SIGTERM
 
+# Wipe session config
+echo "" > /tmp/sunshine-exec-run.conf
+
+# Update display resolution and refresh reate if client provided the required details
+if ([ "X${SUNSHINE_CLIENT_WIDTH:-}" != "X" ] && [ "X${SUNSHINE_CLIENT_HEIGHT:-}" != "X" ] && [ "X${SUNSHINE_CLIENT_FPS:-}" != "X" ]); then
+    echo "  - Setting display resolution to ${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?} ${SUNSHINE_CLIENT_FPS:?}Hz"
+
+    # Read current display mode and extract resolution and refresh rate from the mode string
+    __xrandr_out="$(xrandr)"
+    __current_current_mode=$(echo "${__xrandr_out:?}" | awk '/\*/ {print $0}')
+    __current_resolution=$(echo ${__current_current_mode:?} | awk '{print $1}')
+    __current_refresh_rate=$(echo ${__current_current_mode:?} | awk '{sub(/\*/, "", $2); print $2}')
+
+    # Get the primary output device
+    __primary_output="$(echo "${__xrandr_out:?}" | grep primary | awk '{print $1}')"
+
+    # Get the modeline from cvt and extract the second line (which contains the modeline)
+    __client_modeline=$(cvt "${SUNSHINE_CLIENT_WIDTH:?}" "${SUNSHINE_CLIENT_HEIGHT:?}" "${SUNSHINE_CLIENT_FPS:?}" | grep Modeline | sed -e 's/Modeline //')
+    
+    # Create a new mode for this. This allows us to force a set refresh rate that may not be supported by the display
+    __client_mode=$(echo "${__client_modeline:?}" | awk -F '"' '{print $2}')
+
+    # Check if tthis mode is alread added to the primary display
+    if ! echo "${__xrandr_out:?}" | grep -q "${__client_mode:?}"; then
+        echo "  - Adding new mode '${__client_mode:?}' with new modeline '${__client_modeline:?}'"
+        xrandr --newmode "${__client_mode:?}" ${__client_modeline##*\"}
+        echo "  - Adding new mode '${__client_mode:?}' to device '${__primary_output:?}'"
+        xrandr --addmode "${__primary_output:?}" "${__client_mode:?}"
+    fi
+
+    # Set the current resoultion to the new mode
+    echo "  - Setting the display mode to '${__client_mode:?}'"
+    xrandr --output "${__primary_output:?}" --mode "${__client_mode:?}" --rate "${SUNSHINE_CLIENT_FPS:?}"
+
+    # Save original display settings to config file. This will be read and used to restore the original display settings when the client disconnects.
+    echo "primary_output='${__primary_output:?}'" >> /tmp/sunshine-exec-run.conf 
+    echo "display_mode='${__current_resolution:?}'" >> /tmp/sunshine-exec-run.conf 
+    echo "display_rate='${__current_refresh_rate:?}'" >> /tmp/sunshine-exec-run.conf 
+fi
+
 # Run child process
 /usr/bin/dumb-init "${@}" &
 proc_pid=$!

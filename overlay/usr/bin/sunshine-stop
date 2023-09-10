@@ -21,13 +21,20 @@ echo
 echo "**** Execute sunshine-stop ****"
 echo
 
+# Read the run config
+if [ -f /tmp/sunshine-exec-run.conf ]; then
+    . /tmp/sunshine-exec-run.conf
+fi
 
+# Read the process PID
 process_pid="$(cat /tmp/sunshine-exec-run.pid)"
 echo "  - Found initial sunshine-run PID '${process_pid}'"
 
+# Send a INT signal to the PID
 echo "  - Sending SIGINT to PID '${process_pid}'"
 kill -INT "${process_pid}"
 
+# Run a loop to check for any other "sunshine-run" processes and send them also a INT signal
 echo "  - Checking for other sunshine-run processes '${process_pid}'"
 for process_pid in $(ps aux | grep -v grep | grep sunshine-run | awk '{print $2}'); do
     echo "  - Sending SIGINT to PID '${process_pid}'"
@@ -50,6 +57,16 @@ for process_pid in $(ps aux | grep -v grep | grep sunshine-run | awk '{print $2}
         sleep 1
     done
 done
+
+# Check if the required information was stored for resetting the display resolution and refresh rate
+if ([ "X${primary_output:-}" != "X" ] && [ "X${display_mode:-}" != "X" ] && [ "X${display_rate:-}" != "X" ]); then
+    # Reset display resolution and refresh rate
+    echo "  - Resetting display resolution to ${display_mode:?} ${display_rate:?}Hz"
+    xrandr --output "${primary_output:?}" --mode "${display_mode:?}" --rate "${display_rate:?}"
+fi
+
+# Clean up config file
+rm -f /tmp/sunshine-exec-run.conf
 
 # Clean up PID file
 rm -f /tmp/sunshine-exec-run.pid

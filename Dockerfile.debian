@@ -493,13 +493,26 @@ RUN \
     echo
 
 # Install Sunshine
-ARG SUNSHINE_VERSION=0.20.0
+COPY --from=lizardbyte/sunshine:b00d7af-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
 RUN \
+    echo "**** Update apt database ****" \
+        && apt-get update \
+    && \
+    echo "**** Install Sunshine requirements ****" \
+        && apt-get install -y \
+            va-driver-all \
+    && \
     echo "**** Install Sunshine ****" \
-        && wget -O /usr/bin/sunshine \
-            https://github.com/LizardByte/Sunshine/releases/download/v${SUNSHINE_VERSION}/sunshine.AppImage \
-        && chmod +x /usr/bin/sunshine \
-        && setcap cap_sys_admin+p /usr/bin/sunshine \
+        && apt-get install -y \
+            /usr/src/sunshine.deb \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
     && \
     echo
 
@@ -508,7 +521,7 @@ RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install Intel media drivers and VAAPI ****" \
+    echo "**** Install Steam ****" \
         && apt-get install -y --no-install-recommends \
             steam \
     && \
