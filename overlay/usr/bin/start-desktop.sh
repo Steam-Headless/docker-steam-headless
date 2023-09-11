@@ -25,7 +25,10 @@ rm -f /tmp/.started-desktop
 # Note: This script should be the only one that waits for X after exporting this dbus session
 rm -fv /tmp/.dbus-desktop-session.env
 export_desktop_dbus_session
-
+# Configure some XDG environment variables
+export XDG_CACHE_HOME="${USER_HOME:?}/.cache"
+export XDG_CONFIG_HOME="${USER_HOME:?}/.config"
+export XDG_DATA_HOME="${USER_HOME:?}/.local/share"
 
 # EXECUTE PROCESS:
 # Wait for the X server to start

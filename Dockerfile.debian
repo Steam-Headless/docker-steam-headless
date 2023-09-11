@@ -190,7 +190,8 @@ RUN \
 # TODO: Refine this list of packages to only what is required.
 ENV \
     XORG_SOCKET_DIR="/tmp/.X11-unix" \
-    XDG_RUNTIME_DIR="/tmp/.X11-unix/run"
+    XDG_RUNTIME_DIR="/tmp/.X11-unix/run" \
+    XDG_SESSION_TYPE="x11"
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
