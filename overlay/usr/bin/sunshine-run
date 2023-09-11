@@ -24,8 +24,25 @@ echo
 # Trap SIGINT, SIGQUIT, SIGHUP, SIGTERM to forward signals to the child process
 _term() {
     if [ -n "${proc_pid}" ]; then
-        echo "  - Forwarding signal $1 to process ${proc_pid}"
-        kill -s "${1}" "${proc_pid}"
+        # Read all child processes of proc_pid first
+        child_pids=$(pgrep -P $proc_pid)
+        # Forward the signal proc_pid
+        echo "  - Checking for status of main process ${proc_pid}"
+        if kill -0 "${proc_pid}" 2>/dev/null; then
+            echo "      - Forwarding signal $1 to process ${proc_pid}"
+            kill -s "${1}" "${proc_pid}"
+        else
+            echo "      - Process ${proc_pid} is already stopped. Nothing to do here."
+        fi
+        for child_pid in ${child_pids:-}; do
+            echo "  - Checking for status of child process ${child_pid}"
+            if kill -0 "${child_pid}" 2>/dev/null; then
+                echo "      - Forwarding signal $1 to process ${child_pid}"
+                kill -s "${1}" "${child_pid}"
+            else
+                echo "      - Process ${child_pid} is already stopped. Nothing to do here."
+            fi
+        done
     fi
 }
 trap '_term INT' SIGINT

@@ -36,6 +36,7 @@ echo "  - Found initial sunshine-run PID '${process_pid}'."
 # Send a INT signal to the PID
 echo "  - Sending SIGINT to PID '${process_pid}'."
 kill -INT "${process_pid}" || true
+sleep 1
 
 # Run a loop to check for any other "sunshine-run" processes and send them also a INT signal
 echo "  - Checking for other sunshine-run processes..."
