@@ -524,6 +524,7 @@ RUN \
     echo "**** Install Steam ****" \
         && apt-get install -y --no-install-recommends \
             steam \
+        && ln -sf /usr/games/steam /usr/bin/steam \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
