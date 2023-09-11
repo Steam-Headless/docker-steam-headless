@@ -11,11 +11,19 @@
         {
             "name": "Steam Big Picture",
             "image-path": "steam.png",
-            "exclude-global-prep-cmd": "false",
+            "exclude-global-prep-cmd": "true",
             "detached": [
-                "\/usr\/games\/steam steam:\/\/open\/bigpicture"
+                "\/usr\/bin\/sunshine-run \/usr\/games\/steam steam:\/\/open\/bigpicture"
             ],
             "prep-cmd": [
+                {
+                    "do": "",
+                    "undo": "sh -c \"sleep 7 && pkill -f -2 \/usr\/bin\/sunshine\""
+                },
+                {
+                    "do": "",
+                    "undo": "\/usr\/bin\/sunshine-stop"
+                },
                 {
                     "do": "",
                     "undo": "\/usr\/bin\/xfce4-close-all-windows"
