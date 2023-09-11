@@ -85,11 +85,19 @@ if ([ "X${SUNSHINE_CLIENT_WIDTH:-}" != "X" ] && [ "X${SUNSHINE_CLIENT_HEIGHT:-}"
             xrandr --newmode "${__client_mode:?}" ${__client_modeline##*\"}
             echo "  - Adding new mode '${__client_mode:?}' to device '${__primary_output:?}'"
             xrandr --addmode "${__primary_output:?}" "${__client_mode:?}"
+            __mode_added=$?
         fi
 
         # Set the current resoultion to the new mode
-        echo "  - Setting the display mode to '${__client_mode:?}'"
-        xrandr --output "${__primary_output:?}" --mode "${__client_mode:?}" --rate "${SUNSHINE_CLIENT_FPS:?}"
+        if [ "${__mode_added:?}" -gt 0 ]; then
+            echo "  - Attempting to set the display mode to a supported '${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?}' mode"
+            xrandr --output "${__primary_output:?}" --mode ${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?} --refresh ${SUNSHINE_CLIENT_FPS:?}
+            [ $? -eq 0 ] && echo "      - SUCCESS"
+        else
+            echo "  - Setting the display mode to '${__client_mode:?}'"
+            xrandr --output "${__primary_output:?}" --mode "${__client_mode:?}" --rate "${SUNSHINE_CLIENT_FPS:?}"
+            [ $? -eq 0 ] && echo "      - SUCCESS"
+        fi
 
         # Save original display settings to config file. This will be read and used to restore the original display settings when the client disconnects.
         echo "primary_output='${__primary_output:?}'" >> /tmp/sunshine-exec-run.conf 
