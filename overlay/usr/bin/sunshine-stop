@@ -30,13 +30,19 @@ else
 fi
 
 # Read the process PID
-process_pid="$(cat /tmp/sunshine-exec-run.pid)"
-echo "  - Found initial sunshine-run PID '${process_pid}'."
+if [ -f /tmp/sunshine-exec-run.pid ]; then
+    main_process_pid="$(cat /tmp/sunshine-exec-run.pid)"
+    echo "  - Found initial sunshine-run PID '${main_process_pid}'."
+else
+    echo "  - WARNING: No sunshine-run PID found."
+fi
 
-# Send a INT signal to the PID
-echo "  - Sending SIGINT to PID '${process_pid}'."
-kill -INT "${process_pid}" || true
-sleep 1
+# Send a INT signal to the PID (if it is found)
+if [ "X${main_process_pid:-}" != "X" ]; then
+    echo "  - Sending SIGINT to PID '${main_process_pid}'."
+    kill -INT "${main_process_pid}" || true
+    sleep 1
+fi
 
 # Run a loop to check for any other "sunshine-run" processes and send them also a INT signal
 echo "  - Checking for other sunshine-run processes..."
@@ -74,7 +80,7 @@ for process_pid in $(ps aux | grep -v grep | grep sunshine-run | awk '{print $2}
         echo "      - ERROR: Failed to kill PID '${process_pid}'."
     fi
 done
-echo "  - All sunshine-run related processes stopped."
+echo "  - All sunshine-run related processes are stopped."
 
 # Check if the required information was stored for resetting the display resolution and refresh rate
 if ([ "X${primary_output:-}" != "X" ] && [ "X${display_mode:-}" != "X" ] && [ "X${display_rate:-}" != "X" ]); then
