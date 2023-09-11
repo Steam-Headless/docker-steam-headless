@@ -89,7 +89,7 @@ if ([ "X${SUNSHINE_CLIENT_WIDTH:-}" != "X" ] && [ "X${SUNSHINE_CLIENT_HEIGHT:-}"
         fi
 
         # Set the current resoultion to the new mode
-        if [ "${__mode_added:?}" -gt 0 ]; then
+        if [ "${__mode_added:-0}" -gt 0 ]; then
             echo "  - Attempting to set the display mode to a supported '${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?}' mode"
             xrandr --output "${__primary_output:?}" --mode ${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?} --refresh ${SUNSHINE_CLIENT_FPS:?}
             [ $? -eq 0 ] && echo "      - SUCCESS"
