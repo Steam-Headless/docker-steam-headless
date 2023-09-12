@@ -23,7 +23,6 @@
         <value type="int" value="11"/>
         <value type="int" value="12"/>
         <value type="int" value="13"/>
-        <value type="int" value="14"/>
       </property>
       <property name="background-style" type="uint" value="0"/>
     </property>
@@ -57,6 +56,5 @@
     <property name="plugin-13" type="string" value="separator">
       <property name="style" type="uint" value="0"/>
     </property>
-    <property name="plugin-14" type="string" value="actions"/>
   </property>
 </channel>
