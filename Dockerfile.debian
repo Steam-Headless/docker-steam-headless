@@ -494,7 +494,6 @@ RUN \
     echo
 
 # Install Sunshine
-COPY --from=lizardbyte/sunshine:b00d7af-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
@@ -504,6 +503,7 @@ RUN \
             va-driver-all \
     && \
     echo "**** Install Sunshine ****" \
+        && wget -O /usr/src/sunshine.deb https://github.com/LizardByte/Sunshine/releases/download/nightly-dev/sunshine-debian-bookworm-amd64.deb \
         && apt-get install -y \
             /usr/src/sunshine.deb \
     && \
