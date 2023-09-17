@@ -13,8 +13,14 @@ echo "**** Configure some system kernel parameters ****"
 
 
 if [ "$(cat /proc/sys/vm/max_map_count)" -ge 524288 ]; then
-    echo "Setting the maximum number of memory map areas a process can create to 524288"
-    echo 524288 > /proc/sys/vm/max_map_count
+    if [ -w "/proc/sys/vm/max_map_count" ]; then
+        echo "Setting the maximum number of memory map areas a process can create to 524288"
+        echo 524288 > /proc/sys/vm/max_map_count
+    else
+        echo "WARNING: Unable to set max_map_count on unprivileged container"
+    fi
+else
+    echo "NOTE: vm.max_map_count is already greater than '524288'"
 fi
 
 echo "DONE"
