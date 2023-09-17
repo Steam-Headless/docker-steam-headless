@@ -1,0 +1,11 @@
+"libraryfolders"
+[Desktop Entry]
+NoDisplay=true
+Version=1.0
+Encoding=UTF-8
+Type=X-XFCE-Helper
+X-XFCE-Category=WebBrowser
+X-XFCE-CommandsWithParameter=/home/default/.local/share/flatpak/exports/bin/org.mozilla.firefox "%s"
+Icon=org.mozilla.firefox
+Name=org.mozilla.firefox
+X-XFCE-Commands=/home/default/.local/share/flatpak/exports/bin/org.mozilla.firefox
