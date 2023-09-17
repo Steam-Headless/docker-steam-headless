@@ -79,13 +79,6 @@ ln -sf /usr/share/backgrounds/steam.jpg /etc/alternatives/desktop-background
 chmod a+r /etc/alternatives/desktop-background
 
 
-# Setup home directory and permissions
-echo "Adding default home directory template"
-mkdir -p ${USER_HOME}
-chown -R ${PUID}:${PGID} /etc/home_directory_template
-rsync -aq --ignore-existing /etc/home_directory_template/ ${USER_HOME}/
-
-
 # Setup services log path
 echo "Setting ownership of all log files in '${USER_HOME}/.cache/log'"
 mkdir -p "${USER_HOME}/.cache/log"

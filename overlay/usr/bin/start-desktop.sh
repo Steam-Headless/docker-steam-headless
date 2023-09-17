@@ -31,16 +31,23 @@ export XDG_CONFIG_HOME="${USER_HOME:?}/.config"
 export XDG_DATA_HOME="${USER_HOME:?}/.local/share"
 
 # EXECUTE PROCESS:
+# Setup home directory
+if [[ ! -f /tmp/.home-directory-template-updated ]]; then
+    echo "Installing default home directory template"
+    mkdir -p "${USER_HOME:?}"
+    rsync -aq /templates/home_directory_template/ "${USER_HOME:?}"/
+    touch /tmp/.home-directory-template-updated
+fi
 # Wait for the X server to start
 wait_for_x
 # Install/Upgrade user apps
-if [[ ! -f /tmp/.desktop-apps-updated.lock ]]; then
+if [[ ! -f /tmp/.desktop-apps-updated ]]; then
     xterm -geometry 200x50+0+0 -ls -e /bin/bash -c "
         source /usr/bin/install_firefox.sh;
         source /usr/bin/install_protonup.sh;
         sleep 1;
     "
-    touch /tmp/.desktop-apps-updated.lock
+    touch /tmp/.desktop-apps-updated
 fi
 
 # Run the desktop environment

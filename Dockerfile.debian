@@ -363,8 +363,11 @@ RUN \
         && echo '<!DOCTYPE html>' > /opt/frontend/index.html \
         && echo '<html><head><meta http-equiv="refresh" content="0;url=./web/"></head><body><p>If you are not redirected, <a href="./web/">click here</a>.</p></body></html>' >> /opt/frontend/index.html \
         && chmod -R 755 /opt/frontend \
+        && convert /opt/frontend/web/images/icons/novnc-ios-180.png -resize "128x128" /tmp/steam-headless.png \
+        && xdg-icon-resource install --novendor --size 128 /tmp/steam-headless.png \
     && \
-    echo
+    echo "**** Section cleanup ****" \
+        && rm -f /tmp/steam-headless.png
 
 # Install Websockify
 ARG WEBSOCKETIFY_VERSION=0.11.0
