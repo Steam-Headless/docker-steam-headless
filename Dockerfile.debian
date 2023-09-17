@@ -340,55 +340,45 @@ RUN \
     && \
     echo
 
-# TODO: Deprecate neko and noVNC for KasmVNC
+# TODO: Deprecate neko
 # Install Neko server
 COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
 
-# Install noVNC
-ARG NOVNC_VERSION=1.2.0
+# Install Web Frontend
+ARG FRONTEND_VERSION=0a6ab20
 RUN \
-    echo "**** Fetch noVNC ****" \
-        && cd /tmp \
-        && wget -O /tmp/novnc.tar.gz https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz \
-    && \
-    echo "**** Extract noVNC ****" \
-        && cd /tmp \
-        && tar -xvf /tmp/novnc.tar.gz \
-    && \
-    echo "**** Configure noVNC ****" \
-        && cd /tmp/noVNC-${NOVNC_VERSION} \
-        && sed -i 's/credentials: { password: password } });/credentials: { password: password },\n                           wsProtocols: ["'"binary"'"] });/g' app/ui.js \
+    echo "**** Fetch Web Frontend ****" \
         && mkdir -p /opt \
-        && rm -rf /opt/noVNC \
         && cd /opt \
-        && mv -f /tmp/noVNC-${NOVNC_VERSION} /opt/noVNC \
-        && cd /opt/noVNC \
-        && ln -s vnc.html index.html \
-        && chmod -R 755 /opt/noVNC \
+        && rm -rf /opt/frontend \
+        && git clone https://github.com/Steam-Headless/frontend.git --branch master /opt/frontend \
+        && cd /opt/frontend \
+        && git checkout ${FRONTEND_VERSION} 2> /dev/null \
+        && git submodule init \
+        && git submodule update --depth 1 --recursive \
+        && rm -rf /opt/frontend/.git \
     && \
-    echo "**** Modify noVNC title ****" \
-        && sed -i '/    document.title =/c\    document.title = "Steam Headless - noVNC";' \
-            /opt/noVNC/app/ui.js \
+    echo "**** Configure Web Frontend ****" \
+        && echo '<!DOCTYPE html>' > /opt/frontend/index.html \
+        && echo '<html><head><meta http-equiv="refresh" content="0;url=./web/"></head><body><p>If you are not redirected, <a href="./web/">click here</a>.</p></body></html>' >> /opt/frontend/index.html \
+        && chmod -R 755 /opt/frontend \
     && \
+    echo
+
+# Install Websockify
+ARG WEBSOCKETIFY_VERSION=0.11.0
+RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install nginx support ****" \
+    echo "**** Install Websockify dependencies ****" \
         && apt-get install -y \
-            nginx \
+            python3-numpy \
+            python3-requests \
+            python3-jwcrypto \
+            python3-redis \
     && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /tmp/noVNC* \
-            /tmp/novnc.tar.gz
-
-# Install Websockify
-ARG WEBSOCKETIFY_VERSION=0.10.0
-RUN \
     echo "**** Fetch Websockify ****" \
         && cd /tmp \
         && wget -O /tmp/websockify.tar.gz https://github.com/novnc/websockify/archive/v${WEBSOCKETIFY_VERSION}.tar.gz \
@@ -397,16 +387,15 @@ RUN \
         && cd /tmp \
         && tar -xvf /tmp/websockify.tar.gz \
     && \
-    echo "**** Install Websockify to main ****" \
-        && cd /tmp/websockify-${WEBSOCKETIFY_VERSION} \
-        && python3 ./setup.py install \
-    && \
-    echo "**** Install Websockify to noVNC path ****" \
+    echo "**** Install Websockify to Web Frontend path ****" \
         && cd /tmp \
-        && mv -v /tmp/websockify-${WEBSOCKETIFY_VERSION} /opt/noVNC/utils/websockify \
+        && mv -v /tmp/websockify-${WEBSOCKETIFY_VERSION} /opt/frontend/utils/websockify \
     && \
     echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
         && rm -rf \
+            /var/lib/apt/lists/* \
             /tmp/websockify-* \
             /tmp/websockify.tar.gz
 
