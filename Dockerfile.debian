@@ -347,7 +347,7 @@ COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
 
 # Install Web Frontend
-ARG FRONTEND_VERSION=0a6ab20
+ARG FRONTEND_VERSION=a8eb92f
 RUN \
     echo "**** Fetch Web Frontend ****" \
         && mkdir -p /opt \
