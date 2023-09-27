@@ -24,7 +24,15 @@ rm -rf "${tmp_mount}"
 
 if [[ "${is_privileged}" == "true" ]]; then
     # Since this container may also be run with CAP_SYS_ADMIN, ensure we can actually execute "udevadm trigger"
-    if udevadm trigger &> /dev/null; then
+    if [ ! -w /sys ]; then
+        # Disable supervisord script since we are not able to write to sysfs
+        echo "**** Disable udev - /sys is mounted RO ****";
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
+    elif [ ! -w /run/udev ]; then
+        # Disable supervisord script since we are not able to write to udev/data path
+        echo "**** Disable udev - /run/udev is mounted RO ****";
+        sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
+    elif udevadm trigger &> /dev/null; then
         echo "**** Configure container to run udev management ****";
         # Enable supervisord script
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/udev.ini
