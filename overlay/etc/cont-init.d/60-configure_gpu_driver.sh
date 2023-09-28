@@ -109,18 +109,18 @@ function patch_nvidia_driver {
         # Don't fail boot if something goes wrong here. Set +e
         (
             set +e
-            if [ ! -f "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" ]; then
-                echo "Fetch NVIDIA NVENC patch"
-                wget -q --show-progress --progress=bar:force:noscroll \
-                    -O "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" \
-                    "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch.sh"
-            fi
-            if [ ! -f "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh" ]; then
-                echo "Fetch NVIDIA NvFBC patch"
-                wget -q --show-progress --progress=bar:force:noscroll \
-                    -O "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh" \
-                    "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch-fbc.sh"
-            fi
+
+            echo "Fetch NVIDIA NVENC patch"
+            wget -q --show-progress --progress=bar:force:noscroll \
+                -O "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" \
+                "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch.sh"
+
+
+            echo "Fetch NVIDIA NvFBC patch"
+            wget -q --show-progress --progress=bar:force:noscroll \
+                -O "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh" \
+                "https://raw.githubusercontent.com/keylase/nvidia-patch/${NVIDIA_PATCH_VERSION:?}/patch-fbc.sh"
+
             chmod +x \
                 "${USER_HOME:?}/Downloads/nvidia-patch.${NVIDIA_PATCH_VERSION:?}.sh" \
                 "${USER_HOME:?}/Downloads/nvidia-patch-fbc.${NVIDIA_PATCH_VERSION:?}.sh"
