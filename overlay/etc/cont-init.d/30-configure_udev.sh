@@ -49,6 +49,10 @@ else
     # Disable supervisord script
     echo "**** Disable udev service ****";
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
+    if [ ! -d /run/udev/data ]; then
+        echo "**** Enable dumb-udev service ****";
+        sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/dumb-udev.ini
+    fi
 fi
 
 
