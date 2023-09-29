@@ -575,7 +575,7 @@ ENV \
     ENABLE_STEAM="true" \
     STEAM_ARGS="-silent" \
     ENABLE_SUNSHINE="true" \
-    ENABLE_EVDEV_INPUTS="false" \
+    ENABLE_EVDEV_INPUTS="true" \
     ENABLE_WOL_POWER_MANAGER="false"
 
 # Configure required ports
