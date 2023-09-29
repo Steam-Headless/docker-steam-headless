@@ -94,14 +94,6 @@ RUN \
             python3-setuptools \
             python3-venv \
     && \
-    echo "**** Install dumb-udev ****" \
-        && python3 -m pip install \
-            --break-system-packages \
-            --pre \
-            --upgrade \
-            --no-cache-dir \
-            git+https://github.com/Steam-Headless/dumb-udev.git@64d1427 \
-    && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
         && apt-get autoremove -y \
@@ -540,12 +532,21 @@ RUN \
 
 # Various other tools
 ARG DUMB_INIT_VERSION=1.2.5
+ARG DUMB_UDEV_VERSION=64d1427
 RUN \
     echo "**** Install dumb-init ****" \
         && wget --no-check-certificate --no-cookies --quiet \
             -O /usr/bin/dumb-init \
             https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_x86_64 \
         && chmod +x /usr/bin/dumb-init \
+    && \
+    echo "**** Install dumb-udev ****" \
+        && python3 -m pip install \
+            --break-system-packages \
+            --pre \
+            --upgrade \
+            --no-cache-dir \
+            git+https://github.com/Steam-Headless/dumb-udev.git@${DUMB_UDEV_VERSION} \
     && \
     echo
 
