@@ -100,7 +100,7 @@ RUN \
             --pre \
             --upgrade \
             --no-cache-dir \
-            git+https://github.com/Steam-Headless/dumb-udev.git@master
+            git+https://github.com/Steam-Headless/dumb-udev.git@64d1427 \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \
