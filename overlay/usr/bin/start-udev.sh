@@ -26,8 +26,8 @@ fi
 # Monitor kernel uevents
 udevadm monitor &
 monitor_pid=$!
-# Wait for 10 seconds, then request device events from the kernel
-sleep 10
+# Wait for 5 seconds, then request device events from the kernel
+sleep 5
 udevadm trigger
 
 # WAIT FOR CHILD PROCESS:

@@ -36,7 +36,6 @@ wait_for_udev() {
             exit 11
         fi
     done
-    sleep 5
 }
 
 # Wait for dockerd to start

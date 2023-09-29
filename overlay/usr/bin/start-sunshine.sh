@@ -19,15 +19,15 @@ _term() {
     while kill -0 "$sunshine_pid"; do
         kill -TERM "$sunshine_pid" 2>/dev/null
         counter=$((counter + 1))
-        [ "$counter" -gt 2 ] && break
-        sleep 2
+        [ "$counter" -gt 8 ] && break
+        sleep 0.5
     done
     counter=0
     while kill -0 "$sunshine_pid"; do
         kill -KILL "$sunshine_pid" 2>/dev/null
         counter=$((counter + 1))
-        [ "$counter" -gt 2 ] && break
-        sleep 1
+        [ "$counter" -gt 4 ] && break
+        sleep 0.5
     done
 }
 trap _term SIGTERM SIGINT

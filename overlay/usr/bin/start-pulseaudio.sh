@@ -19,7 +19,6 @@ trap _term SIGTERM SIGINT
 
 # EXECUTE PROCESS:
 echo "PULSEAUDIO: Starting pulseaudio service"
-sleep 5
 #/usr/bin/pulseaudio --disallow-module-loading --disallow-exit --exit-idle-time=-1 &
 /usr/bin/pulseaudio --exit-idle-time=-1 &
 pulseaudio_pid=$!

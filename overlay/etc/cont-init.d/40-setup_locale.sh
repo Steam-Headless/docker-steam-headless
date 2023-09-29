@@ -9,7 +9,7 @@ if [ "${current_local}" != "${USER_LOCALES}" ]; then
 	export LANGUAGE="${user_local}"
 	export LANG="${user_local}"
 	export LC_ALL="${user_local}" 2> /dev/null
-	sleep 2
+	sleep 0.5
 	locale-gen
 	update-locale LC_ALL="${user_local}"
 else
