@@ -14,8 +14,8 @@ services:
         hard: 524288
 
     # NETWORK:
-    ## NOTE:  If we do not use the host network, then physical device input is not possible
-    ##        and your USB connected controllers will not work in steam games.
+    ## NOTE:  With this configuration, if we do not use the host network, then physical device input
+    ##        is not possible and your USB connected controllers will not work in steam games.
     network_mode: host
     hostname: ${NAME}
     extra_hosts:
@@ -49,8 +49,3 @@ services:
       # Input devices used for mouse and joypad support inside the container.
       - /dev/input/:/dev/input/:ro
 
-      # Store flatpak var files in a volume.
-      - steam-headless-var-lib-flatpak:/var/lib/flatpak/:rw
-
-volumes:
-  steam-headless-var-lib-flatpak:

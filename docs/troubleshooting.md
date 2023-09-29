@@ -11,7 +11,7 @@ Once your Flatpak refresh is complete, everything should work correctly and your
 
 ## An error occurred while installing <game>: "disk write error"
 
-![img.png](../images/disk_write_error.png)
+![img.png](./images/disk_write_error.png)
 
 1) Stop the container
 2) Verify your mounted /mnt/games volume is owned by the executing UID/GID, and 777 permissions are set.
