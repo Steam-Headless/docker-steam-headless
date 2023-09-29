@@ -16,12 +16,6 @@ _term() {
 }
 trap _term SIGTERM SIGINT
 
-
-# CONFIGURE:
-# Remove lockfile
-rm -f /tmp/.started-udev
-
-
 # EXECUTE PROCESS:
 # Start udev
 if command -v udevd &>/dev/null; then
@@ -32,9 +26,6 @@ fi
 # Monitor kernel uevents
 udevadm monitor &
 monitor_pid=$!
-# Touch lockfile
-sleep 1
-touch /tmp/.started-udev
 # Wait for 10 seconds, then request device events from the kernel
 sleep 10
 udevadm trigger

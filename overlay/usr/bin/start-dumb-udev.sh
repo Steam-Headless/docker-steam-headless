@@ -17,18 +17,10 @@ _term() {
 trap _term SIGTERM SIGINT
 
 
-# CONFIGURE:
-# Remove lockfile
-rm -f /tmp/.started-udev
-
-
 # EXECUTE PROCESS:
 # Start dumb-udev
-dumb-udev
+dumb-udev &
 dumb_udev_pid=$!
-# Touch lockfile
-sleep 1
-touch /tmp/.started-udev
 
 # WAIT FOR CHILD PROCESS:
 wait "$dumb_udev_pid"

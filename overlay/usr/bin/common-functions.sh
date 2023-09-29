@@ -28,7 +28,7 @@ wait_for_x() {
 wait_for_udev() {
     MAX=10
     CT=0
-    while [ ! -f /tmp/.started-udev ]; do
+    while [ ! -e /run/udev/control ]; do
         sleep 1
         CT=$(( CT + 1 ))
         if [ "$CT" -ge "$MAX" ]; then
@@ -36,6 +36,7 @@ wait_for_udev() {
             exit 11
         fi
     done
+    sleep 5
 }
 
 # Wait for dockerd to start
