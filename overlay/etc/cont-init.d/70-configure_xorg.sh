@@ -84,7 +84,7 @@ function configure_x_server {
     chmod 1777 /tmp/.ICE-unix/
 
     # Check if this container is being run as a secondary instance
-    if [ "${MODE}" == "p" ] | [ "${MODE}" == "primary" ]; then
+    if ([ "${MODE}" = "p" ] || [ "${MODE}" = "primary" ]); then
         echo "Configure container as primary the X server"
         # Enable supervisord script
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/xorg.ini
@@ -108,7 +108,7 @@ function configure_x_server {
     fi
     
     # Configure dummy config if no monitor is connected (not applicable to NVIDIA)
-    if [[ "X${monitor_connected}" == "X" ]]; then
+    if ([ "X${monitor_connected}" = "X" ] || [ "${FORCE_X11_DUMMY_CONFIG}" = "true" ]); then 
         echo "No monitors connected. Installing dummy xorg.conf"
         # Use a dummy display input
         cp -fv /templates/xorg/xorg.dummy.conf /etc/X11/xorg.conf
