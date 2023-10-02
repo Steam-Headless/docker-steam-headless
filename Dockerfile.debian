@@ -144,43 +144,6 @@ RUN \
     && \
     echo
 
-# Install mesa and vulkan requirements
-# TODO: Strip this section back to only what is required for all GPU types.
-#       Anything only required for Intel/AMD/NVIDIA should go in the container init.
-RUN \
-    echo "**** Update apt database ****" \
-        && dpkg --add-architecture i386 \
-        && echo "deb http://deb.debian.org/debian/ sid main" > /etc/apt/sources.list \
-        && apt-get update \
-    && \
-    echo "**** Install mesa requirements ****" \
-        && apt-get install -y --no-install-recommends \
-            libgl1-mesa-dri \
-            libgl1-mesa-glx \
-            libgles2-mesa \
-            libglu1-mesa \
-            mesa-utils \
-            mesa-utils-extra \
-    && \
-    echo "**** Install vulkan requirements ****" \
-        && apt-get install -y --no-install-recommends \
-            libvulkan1 \
-            libvulkan1:i386 \
-            mesa-vulkan-drivers \
-            mesa-vulkan-drivers:i386 \
-            vulkan-tools \
-    && \
-    echo "**** Section cleanup ****" \
-        && rm -f /etc/apt/sources.list \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
-
 # Install X Server requirements
 # TODO: Refine this list of packages to only what is required.
 ENV \
@@ -239,7 +202,7 @@ RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install X Server requirements ****" \
+    echo "**** Install pulseaudio requirements ****" \
         && apt-get install -y --no-install-recommends \
             pulseaudio \
             alsa-utils \
@@ -516,11 +479,12 @@ RUN \
 # Install Steam
 RUN \
     echo "**** Update apt database ****" \
+        && dpkg --add-architecture i386 \
         && apt-get update \
     && \
     echo "**** Install Steam ****" \
         && apt-get install -y --no-install-recommends \
-            steam \
+            steam-installer \
         && ln -sf /usr/games/steam /usr/bin/steam \
     && \
     echo "**** Section cleanup ****" \
