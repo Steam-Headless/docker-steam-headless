@@ -102,7 +102,7 @@ function configure_x_server {
     # Enable KB/Mouse input capture with Xorg if configured
     if [ ${ENABLE_EVDEV_INPUTS:-} = "true" ]; then
         print_step_header "Enabling evdev input class on pointers, keyboards, touchpads, touch screens, etc."
-        cp -fv /usr/share/X11/xorg.conf.d/10-evdev.conf /etc/X11/xorg.conf.d/10-evdev.conf
+        cp -f /usr/share/X11/xorg.conf.d/10-evdev.conf /etc/X11/xorg.conf.d/10-evdev.conf
     else
         print_step_header "Leaving evdev inputs disabled"
     fi
@@ -111,7 +111,7 @@ function configure_x_server {
     if ([ "X${monitor_connected}" = "X" ] || [ "${FORCE_X11_DUMMY_CONFIG}" = "true" ]); then 
         print_step_header "No monitors connected. Installing dummy xorg.conf"
         # Use a dummy display input
-        cp -fv /templates/xorg/xorg.dummy.conf /etc/X11/xorg.conf
+        cp -f /templates/xorg/xorg.dummy.conf /etc/X11/xorg.conf
     fi
 }
 
