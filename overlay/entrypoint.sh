@@ -22,6 +22,26 @@ if [[ -f /version.txt ]]; then
     cat /version.txt
 fi
 
+function print_header {
+    # Magenta
+    echo -e "\e[35m**** ${@} ****\e[0m"
+}
+
+function print_step_header {
+    # Cyan
+    echo -e "\e[36m  - ${@}\e[0m"
+}
+
+function print_warning {
+    # Yellow
+    echo -e "\e[33mWARNING: ${@}\e[0m"
+}
+
+function print_error {
+    # Red
+    echo -e "\e[31mERROR: ${@}\e[0m"
+}
+
 # Execute all container init scripts
 for init_script in /etc/cont-init.d/*.sh ; do
     echo
@@ -59,9 +79,9 @@ touch /tmp/.first-run-user-init-scripts
 
 # Start supervisord
 echo
-echo "**** Starting supervisord ****";
-echo "Logging all root services to '/var/log/supervisor/'"
-echo "Logging all user services to '/home/${USER:?}/.cache/log/'"
+print_header "Starting supervisord";
+print_step_header "Logging all root services to '/var/log/supervisor/'"
+print_step_header "Logging all user services to '/home/${USER:?}/.cache/log/'"
 echo
 mkdir -p /var/log/supervisor
 chmod a+rw /var/log/supervisor

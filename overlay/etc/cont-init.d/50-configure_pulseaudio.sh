@@ -1,18 +1,19 @@
 
-echo "**** Configure pulseaudio ****"
+# Configure dbus
+print_header "Configure pulseaudio"
 
 # Always enable the pulseaudio service
-echo "Enable pulseaudio service."
+print_step_header "Enable pulseaudio service."
 sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/pulseaudio.ini
 
 if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
-    echo "Configure pulseaudio as simple dummy audio"
+    print_step_header "Configure pulseaudio as simple dummy audio"
     sed -i 's|^; autospawn.*$|autospawn = no|' /etc/pulse/client.conf
     sed -i 's|^; daemon-binary.*$|daemon-binary = /bin/true|' /etc/pulse/client.conf
 
     sed -i 's|^; flat-volumes.*$|flat-volumes = yes|' /etc/pulse/daemon.conf
 else
-    echo "Configure pulseaudio to pipe audio to a socket"
+    print_step_header "Configure pulseaudio to pipe audio to a socket"
 
     # Ensure pulseaudio directories have the correct permissions
     mkdir -p \
@@ -37,4 +38,4 @@ else
 fi
 chown -R ${USER} /etc/pulse
 
-echo "DONE"
+echo -e "\e[34mDONE\e[0m"

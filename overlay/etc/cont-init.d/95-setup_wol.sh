@@ -9,12 +9,12 @@
 # Modified By: Josh.5 (jsunnex@gmail.com)
 ###
 
-echo "**** Configure WoL Manager ****"
+print_header "Configure WoL Manager"
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
     if [ "${ENABLE_WOL_POWER_MANAGER:-}" = "true" ]; then
         if [ -f "/tmp/.wol-monitor" ]; then
-            echo "Container started in WoL Manager mode. Disabling all other services."
+            print_step_header "Container started in WoL Manager mode. Disabling all other services."
             for init_config in /etc/supervisor.d/*.ini ; do
                 init_config_basename=$(basename "${init_config:?}")
                 init_name="${init_config_basename%.*}"
@@ -23,12 +23,12 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
                 sed -i 's|^autostart.*=.*$|autostart=false|' "${init_config:?}"
             done
         fi
-        echo "Enable WoL Manager service."
+        print_step_header "Enable WoL Manager service."
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/wol-power-manager.ini
     else
-        echo "Disable WoL Manager service."
+        print_step_header "Disable WoL Manager service."
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/wol-power-manager.ini
     fi
 else
-    echo "WoL Manager service not available when container is run in 'secondary' mode."
+    print_step_header "WoL Manager service not available when container is run in 'secondary' mode."
 fi

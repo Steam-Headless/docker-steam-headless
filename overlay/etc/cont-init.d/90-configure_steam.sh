@@ -1,5 +1,5 @@
 
-echo "**** Configure Steam ****"
+print_header "Configure Steam"
 
 steam_autostart_desktop="$(cat <<EOF
 [Desktop Entry]
@@ -19,17 +19,17 @@ EOF
 
 if [ "${ENABLE_STEAM:-}" = "true" ]; then
     if [ "${MODE}" == "s" ] | [ "${MODE}" == "secondary" ]; then
-        echo "Enable Steam supervisor.d service"
+        print_step_header "Enable Steam supervisor.d service"
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/steam.ini
     else
-        echo "Enable Steam auto-start script"
+        print_step_header "Enable Steam auto-start script"
         mkdir -p "${USER_HOME:?}/.config/autostart"
         echo "${steam_autostart_desktop:?}" > "${USER_HOME:?}/.config/autostart/Steam.desktop"
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/steam.ini
     fi
 else
-    echo "Disable Steam service"
+    print_step_header "Disable Steam service"
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/steam.ini
 fi
 
-echo "DONE"
+echo -e "\e[34mDONE\e[0m"

@@ -14,18 +14,18 @@ PGID=${PGID:-100}
 UMASK=${UMASK:-000}
 USER_PASSWORD=${USER_PASSWORD:-password}
 
-echo "**** Configure default user ****"
+print_header "Configure default user"
 
-echo "Setting default user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
+print_step_header "Setting default user uid=${PUID}(${USER}) gid=${PGID}(${USER})"
 usermod -o -u "${PUID}" ${USER}
 groupmod -o -g "${PGID}" ${USER}
 
 
-echo "Adding default user to any additional required device groups"
+print_step_header "Adding default user to any additional required device groups"
 additional_groups=( video audio input pulse )
 for group_name in "${additional_groups[@]}"; do
     if [ $(getent group ${group_name:?}) ]; then
-        echo "Adding user '${USER}' to group: '${group_name}'"
+        print_step_header "Adding user '${USER}' to group: '${group_name}'"
         usermod -aG ${group_name:?} ${USER}
     fi
 done
@@ -54,20 +54,20 @@ for dev in "${device_nodes[@]}"; do
 
     # Add group to user
     if [[ "${added_groups}" != *"${dev_group}"* ]]; then
-        echo "Adding user '${USER}' to group: '${dev_group}' for device: ${dev}"
+        print_step_header "Adding user '${USER}' to group: '${dev_group}' for device: ${dev}"
         usermod -aG ${dev_group} ${USER}
         added_groups=" ${added_groups} ${dev_group} "
     fi
 done
 
 
-echo "Setting umask to ${UMASK}";
+print_step_header "Setting umask to ${UMASK}";
 umask ${UMASK}
 
 
 # TODO: Move this to its own 'display' init script. It does not really belong here
 # Configure the 'XDG_RUNTIME_DIR' path
-echo "Create the user XDG_RUNTIME_DIR path '${XDG_RUNTIME_DIR}'"
+print_step_header "Create the user XDG_RUNTIME_DIR path '${XDG_RUNTIME_DIR}'"
 mkdir -p ${XDG_RUNTIME_DIR}
 # Ensure it is owned by the 'default' user
 chown -R ${PUID}:${PGID} ${XDG_RUNTIME_DIR}
@@ -80,19 +80,19 @@ chmod a+r /etc/alternatives/desktop-background
 
 
 # Setup services log path
-echo "Setting ownership of all log files in '${USER_HOME}/.cache/log'"
+print_step_header "Setting ownership of all log files in '${USER_HOME}/.cache/log'"
 mkdir -p "${USER_HOME}/.cache/log"
 chown -R ${PUID}:${PGID} "${USER_HOME}/.cache/log"
 
 
 # Set the root and user password
-echo "Setting root password"
+print_step_header "Setting root password"
 echo "root:${USER_PASSWORD}" | chpasswd
-echo "Setting user password"
+print_step_header "Setting user password"
 echo "${USER}:${USER_PASSWORD}" | chpasswd
 
 # Set root XDG_RUNTIME_DIR path
 mkdir -p /tmp/runtime-root
 chown root:root /tmp/runtime-root
 
-echo "DONE"
+echo -e "\e[34mDONE\e[0m"

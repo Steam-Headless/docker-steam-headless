@@ -1,14 +1,14 @@
 
 # Configure dbus
-echo "**** Configure container dbus ****";
+print_header "Configure container dbus"
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
     if [[ "${HOST_DBUS}" == "true" ]]; then
-        echo "Container configured to use the host dbus";
+        print_step_header "Container configured to use the host dbus";
         # Disable supervisord script
         sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/dbus.ini
     else
-        echo "Container configured to run its own dbus";
+        print_step_header "Container configured to run its own dbus";
         # Enable supervisord script
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/dbus.ini
         # Configure dbus to run as USER
@@ -25,8 +25,8 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         find /var/run/dbus -name "pid" -exec rm -f {} \;
     fi
 else
-    echo "Dbus service not available when container is run in 'secondary' mode."
+    print_step_header "Dbus service not available when container is run in 'secondary' mode."
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/dbus.ini
 fi
 
-echo "DONE"
+echo -e "\e[34mDONE\e[0m"

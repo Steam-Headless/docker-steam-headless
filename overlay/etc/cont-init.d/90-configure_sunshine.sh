@@ -1,15 +1,15 @@
 
-echo "**** Configure Sunshine ****"
+print_header "Configure Sunshine"
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
     if [ "${ENABLE_SUNSHINE:-}" = "true" ]; then
-        echo "Enable Sunshine server"
+        print_step_header "Enable Sunshine server"
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/sunshine.ini
     else
-        echo "Disable Sunshine server"
+        print_step_header "Disable Sunshine server"
     fi
 else
-    echo "Sunshine server not available when container is run in 'secondary' mode"
+    print_step_header "Sunshine server not available when container is run in 'secondary' mode"
 fi
 
-echo "DONE"
+echo -e "\e[34mDONE\e[0m"

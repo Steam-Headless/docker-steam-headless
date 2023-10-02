@@ -1,10 +1,10 @@
 
-echo "**** Configure Neko ****"
+print_header "Configure Neko"
 # REF: https://neko.m1k1o.net/#/getting-started/configuration
 
 if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
     if [ ${WEB_UI_MODE} = "neko" ]; then
-        echo "Enable Neko server"
+        print_step_header "Enable Neko server"
         sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/neko.ini
 
         # Make directories for neko
@@ -15,9 +15,9 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
         # Configure nat1to1 if it is not already set
         if [[ -z ${NEKO_NAT1TO1} ]]; then
             export NEKO_NAT1TO1=$(ip route get 1 | awk '{print $(NF-2);exit}')
-            echo "Setting NEKO_NAT1TO1=${NEKO_NAT1TO1}"
+            print_step_header "Setting NEKO_NAT1TO1=${NEKO_NAT1TO1}"
         else
-            echo "User provided setting NEKO_NAT1TO1=${NEKO_NAT1TO1}"
+            print_step_header "User provided setting NEKO_NAT1TO1=${NEKO_NAT1TO1}"
         fi
 
         # Configure hardware acceleration if it is not already set
@@ -39,10 +39,10 @@ if ([ "${MODE}" != "s" ] && [ "${MODE}" != "secondary" ]); then
             export NEKO_SCREEN="${DISPLAY_SIZEW}x${DISPLAY_SIZEH}@${DISPLAY_REFRESH}"
         fi
     else
-        echo "Disable Neko server"
+        print_step_header "Disable Neko server"
     fi
 else
-    echo "Neko server not available when container is run in 'secondary' mode"
+    print_step_header "Neko server not available when container is run in 'secondary' mode"
 fi
 
-echo "DONE"
+echo -e "\e[34mDONE\e[0m"
