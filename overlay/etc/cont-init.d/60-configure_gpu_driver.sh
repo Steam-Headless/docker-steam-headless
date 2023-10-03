@@ -157,6 +157,7 @@ function install_deb_mesa {
             mesa-utils \
             mesa-utils-extra \
             vulkan-tools \
+            libva2 \
             &>> /tmp/init-mesa-libs-install.log
     else
         print_step_header "Mesa has already been installed into this container"
