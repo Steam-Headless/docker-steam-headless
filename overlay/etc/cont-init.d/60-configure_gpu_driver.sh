@@ -172,6 +172,7 @@ function install_amd_gpu_driver {
             lib32-vulkan-radeon \
             vulkan-icd-loader \
             vulkan-radeon \
+            vdpau-driver-all \
             libva-mesa-driver
     elif command -v apt-get &> /dev/null; then
         install_deb_mesa
