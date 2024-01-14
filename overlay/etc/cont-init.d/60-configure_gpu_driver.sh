@@ -157,6 +157,7 @@ function install_deb_mesa {
             mesa-utils \
             mesa-utils-extra \
             vulkan-tools \
+            libva2 \
             &>> /tmp/init-mesa-libs-install.log
     else
         print_step_header "Mesa has already been installed into this container"
@@ -170,7 +171,8 @@ function install_amd_gpu_driver {
             lib32-vulkan-icd-loader \
             lib32-vulkan-radeon \
             vulkan-icd-loader \
-            vulkan-radeon
+            vulkan-radeon \
+            libva-mesa-driver
     elif command -v apt-get &> /dev/null; then
         install_deb_mesa
     fi
@@ -183,7 +185,9 @@ function install_intel_gpu_driver {
             lib32-vulkan-icd-loader \
             lib32-vulkan-intel \
             vulkan-icd-loader \
-            vulkan-intel
+            vulkan-intel \
+            intel-media-va-driver-non-free \
+            i965-va-driver-shaders
     elif command -v apt-get &> /dev/null; then
         install_deb_mesa
     fi

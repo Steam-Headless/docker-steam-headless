@@ -410,25 +410,25 @@ RUN \
     echo
 
 # Setup video streaming deps
-RUN \
-    echo "**** Update apt database ****" \
-        && apt-get update \
-    && \
-    echo "**** Install Intel media drivers and VAAPI ****" \
-        && apt-get install -y --no-install-recommends \
-            intel-media-va-driver-non-free \
-            i965-va-driver-shaders \
-            libva2 \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
+#RUN \
+#    echo "**** Update apt database ****" \
+#        && apt-get update \
+#    && \
+#    echo "**** Install Intel media drivers and VAAPI ****" \
+#        && apt-get install -y --no-install-recommends \
+#            intel-media-va-driver-non-free \
+#            i965-va-driver-shaders \
+#            libva2 \
+#    && \
+#    echo "**** Section cleanup ****" \
+#        && apt-get clean autoclean -y \
+#        && apt-get autoremove -y \
+#        && rm -rf \
+#            /var/lib/apt/lists/* \
+#            /var/tmp/* \
+#            /tmp/* \
+#    && \
+#    echo
 
 # Install tools for monitoring hardware
 RUN \
@@ -453,7 +453,7 @@ RUN \
     echo
 
 # Install Sunshine
-COPY --from=lizardbyte/sunshine:1303def-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
+COPY --from=lizardbyte/sunshine:v0.21.0-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
