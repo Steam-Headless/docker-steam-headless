@@ -51,6 +51,10 @@ function install_nvidia_driver {
         # Download the driver (if it does not yet exist locally)
         download_driver
 
+        if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) >= 550)); then
+            sed -i 's/--no-multigpu//g' /etc/cont-init.d/70-configure_xorg.sh
+        fi
+
         if (($(echo $nvidia_host_driver_version | cut -d '.' -f 1) > 500)); then
             print_step_header "Installing NVIDIA driver v${nvidia_host_driver_version:?} to match what is running on the host"
             chmod +x "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
