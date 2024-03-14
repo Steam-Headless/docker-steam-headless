@@ -11,10 +11,18 @@ Follow these instructions to install Steam Headless on Ubuntu Server.
 
 ## INSTALL DOCKER:
 
-Install docker-ce to your Ubuntu server following the [official instrctions](https://docs.docker.com/engine/install/ubuntu/).
+Install docker-ce to your Ubuntu server following the [official instructions](https://docs.docker.com/engine/install/ubuntu/).
 
 Ensure you install the `docker-compose-plugin` mentioned within these instructions
 
+
+## INSTALL NVIDIA CONTAINER TOOLKIT
+
+The easiest way to get running with NVIDIA GPUs is to install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-container-toolkit?tab=readme-ov-file).
+
+Follow the [official instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-apt) for installing the container toolkit to your Ubuntu server with apt.
+
+If you do this, ensure that when you configure Docker Compose in the next step you choose the `nvidia` runtime.
 
 ## CONFIGURE DOCKER COMPOSE:
 
