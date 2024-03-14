@@ -48,7 +48,7 @@ function configure_nvidia_x_server {
     # Prevent interference between GPUs
     echo -e "Section \"ServerFlags\"\n    Option \"AutoAddGPU\" \"false\"\nEndSection" | tee -a /etc/X11/xorg.conf > /dev/null
     # Configure primary GPU
-    sed -i '/Driver\s\+"nvidia"/a\    Option "AllowEmptyInitialConfiguration"\n    Option "PrimaryGPU" "yes"' /usr/share/X11/xorg.conf.d/nvidia-drm-outputclass.conf 
+    sed -i '/Driver\s\+"nvidia"/a\    Option "AllowEmptyInitialConfiguration"\n    Option "AllowExternalGpus" "true"\n    Option "PrimaryGPU" "yes"' /usr/share/X11/xorg.conf.d/nvidia-drm-outputclass.conf 
 }
 
 # Allow anybody for running x server
