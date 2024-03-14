@@ -26,17 +26,46 @@ services:
     
     # ENVIRONMENT:
     ## Read all config variables from the .env file
-    env_file: .env
+    environment:
+      # System
+      - TZ=${TZ}
+      - USER_LOCALES=${USER_LOCALES}
+      - DISPLAY=${DISPLAY}
+      # User
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - USER_PASSWORD=${USER_PASSWORD}
+      # Mode
+      - MODE=${MODE}
+      # Web UI
+      - WEB_UI_MODE=${WEB_UI_MODE}
+      - ENABLE_VNC_AUDIO=${ENABLE_VNC_AUDIO}
+      - PORT_NOVNC_WEB=${PORT_NOVNC_WEB}
+      - NEKO_NAT1TO1=${NEKO_NAT1TO1}
+      # Steam
+      - ENABLE_STEAM=${ENABLE_STEAM}
+      - STEAM_ARGS=${STEAM_ARGS}
+      # Sunshine
+      - ENABLE_SUNSHINE=${ENABLE_SUNSHINE}
+      - SUNSHINE_USER=${SUNSHINE_USER}
+      - SUNSHINE_PASS=${SUNSHINE_PASS}
+      # Xorg
+      - ENABLE_EVDEV_INPUTS=${ENABLE_EVDEV_INPUTS}
+      # Nvidia specific config
+      - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES}
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES}
+      - NVIDIA_DRIVER_VERSION=${NVIDIA_DRIVER_VERSION}
 
     # DEVICES:
     devices:
-      # Use the host fuse device.
+      # Use the host fuse device [REQUIRED].
       - /dev/fuse
-      # Add the host uinput device.
+      # Add the host uinput device [REQUIRED].
       - /dev/uinput
-      # Add AMD/Intel HW accelerated video encoding/decoding devices (optional)
+      # Add AMD/Intel HW accelerated video encoding/decoding devices [OPTIONAL].
       #- /dev/dri
-      # Add NVIDIA HW accelerated devices (optional - must be run with runc docker runtime. If you use the nvidia runtime, this is not needed)
+      # Add NVIDIA HW accelerated devices [OPTIONAL - must be run with runc docker runtime. If you use the nvidia runtime, this is not needed].
       #- /dev/nvidia0
       #- /dev/nvidiactl
       #- /dev/nvidia-modeset
@@ -51,12 +80,12 @@ services:
     # VOLUMES:
     volumes:
       # The location of your home directory.
-      - /opt/container-data/steam-headless/home/:/home/default/:rw
+      - ${HOME_DIR}/:/home/default/:rw
 
       # The location where all games should be installed.
       # This path needs to be set as a library path in Steam after logging in.
       # Otherwise, Steam will store games in the home directory above.
-      - /mnt/games/:/mnt/games/:rw
+      - ${GAMES_DIR}/:/mnt/games/:rw
 
       # The Xorg socket. This will be shared with other containers so they can access the X server.
       # Select only one option or leave commented out to not share the Xorg socket with any other Docker containers.
@@ -68,5 +97,3 @@ services:
       # Pulse audio socket. This will be shared with other containers so they can access the audio sink.
       # Leave commented out to not share the pulse socket with any other Docker containers.
       #- /opt/container-data/steam-headless/pulse/:/tmp/pulse/:rw
-
-
