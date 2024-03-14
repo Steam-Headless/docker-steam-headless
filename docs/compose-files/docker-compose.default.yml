@@ -1,9 +1,10 @@
 ---
+version: "3.9"
+
 services:
   steam-headless:
     image: josh5/steam-headless:latest
     restart: unless-stopped
-    runtime: ${DOCKER_RUNTIME}
     shm_size: ${SHM_SIZE}
     ipc: host # Could also be set to 'shareable'
     ulimits:
@@ -17,6 +18,17 @@ services:
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined
+
+    # GPU PASSTHROUGH
+    deploy:
+      resources:
+        reservations:
+          # Enable support for NVIDIA GPUs.
+          # 
+          # Ref: https://docs.docker.com/compose/gpu-support/#enabling-gpu-access-to-service-containers
+          devices:
+            - capabilities: [gpu]
+              device_ids: ["${NVIDIA_VISIBLE_DEVICES}"]
 
     # NETWORK:
     network_mode: host
@@ -65,7 +77,7 @@ services:
       - /dev/uinput
       # Add AMD/Intel HW accelerated video encoding/decoding devices [OPTIONAL].
       #- /dev/dri
-      # Add NVIDIA HW accelerated devices [OPTIONAL - must be run with runc docker runtime. If you use the nvidia runtime, this is not needed].
+      # Add NVIDIA HW accelerated devices [OPTIONAL - If you use the nvidia container toolkit, this is not needed].
       #- /dev/nvidia0
       #- /dev/nvidiactl
       #- /dev/nvidia-modeset
