@@ -36,6 +36,14 @@ services:
       - /dev/uinput
       # Add AMD/Intel HW accelerated video encoding/decoding devices (optional)
       #- /dev/dri
+      # Add NVIDIA HW accelerated devices (optional - must be run with runc docker runtime. If you use the nvidia runtime, this is not needed)
+      #- /dev/nvidia0
+      #- /dev/nvidiactl
+      #- /dev/nvidia-modeset
+      #- /dev/nvidia-uvm
+      #- /dev/nvidia-uvm-tools
+      #- /dev/nvidia-caps/nvidia-cap1
+      #- /dev/nvidia-caps/nvidia-cap2
     # Ensure container access to devices 13:*
     device_cgroup_rules:
       - 'c 13:* rmw'

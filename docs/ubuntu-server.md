@@ -24,6 +24,9 @@ Follow the [official instructions](https://docs.nvidia.com/datacenter/cloud-nati
 
 If you do this, ensure that when you configure Docker Compose in the next step you choose the `nvidia` runtime.
 
+Alternately, it is possible to run the container without the NVIDIA runtime by uncommenting the `/dev/nvidia` devices in the Compose file.
+
+
 ## CONFIGURE DOCKER COMPOSE:
 
 Once you have installed docker, follow the [Compose Files](./docker-compose.md) section and select the right configuration file for your hardware.
