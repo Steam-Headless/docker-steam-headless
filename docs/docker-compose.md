@@ -55,6 +55,6 @@ cd /opt/container-services/steam-headless
 sudo docker-compose up -d --force-recreate
 ```
 
-After container executes successfully, navigate to your docker host URL in your browser on port 8083 and click connect.
-`http://<host-ip>:8083/`
+After container executes successfully, navigate to your docker host URL in your browser on port 58083 and click connect.
+`http://<host-ip>:58083/`
 ![img.png](./images/web_connect.png)
