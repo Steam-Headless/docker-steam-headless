@@ -60,6 +60,7 @@ RUN \
     && \
     echo "**** Install tools ****" \
         && apt-get install -y --no-install-recommends \
+            apt-transport-https \
             bash \
             bash-completion \
             curl \
