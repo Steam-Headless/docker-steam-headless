@@ -1,0 +1,76 @@
+---
+version: "3.8"
+
+services:
+  steam-headless:
+    image: josh5/steam-headless:latest
+    restart: unless-stopped
+    ## NOTE: This config uses privileged to access to host to be able to access the required devices
+    privileged: true
+    shm_size: ${SHM_SIZE}
+    ipc: host # Could also be set to 'shareable'
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 524288
+
+    # NETWORK:
+    ## NOTE:  With this configuration, if we do not use the host network, then physical device input
+    ##        is not possible and your USB connected controllers will not work in steam games.
+    network_mode: host
+    hostname: ${NAME}
+    extra_hosts:
+      - "${NAME}:127.0.0.1"
+    
+    # ENVIRONMENT:
+    ## Read all config variables from the .env file
+    environment:
+      # System
+      - TZ=${TZ}
+      - USER_LOCALES=${USER_LOCALES}
+      - DISPLAY=${DISPLAY}
+      # User
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - USER_PASSWORD=${USER_PASSWORD}
+      # Mode
+      - MODE=${MODE}
+      # Web UI
+      - WEB_UI_MODE=${WEB_UI_MODE}
+      - ENABLE_VNC_AUDIO=${ENABLE_VNC_AUDIO}
+      - PORT_NOVNC_WEB=${PORT_NOVNC_WEB}
+      - NEKO_NAT1TO1=${NEKO_NAT1TO1}
+      # Steam
+      - ENABLE_STEAM=${ENABLE_STEAM}
+      - STEAM_ARGS=${STEAM_ARGS}
+      # Sunshine
+      - ENABLE_SUNSHINE=${ENABLE_SUNSHINE}
+      - SUNSHINE_USER=${SUNSHINE_USER}
+      - SUNSHINE_PASS=${SUNSHINE_PASS}
+      # Xorg
+      - ENABLE_EVDEV_INPUTS=${ENABLE_EVDEV_INPUTS}
+      - FORCE_X11_DUMMY_CONFIG=${FORCE_X11_DUMMY_CONFIG}
+      # Nvidia specific config
+      - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES}
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES}
+      - NVIDIA_DRIVER_VERSION=${NVIDIA_DRIVER_VERSION}
+
+    # VOLUMES:
+    volumes:
+      # The location of your home directory.
+      - ${HOME_DIR}/:/home/default/:rw
+
+      # The location where all games should be installed.
+      # This path needs to be set as a library path in Steam after logging in.
+      # Otherwise, Steam will store games in the home directory above.
+      - ${GAMES_DIR}/:/mnt/games/:rw
+
+      # The Xorg socket.
+      - ${SHARED_SOCKETS_DIR}/.X11-unix/:/tmp/.X11-unix/:rw
+
+      # Pulse audio socket.
+      - ${SHARED_SOCKETS_DIR}/pulse/:/tmp/pulse/:rw
+
+      # Input devices used for mouse and joypad support inside the container.
+      - /dev/input/:/dev/input/:ro
