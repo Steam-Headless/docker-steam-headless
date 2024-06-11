@@ -35,6 +35,7 @@ RUN \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
@@ -49,6 +50,8 @@ RUN \
             docbook-xml \
             docbook-xsl \
             fakeroot \
+            p7zip \
+            patch \
             git \
             jq \
             less \
@@ -67,6 +70,7 @@ RUN \
             unzip \
             vim \
             wget \
+            xmlstarlet \
             xz \
     && \
     echo "**** Install python ****" \
@@ -79,6 +83,7 @@ RUN \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
@@ -111,9 +116,10 @@ RUN \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /home/default/.cache/yay \
         && rm -fr /var/lib/pacman/sync/* \
-        && rm -rf \
-            /tmp/yay* \
+        && rm -fr /var/cache/pacman/pkg/* \
+        && rm -rf /tmp/yay* \
     && \
     echo
 
@@ -126,51 +132,37 @@ RUN \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
-# XFS requirements
+# Install mscorefonts
 RUN \
-    echo "**** Install XFS requirements ****" \
-	    && pacman -Syu --noconfirm --needed \
-            xfsdump \
-            xfsprogs \
+    echo "**** Install ms fonts ****" \
+        && su - default -c "yay -Syu --noconfirm --needed ttf-msfonts" \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
+        && rm -fr /home/default/.cache/yay \
         && rm -fr /var/lib/pacman/sync/* \
-    && \
-    echo
-
-# Install mesa requirements
-RUN \
-    echo "**** Install mesa and vulkan requirements ****" \
-	    && pacman -Syu --noconfirm --needed \
-            glu \
-            libva-mesa-driver \
-            mesa-utils \
-            mesa-vdpau \
-            pciutils \
-            vulkan-mesa-layers \
-            vdpauinfo \
-    && \
-    echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
-        && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
+        && rm -rf /tmp/yay* \
     && \
     echo
 
 # Install X Server requirements
 ENV \
     XORG_SOCKET_DIR="/tmp/.X11-unix" \
-    XDG_RUNTIME_DIR="/tmp/.X11-unix/run"
+    XDG_RUNTIME_DIR="/tmp/.X11-unix/run" \
+    XDG_SESSION_TYPE="x11" \
+    FORCE_X11_DUMMY_CONFIG="false"
 RUN \
     echo "**** Install X Server requirements ****" \
 	    && pacman -Syu --noconfirm --needed \
             avahi \
             dbus \
             lib32-fontconfig \
-            ttf-liberation \
+            fuse2 \
             x11vnc \
             xorg \
             xorg-apps \
@@ -190,11 +182,14 @@ RUN \
             xorg-xrandr \
             xorg-xsetroot \
             xorg-xwininfo \
+            xf86-input-evdev \
             xterm \
+            gamescope \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
@@ -213,6 +208,7 @@ RUN \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
@@ -226,110 +222,75 @@ RUN \
             xfce4-goodies \
             xfce4-terminal \
             ttf-liberation \
-        # Delete these as they are not needed at all
-        && rm -f \
-            /usr/share/applications/software-properties-drivers.desktop \
-            /usr/share/applications/xfce4-about.desktop \
-            /usr/share/applications/xfce4-session-logout.desktop \
-        # Hide these apps. They can be displayed if a user really wants them.
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-accessibility-settings.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-color-settings.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xfce4-mail-reader.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/vim.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar-settings.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/thunar.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/pavucontrol.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/x11vnc.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/xterm.desktop \
-        && sed -i '/[Desktop Entry]/a\NoDisplay=true' /usr/share/applications/uxterm.desktop \
-        # Force these apps to be "System" Apps rather than "Categories=System;Utility;Core;GTK;Filesystem;"
-        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/xfce4-appfinder.desktop \
-        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/thunar-bulk-rename.desktop \
-        && sed -i 's/^Categories=.*$/Categories=System;/' /usr/share/applications/org.gnome.gedit.desktop \
+            xdg-user-dirs \
+            xdg-utils \
+            imagemagick \
+    && \
+    echo "**** Install WoL Manager requirements ****" \
+            && pacman -Syu --noconfirm --needed \
+            tcpdump \
+            xprintidle \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
-# TODO: Add support for flatpaks
-# Note: Debian Bullseye had bubblewrap v0.4.1 which worked fine in the Nvidia docker runtime
-#   At the moment this is only working beacuse /proc is being mounted again in 10-setup_user.sh
-#   Need to find a better solution for this...
-ARG BUBBLEWRAP_VERSION=0.8.0
+# Add support for flatpaks
 ENV \
     XDG_DATA_DIRS="/home/default/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/"
 RUN \
     echo "**** Install flatpak support ****" \
 	    && pacman -Syu --noconfirm --needed \
             flatpak \
-            gnome-software \
             xdg-desktop-portal-gtk \
+            gnome-software \
     && \
-    #echo "**** Build and install custom bubblewrap ****" \
-    #    && cd /tmp \
-    #    && wget -O /tmp/bubblewrap-${BUBBLEWRAP_VERSION:?}.tar.xz https://github.com/containers/bubblewrap/releases/download/v${BUBBLEWRAP_VERSION:?}/bubblewrap-${BUBBLEWRAP_VERSION:?}.tar.xz \
-    #    && tar -xvf /tmp/bubblewrap-${BUBBLEWRAP_VERSION:?}.tar.xz \
-    #    && cd /tmp/bubblewrap-${BUBBLEWRAP_VERSION:?} \
-    #    && sed -i 's|die ("Unexpected capabilities but not setuid, old file caps config?");|printf ("Unexpected capabilities but not setuid, old file caps config?");|' ./bubblewrap.c \
-    #    && ./autogen.sh \
-    #    && make clean \
-    #    && make \
-    #    && make install
-    #&& \
     echo "**** Configure flatpak ****" \
         && chmod u-s /usr/bin/bwrap \
         && flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo \
+        && su - default -c "flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo" \
     && \
     echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
+	&& pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
-# Install noVNC
-# TODO: Add nginx or remove the whole proxy setup and just connect directly for audio (I think that is the better option)
-ARG NOVNC_VERSION=1.2.0
+# TODO: Deprecate neko
+# Install Neko server
+COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
+COPY --from=m1k1o/neko:base /var/www /var/www
+
+# Install Web Frontend
+ARG FRONTEND_VERSION=a8eb92f
 RUN \
-    echo "**** Fetch noVNC ****" \
-        && cd /tmp \
-        && wget -O /tmp/novnc.tar.gz https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz \
-    && \
-    echo "**** Extract noVNC ****" \
-        && cd /tmp \
-        && tar -xvf /tmp/novnc.tar.gz \
-    && \
-    echo "**** Configure noVNC ****" \
-        && cd /tmp/noVNC-${NOVNC_VERSION} \
-        && sed -i 's/credentials: { password: password } });/credentials: { password: password },\n                           wsProtocols: ["'"binary"'"] });/g' app/ui.js \
+    echo "**** Fetch Web Frontend ****" \
         && mkdir -p /opt \
-        && rm -rf /opt/noVNC \
         && cd /opt \
-        && mv -f /tmp/noVNC-${NOVNC_VERSION} /opt/noVNC \
-        && cd /opt/noVNC \
-        && ln -s vnc.html index.html \
-        && chmod -R 755 /opt/noVNC \
+        && rm -rf /opt/frontend \
+        && git clone https://github.com/Steam-Headless/frontend.git --branch master /opt/frontend \
+        && cd /opt/frontend \
+        && git checkout ${FRONTEND_VERSION} 2> /dev/null \
+        && git submodule init \
+        && git submodule update --depth 1 --recursive \
+        && rm -rf /opt/frontend/.git \
     && \
-    echo "**** Modify noVNC title ****" \
-        && sed -i '/    document.title =/c\    document.title = "Steam Headless - noVNC";' \
-            /opt/noVNC/app/ui.js \
-    && \
-    echo "**** Install nginx support ****" \
-	    && pacman -Syu --noconfirm --needed \
-            nginx \
+    echo "**** Configure Web Frontend ****" \
+        && echo '<!DOCTYPE html>' > /opt/frontend/index.html \
+        && echo '<html><head><meta http-equiv="refresh" content="0;url=./web/"></head><body><p>If you are not redirected, <a href="./web/">click here</a>.</p></body></html>' >> /opt/frontend/index.html \
+        && chmod -R 755 /opt/frontend \
+        && convert /opt/frontend/web/images/icons/novnc-ios-180.png -resize "128x128" /tmp/steam-headless.png \
+        && xdg-icon-resource install --novendor --size 128 /tmp/steam-headless.png \
     && \
     echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
-        && rm -fr /var/lib/pacman/sync/* \
-        && rm -rf \
-            /tmp/noVNC* \
-            /tmp/novnc.tar.gz \
-    && \
-    echo
+        && rm -f /tmp/steam-headless.png
 
 # Install Websockify
-ARG WEBSOCKETIFY_VERSION=0.10.0
+ARG WEBSOCKETIFY_VERSION=0.11.0
 RUN \
     echo "**** Fetch Websockify ****" \
         && cd /tmp \
@@ -345,6 +306,7 @@ RUN \
     && \
     echo "**** Install Websockify to noVNC path ****" \
         && cd /tmp \
+        && mkdir -p /opt/noVNC/utils \
         && mv -v /tmp/websockify-${WEBSOCKETIFY_VERSION} /opt/noVNC/utils/websockify \
     && \
     echo "**** Section cleanup ****" \
@@ -365,51 +327,148 @@ RUN \
             gst-plugins-good \
             gst-plugins-ugly \
     && \
-    echo "**** Fetch ucspi-tcp ****" \
-        && mkdir -p /tmp/ucspi-tcp-0.88 \
-        && cd /tmp \
-        #&& wget -O /tmp/ucspi-tcp.tar.gz https://github.com/trafficgate/ucspi-tcp/archive/refs/heads/master.tar.gz \
-        && wget -O /tmp/ucspi-tcp.tar.gz http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz \
-        && cd /tmp/ucspi-tcp-0.88 \
-        && tar -xvf /tmp/ucspi-tcp.tar.gz --strip-components=1 \
+    #echo "**** Fetch ucspi-tcp ****" \
+    #    && mkdir -p /tmp/ucspi-tcp-0.88 \
+    #    && cd /tmp \
+    #    #&& wget -O /tmp/ucspi-tcp.tar.gz https://github.com/trafficgate/ucspi-tcp/archive/refs/heads/master.tar.gz \
+    #    && wget -O /tmp/ucspi-tcp.tar.gz http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz \
+    #    && cd /tmp/ucspi-tcp-0.88 \
+    #    && tar -xvf /tmp/ucspi-tcp.tar.gz --strip-components=1 \
+    #&& \
+    #echo "**** Build and install ucspi-tcp ****" \
+    #    && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.errno.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.errno.patch \
+    #    && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.a_record.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.a_record.patch \
+    #    && patch -p1 --input=ucspi-tcp-0.88.errno.patch \
+    #    && patch -p1 --input=ucspi-tcp-0.88.a_record.patch \
+    #    && sed -i 's|^/usr/local|/usr|' /tmp/ucspi-tcp-0.88/conf-home \
+    #    && make \
+#	    && for f in tcpserver tcprules tcprulescheck argv0 recordio tcpclient *\@ tcpcat mconnect mconnect-io addcr delcr fixcrio rblsmtpd; do \
+    #        cp $f /usr/bin/$f; \
+    #    done \
+    #&& \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
-    echo "**** Build and install ucspi-tcp ****" \
-        && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.errno.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.errno.patch \
-        && wget -O /tmp/ucspi-tcp-0.88/ucspi-tcp-0.88.a_record.patch https://git.alpinelinux.org/aports/plain/testing/ucspi-tcp/ucspi-tcp-0.88.a_record.patch \
-        && patch -p1 --input=ucspi-tcp-0.88.errno.patch \
-        && patch -p1 --input=ucspi-tcp-0.88.a_record.patch \
-        && sed -i 's|^/usr/local|/usr|' /tmp/ucspi-tcp-0.88/conf-home \
-        && make \
-	    && for f in tcpserver tcprules tcprulescheck argv0 recordio tcpclient *\@ tcpcat mconnect mconnect-io addcr delcr fixcrio rblsmtpd; do \
-            cp $f /usr/bin/$f; \
-        done \
+    echo
+
+# Setup video streaming deps
+RUN \
+    echo "**** Install video streaming deps ****" \
+        && pacman -Syu --noconfirm --needed \
+            libva \
+            libva-mesa-driver \
+            libva-intel-driver \
+            libva-vdpau-driver \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
-        && rm -rf \
-            /tmp/ucspi-tcp-* \
+        && rm -fr /var/cache/pacman/pkg/* \
+    && \
+    echo
+
+# Install tools for monitoring hardware
+RUN \
+    echo "**** Install audio streaming deps ****" \
+        && pacman -Syu --noconfirm --needed \
+            #cpu-x \
+            htop \
+            libva-utils \
+            vdpauinfo \
+    && \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
+    && \
+    echo
+
+# Install Sunshine
+RUN \
+    echo "**** Install stable sunshine ****" \
+        && su - default -c "yay -Syu --noconfirm --needed miniupnpc sunshine-bin" \
+        && setcap cap_sys_admin+p $(readlink -f $(which sunshine)) \
+    && \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /home/default/.cache/yay \
+        && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
+        && rm -rf /tmp/yay* \
+    && \
+    echo
+
+# Install Firefox
+RUN \
+    echo "**** Install Firefox ****" \
+	    && pacman -Syu --noconfirm --needed \
+            firefox \
+    && \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
     && \
     echo
 
 # Install Steam
 RUN \
-    echo "**** Install X Server requirements ****" \
+    echo "**** Install Steam ****" \
 	    && pacman -Syu --noconfirm --needed \
             steam \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
         && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
+    && \
+    echo
+
+# Various other tools
+ARG DUMB_INIT_VERSION=1.2.5
+ARG DUMB_UDEV_VERSION=64d1427
+RUN \
+    echo "**** Install dumb-init ****" \
+        && wget --no-check-certificate --no-cookies --quiet \
+            -O /usr/bin/dumb-init \
+            https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_x86_64 \
+        && chmod +x /usr/bin/dumb-init \
+    && \
+    echo "**** Install dumb-udev ****" \
+        && python3 -m pip install \
+            --break-system-packages \
+            --pre \
+            --upgrade \
+            --no-cache-dir \
+            git+https://github.com/Steam-Headless/dumb-udev.git@${DUMB_UDEV_VERSION} \
+    && \
+    echo
+
+# Install Protonup replacement
+RUN \
+    echo "**** Install PorotonUP ****" \
+        && su - default -c "yay -Sy --noconfirm --needed --overwrite \"/usr/bin/normalizer\" protonup-qt" \
+    && \
+    echo "**** Section cleanup ****" \
+	    && pacman -Scc --noconfirm \
+        && rm -fr /home/default/.cache/yay \
+        && rm -fr /var/lib/pacman/sync/* \
+        && rm -fr /var/cache/pacman/pkg/* \
+        && rm -rf /tmp/yay* \
     && \
     echo
 
 # Add FS overlay
 COPY overlay /
 
+# Tweaks as flatpak issue isn't sorted
 RUN \
-    echo "**** Setup Steam Supervisor ****" \
-            && sed -i 's#/usr/games/steam#/usr/bin/steam#g' /etc/supervisor.d/steam.ini \
+    echo "**** Tweaks for Arch ****" \
+        && sed -i d /usr/bin/install_firefox.sh \
+        && sed -i d /usr/bin/install_protonup.sh \
+        && sed -i d /templates/home_directory_template/.local/share/xfce4/helpers/custom-WebBrowser.desktop \
     && \
     echo
 
@@ -426,6 +485,7 @@ ENV \
     NVIDIA_VISIBLE_DEVICES="all"
 
 # Set container configuration environment variables
+# APPIMAGE_EXTRACT_AND_RUN="0" 
 ENV \
     MODE="primary" \
     WEB_UI_MODE="vnc" \
@@ -434,8 +494,9 @@ ENV \
     NEKO_PASSWORD_ADMIN=admin \
     ENABLE_STEAM="true" \
     STEAM_ARGS="-silent" \
-    ENABLE_SUNSHINE="false" \
-    ENABLE_EVDEV_INPUTS="false"
+    ENABLE_SUNSHINE="true" \
+    ENABLE_EVDEV_INPUTS="true" \
+    ENABLE_WOL_POWER_MANAGER="false" 
 
 # Configure required ports
 ENV \
