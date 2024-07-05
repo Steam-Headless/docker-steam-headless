@@ -38,8 +38,18 @@ function download_driver {
         wget -q --show-progress --progress=bar:force:noscroll \
             -O /tmp/NVIDIA.run \
             "http://download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version:?}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version:?}.run"
-        [[ $? -gt 0 ]] && print_error "Unable to download driver. Exit!" && return 1
-
+        if [[ $? -gt 0 ]]; then
+            print_error "Unable to download driver from NVIDIA. Trying GitHub..."
+            # Strip the 'v' from the version if present (v545.23.08 -> 545.23.08)
+            local stripped_version="${nvidia_host_driver_version#v}"
+            wget -q --show-progress --progress=bar:force:noscroll \
+                -O /tmp/NVIDIA.run \
+                "https://github.com/flathub/org.freedesktop.Platform.GL.nvidia/releases/download/cuda/NVIDIA-Linux-aarch64-${stripped_version}.run"
+            if [[ $? -gt 0 ]]; then
+                print_error "Unable to download driver from GitHub. Exit!"
+                return 1
+            fi
+        fi
         mv /tmp/NVIDIA.run "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
     fi
 }
