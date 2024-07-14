@@ -13,12 +13,13 @@
             "image-path": "steam.png",
             "exclude-global-prep-cmd": "true",
             "detached": [
-                "\/usr\/bin\/sunshine-run \/usr\/games\/steam steam:\/\/open\/bigpicture"
+                "\/usr\/games\/steam steam:\/\/open\/bigpicture",
+                "\/usr\/bin\/sunshine-run sleep infinity"
             ],
             "prep-cmd": [
                 {
                     "do": "",
-                    "undo": "sh -c \"sleep 7 && pkill -f -2 \/usr\/bin\/sunshine\""
+                    "undo": "sh -c \"sleep 5 && pkill -f -2 \/usr\/bin\/sunshine\""
                 },
                 {
                     "do": "",
@@ -27,6 +28,10 @@
                 {
                     "do": "",
                     "undo": "\/usr\/bin\/xfce4-close-all-windows"
+                },
+                {
+                    "do": "",
+                    "undo": "\/usr\/games\/steam steam:\/\/close\/bigpicture"
                 }
             ]
         }
