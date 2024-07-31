@@ -5,8 +5,8 @@
 # File Created: Tuesday, 23rd August 2023 3:28:52 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Friday, 23rd August 2023 4:21:00 pm
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Saturday, 20th July 2024 7:07:00 pm
+# Modified By: Josh5 (jsunnex@gmail.com)
 ###
 set -e
 
@@ -71,71 +71,76 @@ if ([ "X${SUNSHINE_CLIENT_WIDTH:-}" != "X" ] && [ "X${SUNSHINE_CLIENT_HEIGHT:-}"
         __current_refresh_rate=$(echo ${__current_current_mode:?} | awk '{sub(/\*/, "", $2); print $2}')
 
         # Get the primary output device
-        __primary_output="$(echo "${__xrandr_out:?}" | grep primary | awk '{print $1}')"
-
-        # Get the modeline from cvt and extract the second line (which contains the modeline)
-        __client_modeline=$(cvt "${SUNSHINE_CLIENT_WIDTH:?}" "${SUNSHINE_CLIENT_HEIGHT:?}" "${SUNSHINE_CLIENT_FPS:?}" | grep Modeline | sed -e 's/Modeline //')
-        # Create a new mode for this. This allows us to force a set refresh rate that may not be supported by the display
-        __client_mode=$(echo "${__client_modeline:?}" | awk -F '"' '{print $2}')
-
-        # Check if this custom mode is already created
-        if ! echo "${__xrandr_out:?}" | grep -q "${__client_mode:?}"; then
-            # Custom mode does not yet exist. Create it
-            echo "      - Adding new mode '${__client_mode:?}' with new modeline '${__client_modeline:?}'"
-            xrandr --newmode "${__client_mode:?}" ${__client_modeline##*\"}
-            if [ $? -gt 0 ]; then
-                echo "          - WARNING: Failed to add new mode '${__client_mode:?}'."
-            else
-                echo "          - SUCCESS"
-            fi
-        else
-            echo "      - Custom mode '${__client_mode:?}' already exists."
+        __primary_output="$(echo "${__xrandr_out:?}" | grep primary | head -n1 | awk '{print $1}')"
+        if [ "X${__primary_output:-}" = "X" ]; then
+            __primary_output="$(echo "${__xrandr_out:?}" | grep -E "\sconnected" | head -n1 | awk '{print $1}')"
         fi
-        # Check if custom mode exists
-        __xrandr_out="$(xrandr -q)"
-        if echo "${__xrandr_out:?}" | grep -q "${__client_mode:?}"; then
-             # Check if this mode is already added to the primary display
-            if ! echo "${__xrandr_out:?}" | sed -n "/${__primary_output:?}/,/^[^[:space:]]/ {/^[[:space:]]/p}" | grep -q "${__client_mode:?}"; then
-                # Custom mode exists, but is not yet added to the primary output device. Add it
-                echo "      - Adding custom mode '${__client_mode:?}' to device '${__primary_output:?}'"
-                xrandr --addmode "${__primary_output:?}" "${__client_mode:?}"
-                __mode_added=$?
-                if [ "${__mode_added:-0}" -gt 0 ]; then
-                    echo "          - WARNING: Failed to assign custom mode to primary output device '${__primary_output:?}'."
+
+        if [ "X${__primary_output:-}" != "X" ]; then
+            # Get the modeline from cvt and extract the second line (which contains the modeline)
+            __client_modeline=$(cvt "${SUNSHINE_CLIENT_WIDTH:?}" "${SUNSHINE_CLIENT_HEIGHT:?}" "${SUNSHINE_CLIENT_FPS:?}" | grep Modeline | sed -e 's/Modeline //')
+            # Create a new mode for this. This allows us to force a set refresh rate that may not be supported by the display
+            __client_mode=$(echo "${__client_modeline:?}" | awk -F '"' '{print $2}')
+
+            # Check if this custom mode is already created
+            if ! echo "${__xrandr_out:?}" | grep -q "${__client_mode:?}"; then
+                # Custom mode does not yet exist. Create it
+                echo "      - Adding new mode '${__client_mode:?}' with new modeline '${__client_modeline:?}'"
+                xrandr --newmode "${__client_mode:?}" ${__client_modeline##*\"}
+                if [ $? -gt 0 ]; then
+                    echo "          - WARNING: Failed to add new mode '${__client_mode:?}'."
                 else
                     echo "          - SUCCESS"
                 fi
             else
-                echo "      - Custom mode '${__client_mode:?}' is already configured for the primary output device."
-                __mode_added=0
+                echo "      - Custom mode '${__client_mode:?}' already exists."
             fi
-        else
-            echo "      - WARNING: Custom mode '${__client_mode:?}' does not exist."
-        fi
-
-        # Set the current resoultion to the new mode
-        if ([ "X${__mode_added:-}" = "X" ] || [ "${__mode_added:-0}" -gt 0 ]); then
-            echo "  - Attempting to set the display mode to a supported '${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?}' mode. Note that this may not support the configured refresh rate."
-            xrandr --output "${__primary_output:?}" --mode ${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?} --refresh ${SUNSHINE_CLIENT_FPS:?}
-            if [ $? -gt 0 ]; then
-                echo "          - WARNING: Failed to set current output to mode '${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?}' on device '${__primary_output:?}'."
+            # Check if custom mode exists
+            __xrandr_out="$(xrandr -q)"
+            if echo "${__xrandr_out:?}" | grep -q "${__client_mode:?}"; then
+                # Check if this mode is already added to the primary display
+                if ! echo "${__xrandr_out:?}" | sed -n "/${__primary_output:?}/,/^[^[:space:]]/ {/^[[:space:]]/p}" | grep -q "${__client_mode:?}"; then
+                    # Custom mode exists, but is not yet added to the primary output device. Add it
+                    echo "      - Adding custom mode '${__client_mode:?}' to device '${__primary_output:?}'"
+                    xrandr --addmode "${__primary_output:?}" "${__client_mode:?}"
+                    __mode_added=$?
+                    if [ "${__mode_added:-0}" -gt 0 ]; then
+                        echo "          - WARNING: Failed to assign custom mode to primary output device '${__primary_output:?}'."
+                    else
+                        echo "          - SUCCESS"
+                    fi
+                else
+                    echo "      - Custom mode '${__client_mode:?}' is already configured for the primary output device."
+                    __mode_added=0
+                fi
             else
-                echo "          - SUCCESS"
+                echo "      - WARNING: Custom mode '${__client_mode:?}' does not exist."
             fi
-        else
-            echo "  - Setting the display mode to '${__client_mode:?}'"
-            xrandr --output "${__primary_output:?}" --mode "${__client_mode:?}" --rate "${SUNSHINE_CLIENT_FPS:?}"
-            if [ $? -gt 0 ]; then
-                echo "      - WARNING: Failed to set current output to custom mode '${__client_mode:?}' on device '${__primary_output:?}'."
-            else
-                echo "      - SUCCESS"
-            fi
-        fi
 
-        # Save original display settings to config file. This will be read and used to restore the original display settings when the client disconnects.
-        echo "primary_output='${__primary_output:?}'" >> /tmp/sunshine-exec-run.conf 
-        echo "display_mode='${__current_resolution:?}'" >> /tmp/sunshine-exec-run.conf 
-        echo "display_rate='${__current_refresh_rate:?}'" >> /tmp/sunshine-exec-run.conf
+            # Set the current resoultion to the new mode
+            if ([ "X${__mode_added:-}" = "X" ] || [ "${__mode_added:-0}" -gt 0 ]); then
+                echo "  - Attempting to set the display mode to a supported '${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?}' mode. Note that this may not support the configured refresh rate."
+                xrandr --output "${__primary_output:?}" --mode ${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?} --refresh ${SUNSHINE_CLIENT_FPS:?}
+                if [ $? -gt 0 ]; then
+                    echo "          - WARNING: Failed to set current output to mode '${SUNSHINE_CLIENT_WIDTH:?}x${SUNSHINE_CLIENT_HEIGHT:?}' on device '${__primary_output:?}'."
+                else
+                    echo "          - SUCCESS"
+                fi
+            else
+                echo "  - Setting the display mode to '${__client_mode:?}'"
+                xrandr --output "${__primary_output:?}" --mode "${__client_mode:?}" --rate "${SUNSHINE_CLIENT_FPS:?}"
+                if [ $? -gt 0 ]; then
+                    echo "      - WARNING: Failed to set current output to custom mode '${__client_mode:?}' on device '${__primary_output:?}'."
+                else
+                    echo "      - SUCCESS"
+                fi
+            fi
+
+            # Save original display settings to config file. This will be read and used to restore the original display settings when the client disconnects.
+            echo "primary_output='${__primary_output:?}'" >> /tmp/sunshine-exec-run.conf 
+            echo "display_mode='${__current_resolution:?}'" >> /tmp/sunshine-exec-run.conf 
+            echo "display_rate='${__current_refresh_rate:?}'" >> /tmp/sunshine-exec-run.conf
+        fi
     )
 fi
 
