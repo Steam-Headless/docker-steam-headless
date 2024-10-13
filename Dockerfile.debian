@@ -313,19 +313,24 @@ COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
 
 # Install Web Frontend
-ARG FRONTEND_VERSION=a8eb92f
+ARG FRONTEND_VERSION=dev-SHUI
 RUN \
     echo "**** Fetch Web Frontend ****" \
         && mkdir -p /opt \
         && cd /opt \
         && rm -rf /opt/frontend \
-        && git clone https://github.com/Steam-Headless/frontend.git --branch master /opt/frontend \
+        && git clone https://github.com/Steam-Headless/frontend.git --branch dev-SHUI /opt/frontend \
         && cd /opt/frontend \
         && git checkout ${FRONTEND_VERSION} 2> /dev/null \
         && git submodule init \
         && git submodule update --depth 1 --recursive \
         && rm -rf /opt/frontend/.git \
     && \
+    echo "**** Install SHUI requirements ****" \
+        && python3 -m venv --symlinks /opt/frontend/venv \
+        && /opt/frontend/venv/bin/python3 -m pip install --no-cache-dir --upgrade pip \
+        && /opt/frontend/venv/bin/python3 -m pip install --no-cache-dir -r /opt/frontend/requirements.txt \
+        && \
     echo "**** Configure Web Frontend ****" \
         && echo '<!DOCTYPE html>' > /opt/frontend/index.html \
         && echo '<html><head><meta http-equiv="refresh" content="0;url=./web/"></head><body><p>If you are not redirected, <a href="./web/">click here</a>.</p></body></html>' >> /opt/frontend/index.html \
@@ -453,7 +458,7 @@ RUN \
     echo
 
 # Install Sunshine
-COPY --from=lizardbyte/sunshine:v2024.903.123219-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
+COPY --from=lizardbyte/sunshine:latest-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
 RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
