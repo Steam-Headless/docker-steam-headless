@@ -347,13 +347,6 @@ RUN \
     echo "**** Update apt database ****" \
         && apt-get update \
     && \
-    echo "**** Install Websockify dependencies ****" \
-        && apt-get install -y \
-            python3-numpy \
-            python3-requests \
-            python3-jwcrypto \
-            python3-redis \
-    && \
     echo "**** Fetch Websockify ****" \
         && cd /tmp \
         && wget -O /tmp/websockify.tar.gz https://github.com/novnc/websockify/archive/v${WEBSOCKETIFY_VERSION}.tar.gz \
