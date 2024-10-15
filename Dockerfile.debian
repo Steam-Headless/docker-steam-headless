@@ -319,7 +319,7 @@ RUN \
         && mkdir -p /opt \
         && cd /opt \
         && rm -rf /opt/frontend \
-        && git clone https://github.com/Steam-Headless/frontend.git --branch dev-SHUI /opt/frontend \
+        && git clone https://github.com/Steam-Headless/frontend.git --branch master /opt/frontend \
         && cd /opt/frontend \
         && git checkout ${FRONTEND_VERSION} 2> /dev/null \
         && git submodule init \
