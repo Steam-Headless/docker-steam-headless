@@ -313,8 +313,20 @@ COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
 COPY --from=m1k1o/neko:base /var/www /var/www
 
 # Install Web Frontend
+ARG NODE_VERSION="v20"
 ARG FRONTEND_VERSION=a8eb92f
 RUN \
+    echo "**** Install Node ${NODE_VERSION} ****" \
+        && mkdir -p /tmp/nodejs \
+        && rm -rf /opt/nodejs \
+        && wget -qO /tmp/nodejs/nodejs.tar.xz \
+            "https://nodejs.org/dist/latest-${NODE_VERSION:?}.x/node-$(wget -qO- https://nodejs.org/dist/latest-${NODE_VERSION:?}.x/ | sed -nE 's|.*>node-(.*)-linux-x64\.tar.xz</a>.*|\1|p')-linux-x64.tar.xz" \
+        && tar -xJf /tmp/nodejs/nodejs.tar.xz -C /tmp/nodejs --strip-components=1 \
+        && mv /tmp/nodejs /opt/nodejs \
+        && ln -sf /opt/nodejs/bin/node /usr/local/bin/node \
+        && ln -sf /opt/nodejs/bin/npm /usr/local/bin/npm \
+        && ln -sf /opt/nodejs/bin/npx /usr/local/bin/npx \
+    && \
     echo "**** Fetch Web Frontend ****" \
         && mkdir -p /opt \
         && cd /opt \
