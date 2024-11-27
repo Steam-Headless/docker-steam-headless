@@ -546,6 +546,7 @@ ENV \
     NVIDIA_VISIBLE_DEVICES="all"
 
 # Set container configuration environment variables
+# TODO: Set the default WEBUI_USER & WEBUI_PASS after release of SHUI
 ENV \
     MODE="primary" \
     WEB_UI_MODE="vnc" \
@@ -554,6 +555,8 @@ ENV \
     NEKO_PASSWORD_ADMIN=admin \
     ENABLE_STEAM="true" \
     STEAM_ARGS="-silent" \
+    WEBUI_USER="" \
+    WEBUI_PASS="" \
     ENABLE_SUNSHINE="true" \
     ENABLE_EVDEV_INPUTS="true" \
     ENABLE_WOL_POWER_MANAGER="false" \

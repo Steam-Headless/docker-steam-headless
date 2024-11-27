@@ -5,8 +5,8 @@
 # File Created: Tuesday, 4th October 2022 8:22:17 pm
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Tuesday, 4th October 2022 8:22:17 pm
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Wednesday, 27th November 2024 3:54:19 pm
+# Modified By: Josh5 (jsunnex@gmail.com)
 ###
 set -e
 source /usr/bin/common-functions.sh
@@ -48,6 +48,10 @@ fi
 # Reset the default username/password
 if ([ "X${SUNSHINE_USER:-}" != "X" ] && [ "X${SUNSHINE_PASS:-}" != "X" ]); then
     /usr/bin/sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" --creds "${SUNSHINE_USER:?}" "${SUNSHINE_PASS:?}"
+fi
+# If we are running the SHUI, then force the same user upon sunshine
+if ([ "X${WEBUI_USER:-}" != "X" ] && [ "X${WEBUI_PASS:-}" != "X" ]); then
+    /usr/bin/sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" --creds "${WEBUI_USER:?}" "${WEBUI_PASS:?}"
 fi
 # Remove any auto-start scripts from user's .local dir
 if [ -f "${USER_HOME:?}/.config/autostart/Sunshine.desktop" ]; then
