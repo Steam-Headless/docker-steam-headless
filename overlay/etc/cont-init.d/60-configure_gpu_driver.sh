@@ -38,25 +38,39 @@ function download_driver {
 
     if [[ ! -f "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run" ]]; then
         print_step_header "Downloading driver v${nvidia_host_driver_version:?}"
-        driver_url="http://us.download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version:?}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version:?}.run"
+
+        # Try downloading from NVIDIA Global Server
+        driver_url="http://download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version:?}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version:?}.run"
         if wget --spider --quiet "${driver_url:?}"; then
             wget -q --show-progress --progress=bar:force:noscroll \
                 -O /tmp/NVIDIA.run \
                 "${driver_url:?}"
         else
-            print_warning "Unable to download driver from NVIDIA. Trying GitHub..."
-            # Strip the 'v' from the version if present (v545.23.08 -> 545.23.08)
-            stripped_version="${nvidia_host_driver_version#v}"
-            driver_url="https://github.com/flathub/org.freedesktop.Platform.GL.nvidia/releases/download/cuda/NVIDIA-Linux-x86_64-${stripped_version:?}.run"
+            print_warning "Unable to download driver from NVIDIA Global Server. Trying US Server..."
+
+            # If NVIDIA Global Server fails, try the US server
+            driver_url="http://us.download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version:?}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version:?}.run"
             if wget --spider --quiet "${driver_url:?}"; then
                 wget -q --show-progress --progress=bar:force:noscroll \
                     -O /tmp/NVIDIA.run \
                     "${driver_url:?}"
             else
-                print_error "Unable to download driver from GitHub. Exit!"
-                return 1
+                print_warning "Unable to download driver from NVIDIA US Server. Trying GitHub..."
+
+                # Finally, if both fail, try downloading from GitHub
+                stripped_version="${nvidia_host_driver_version#v}" # Strip 'v' from the version if present
+                driver_url="https://github.com/flathub/org.freedesktop.Platform.GL.nvidia/releases/download/cuda/NVIDIA-Linux-x86_64-${stripped_version:?}.run"
+                if wget --spider --quiet "${driver_url:?}"; then
+                    wget -q --show-progress --progress=bar:force:noscroll \
+                        -O /tmp/NVIDIA.run \
+                        "${driver_url:?}"
+                else
+                    print_error "Unable to download driver from any source. Exit!"
+                    return 1
+                fi
             fi
         fi
+
         mv /tmp/NVIDIA.run "${USER_HOME:?}/Downloads/NVIDIA_${nvidia_host_driver_version:?}.run"
     fi
 }
