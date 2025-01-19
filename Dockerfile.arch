@@ -360,7 +360,6 @@ RUN \
             libva \
             libva-mesa-driver \
             libva-intel-driver \
-            libva-vdpau-driver \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
