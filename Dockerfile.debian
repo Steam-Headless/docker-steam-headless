@@ -307,11 +307,6 @@ RUN \
     && \
     echo
 
-# TODO: Deprecate neko
-# Install Neko server
-COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
-COPY --from=m1k1o/neko:base /var/www /var/www
-
 # Install Web Frontend
 ARG NODE_VERSION="v20"
 ARG FRONTEND_VERSION=a8eb92f
@@ -464,6 +459,28 @@ RUN \
     && \
     echo
 
+# Install Steam
+RUN \
+    echo "**** Update apt database ****" \
+        && dpkg --add-architecture i386 \
+        && apt-get update \
+    && \
+    echo "**** Install Steam ****" \
+        && apt-get install -y --no-install-recommends \
+            steam-installer \
+            gamescope \
+        && ln -sf /usr/games/steam /usr/bin/steam \
+    && \
+    echo "**** Section cleanup ****" \
+        && apt-get clean autoclean -y \
+        && apt-get autoremove -y \
+        && rm -rf \
+            /var/lib/apt/lists/* \
+            /var/tmp/* \
+            /tmp/* \
+    && \
+    echo
+
 # Install Sunshine
 COPY --from=lizardbyte/sunshine:v2025.122.141614-debian-bookworm /sunshine.deb /usr/src/sunshine.deb
 RUN \
@@ -488,27 +505,10 @@ RUN \
     && \
     echo
 
-# Install Steam
-RUN \
-    echo "**** Update apt database ****" \
-        && dpkg --add-architecture i386 \
-        && apt-get update \
-    && \
-    echo "**** Install Steam ****" \
-        && apt-get install -y --no-install-recommends \
-            steam-installer \
-            gamescope \
-        && ln -sf /usr/games/steam /usr/bin/steam \
-    && \
-    echo "**** Section cleanup ****" \
-        && apt-get clean autoclean -y \
-        && apt-get autoremove -y \
-        && rm -rf \
-            /var/lib/apt/lists/* \
-            /var/tmp/* \
-            /tmp/* \
-    && \
-    echo
+# TODO: Deprecate neko
+# Install Neko server
+COPY --from=m1k1o/neko:base /usr/bin/neko /usr/bin/neko
+COPY --from=m1k1o/neko:base /var/www /var/www
 
 # Various other tools
 ARG DUMB_INIT_VERSION=1.2.5

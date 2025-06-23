@@ -41,8 +41,8 @@ function download_driver {
         # Try downloading from a list of NVIDIA driver hosting servers
         stripped_version="${nvidia_host_driver_version#v}" # Strip 'v' if present
         declare -a sources=(
-            "http://download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version}.run"
-            "http://us.download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version}.run"
+            "https://download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version}.run"
+            "https://us.download.nvidia.com/XFree86/Linux-x86_64/${nvidia_host_driver_version}/NVIDIA-Linux-x86_64-${nvidia_host_driver_version}.run"
             "https://github.com/flathub/org.freedesktop.Platform.GL.nvidia/releases/download/cuda/NVIDIA-Linux-x86_64-${stripped_version}.run"
         )
 
@@ -59,10 +59,11 @@ function download_driver {
             fi
         done
 
+        print_note "Visit https://download.nvidia.com/XFree86/Linux-x86_64/ in a browser and find the closest match to version '${nvidia_host_driver_version:?}', then set that version in the NVIDIA_DRIVER_VERSION environment variable."
         print_error "Unable to download driver from any source. Exit!"
+        sleep 10
         return 1
     fi
-
 }
 
 function install_nvidia_driver {
@@ -119,6 +120,8 @@ function install_nvidia_driver {
                 --no-install-libglvnd \
                 >"${USER_HOME:?}/Downloads/nvidia_gpu_install.log" 2>&1
         fi
+    else
+        print_step_header "NVIDIA driver version ${nvidia_settings_version:-} is already installed"
     fi
 }
 
@@ -240,13 +243,13 @@ else
     print_header "No AMD device found"
 fi
 # NVIDIA GPU
-if [ "${nvidia_pci_address:-}X" != "X" ]; then
-    print_header "Found NVIDIA device '${nvidia_gpu_name:?}'"
-    install_nvidia_driver
-    patch_nvidia_driver
-elif [ "${NVIDIA_DRIVER_VERSION:-}X" != "X" ]; then
+if [ "${NVIDIA_DRIVER_VERSION:-}X" != "X" ]; then
     export nvidia_host_driver_version="${NVIDIA_DRIVER_VERSION:?}"
     print_header "Forcing install of NVIDIA driver version '${nvidia_host_driver_version:?}' because the 'NVIDIA_DRIVER_VERSION' variable is set."
+    install_nvidia_driver
+    patch_nvidia_driver
+elif [ "${nvidia_pci_address:-}X" != "X" ]; then
+    print_header "Found NVIDIA device '${nvidia_gpu_name:?}'"
     install_nvidia_driver
     patch_nvidia_driver
 else

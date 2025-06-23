@@ -42,6 +42,11 @@ function print_error {
     echo -e "\e[31mERROR: ${@}\e[0m"
 }
 
+function print_note {
+    # Cyan
+    echo -e "\e[36mNOTE: ${@}\e[0m"
+}
+
 # Execute all container init scripts
 for init_script in /etc/cont-init.d/*.sh ; do
     echo

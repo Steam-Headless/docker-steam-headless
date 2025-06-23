@@ -1,33 +1,57 @@
-# Ubuntu Server
+# Ubuntu Server Setup
 
-Follow these instructions to install Steam Headless on Ubuntu Server.
+Use these instructions to install **Steam Headless** on an Ubuntu Server system.
 
-> __Note__
+> ⚠️ **Note**
 >
-> This assumes that your Ubuntu Server has not be configured to run any desktop environment!
-> 
-> This will not work with Ubuntu Desktop.
+> These steps assume you are running a minimal **Ubuntu Server** installation **without any desktop environment**.
+> This setup **will not work** on Ubuntu Desktop.
 
+---
+
+## INSTALL NVIDIA DRIVER:
+
+Although you're on a server system, using the `-server` variant of the NVIDIA driver can cause compatibility issues.  
+Instead, install the standard driver **without recommended extras**:
+
+```bash
+apt install --no-install-recommends nvidia-driver-570
+```
+
+> 🔍 Feel free to `570` with the latest available version.
+
+To find the latest version of the standard (non-`-server`, non-`-open`) drivers, run:
+
+```bash
+apt-cache search ^nvidia-driver- | awk '{print $1}' | grep -vE '(-server|-open)' | xargs -n1 apt-cache policy | awk '/^nvidia-driver-/{driver=$1} /Candidate:/ {print driver, $2}'
+```
+
+---
 
 ## INSTALL DOCKER:
 
-Install docker-ce to your Ubuntu server following the [official instructions](https://docs.docker.com/engine/install/ubuntu/).
+Install `docker-ce` on your Ubuntu server by following the [official Docker instructions](https://docs.docker.com/engine/install/ubuntu/).
 
-Ensure you install the `docker-compose-plugin` mentioned within these instructions
+Make sure you also install the `docker-compose-plugin` as noted in the Docker documentation.
 
+---
 
 ## INSTALL NVIDIA CONTAINER TOOLKIT
 
-The easiest way to get running with NVIDIA GPUs is to install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-container-toolkit?tab=readme-ov-file).
+To enable GPU support inside Docker containers, install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-container-toolkit?tab=readme-ov-file).
 
-Follow the [official instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-apt) for installing the container toolkit to your Ubuntu server with apt.
+Follow the [APT-based installation steps](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-apt) provided in the official documentation.
 
-If you do this, ensure that when you configure Docker Compose in the next step you choose the `nvidia` runtime.
+Once installed, configure Docker to use the NVIDIA runtime by default:
 
-Alternately, it is possible to run the container without the NVIDIA runtime by uncommenting the `/dev/nvidia` devices in the Compose file.
+```bash
+sudo nvidia-ctk runtime configure --runtime=docker
+```
 
+> 💡 You *can* also run the container without the NVIDIA runtime by manually uncommenting the `/dev/nvidia*` device entries in the Compose file — but this approach is **not recommended**.
+
+---
 
 ## CONFIGURE DOCKER COMPOSE:
 
-Once you have installed docker, follow the [Compose Files](./docker-compose.md) section and select the right configuration file for your hardware.
-
+After installing Docker, proceed to the [Compose Files](./docker-compose.md) section and select the appropriate configuration for your hardware setup.
