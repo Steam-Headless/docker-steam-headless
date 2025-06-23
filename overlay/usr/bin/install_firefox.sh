@@ -9,7 +9,6 @@ flatpak --user install --assumeyes --or-update flathub org.mozilla.firefox
 # Configure Firefox as the default browser
 echo "Configure Firefox..."
 custom_webbrowser="$(cat <<EOF
-"libraryfolders"
 [Desktop Entry]
 NoDisplay=true
 Version=1.0
