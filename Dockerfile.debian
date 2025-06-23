@@ -309,7 +309,7 @@ RUN \
 
 # Install Web Frontend
 ARG NODE_VERSION="v20"
-ARG FRONTEND_VERSION=a8eb92f
+ARG FRONTEND_VERSION=29e93b2
 RUN \
     echo "**** Install Node ${NODE_VERSION} ****" \
         && mkdir -p /tmp/nodejs \
@@ -326,18 +326,34 @@ RUN \
         && mkdir -p /opt \
         && cd /opt \
         && rm -rf /opt/frontend \
-        && git clone https://github.com/Steam-Headless/frontend.git --branch master /opt/frontend \
+        && git clone https://github.com/Steam-Headless/frontend.git --branch dev-SHUI /opt/frontend \
         && cd /opt/frontend \
         && git checkout ${FRONTEND_VERSION} 2> /dev/null \
         && git submodule init \
         && git submodule update --depth 1 --recursive \
         && rm -rf /opt/frontend/.git \
     && \
+    echo "**** Install SHUIv2 requirements ****" \
+        && cd /opt/frontend \
+        && python3 -m venv --symlinks ./venv \
+        && ./venv/bin/python3 -m pip install --no-cache-dir --upgrade pip \
+        && ./venv/bin/python3 -m pip install --no-cache-dir -r ./requirements.txt \
+    && \
+    echo "**** Build SHUIv2 vue ****" \
+        && cd /opt/frontend \
+        && cd ./shui2/shui-vue/ \
+        && npm ci \
+        && npm run build \
+        && cd /opt/frontend \
+        && cd ./shui2/server/ \
+        && npm ci \
+    && \
     echo "**** Configure Web Frontend ****" \
-        && echo '<!DOCTYPE html>' > /opt/frontend/index.html \
-        && echo '<html><head><meta http-equiv="refresh" content="0;url=./web/"></head><body><p>If you are not redirected, <a href="./web/">click here</a>.</p></body></html>' >> /opt/frontend/index.html \
-        && chmod -R 755 /opt/frontend \
-        && convert /opt/frontend/web/images/icons/novnc-ios-180.png -resize "128x128" /tmp/steam-headless.png \
+        && cd /opt/frontend \
+        && echo '<!DOCTYPE html>' > ./index.html \
+        && echo '<html><head><meta http-equiv="refresh" content="0;url=./web/"></head><body><p>If you are not redirected, <a href="./web/">click here</a>.</p></body></html>' >> ./index.html \
+        && chmod -R a+r . \
+        && convert ./web/images/icons/novnc-ios-180.png -resize "128x128" /tmp/steam-headless.png \
         && xdg-icon-resource install --novendor --size 128 /tmp/steam-headless.png \
     && \
     echo "**** Section cleanup ****" \
