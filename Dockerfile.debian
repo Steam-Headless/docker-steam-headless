@@ -438,7 +438,7 @@ RUN \
 
 # Install Web Frontend
 ARG NODE_VERSION="v20"
-ARG FRONTEND_VERSION=29e93b2
+ARG FRONTEND_VERSION=5ede778
 RUN \
     echo "**** Install Node ${NODE_VERSION} ****" \
         && mkdir -p /tmp/nodejs \
