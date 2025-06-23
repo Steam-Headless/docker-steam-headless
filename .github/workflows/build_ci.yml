@@ -1,144 +1,170 @@
----
-
 name: Build and Deploy CI
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ 'dev-**', 'pr-**', staging, master ]
-    tags: [ '**' ]
+    branches: ['dev-**', 'pr-**', staging, master]
+    tags: ['**']
   pull_request:
-    branches: [ staging, master ]
+    branches: [staging, master]
   schedule:
     # At 02:30 on Saturday
-    - cron:  '30 2 * * 6'
+    - cron: '30 2 * * 6'
 
 jobs:
-
   build_docker:
-
     name: Build Docker Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
-        flavour: ["debian", "arch"]
+        flavour: ['debian', 'arch']
 
     steps:
-    # Fetch shallow git repository
-    - name: Checkout
-      uses: actions/checkout@v2
+      # ---
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # Use QEMU to build
-    - name: Set up QEMU
-      if: success()
-      id: qemu
-      uses: docker/setup-qemu-action@v1
+      # ---
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 #v3.8.0
 
-    # Use docker buildx to build the docker image
-    - name: Build the Docker image
-      uses: docker/setup-buildx-action@v1
-      if: success()
-      id: buildx
-      with:
-        version: latest
+      # ---
+      - name: Prepare
+        if: success()
+        id: prepare
+        run: |
+          FLAVOUR=${{ matrix.flavour }}
+          echo  "FLAVOUR='${FLAVOUR}'"
+          echo  "GITHUB_REF='${GITHUB_REF}'"
+          echo  "GITHUB_REPOSITORY='${GITHUB_REPOSITORY}'"
+          VERSION_TAG=${GITHUB_REF#refs/*/}
+          SHA_SHORT="${GITHUB_SHA::7}"
+          ORG=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-    # Generate 'prepare' build arguments to be retrieved later on
-    - name: Prepare
-      if: success()
-      id: prepare
-      run: |
-        FLAVOUR=${{ matrix.flavour }}
-        echo  "FLAVOUR='${FLAVOUR}'"
-        echo  "GITHUB_REF='${GITHUB_REF}'"
-        echo  "GITHUB_REPOSITORY='${GITHUB_REPOSITORY}'"
-        DOCKER_IMAGE=docker.io/josh5/steam-headless
-        VERSION_TAG=${GITHUB_REF#refs/*/}
-        DOCKER_TAGS=""
-        if [[ ${VERSION_TAG%/merge} == 'master' ]]; then
-          if [[ ${FLAVOUR} == 'debian' ]]; then
-            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
-          fi
-          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR},"
-        elif [[ ${VERSION_TAG%/merge} == 'staging' ]]; then
-          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR}-staging,"
-        elif [[ ${VERSION_TAG%/merge} =~ "dev-"* ]]; then
-          DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR}-${VERSION_TAG%/merge},"
-        fi
-        if [[ ${GITHUB_REF} == refs/tags/* ]]; then
-          VERSION=${GITHUB_REF#refs/tags/}
-          if [[ ${VERSION} =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}[-\w]*$ ]]; then
-            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:${FLAVOUR}-${VERSION},"
+          SERVICE_NAME=steam-headless
+          DOCKER_HUB_IMAGE=docker.io/josh5/${SERVICE_NAME:?}
+          GHCR_IMAGE=ghcr.io/${ORG:?}/${SERVICE_NAME:?}
+
+          DOCKER_TAGS=""
+          if [[ ${GITHUB_REF} == refs/heads/master ]]; then
             if [[ ${FLAVOUR} == 'debian' ]]; then
-              DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_IMAGE}:latest,"
+              DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_HUB_IMAGE}:latest,${GHCR_IMAGE}:latest,${GHCR_IMAGE}:stable,"
             fi
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_HUB_IMAGE}:${FLAVOUR},${GHCR_IMAGE}:${FLAVOUR},"
+          elif [[ ${GITHUB_REF} == refs/heads/staging ]]; then
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_HUB_IMAGE}:${FLAVOUR}-staging,${GHCR_IMAGE}:${FLAVOUR}-staging,"
+          elif [[ ${GITHUB_REF} == refs/heads/dev-* ]]; then
+            DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_HUB_IMAGE}:${FLAVOUR}-${VERSION_TAG},${GHCR_IMAGE}:${FLAVOUR}-${VERSION_TAG},"
+          elif [[ ${GITHUB_REF} == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+            if [[ ${VERSION} =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}[-\w]*$ ]]; then
+              DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_HUB_IMAGE}:${FLAVOUR}-${VERSION},${GHCR_IMAGE}:${FLAVOUR}-${VERSION},"
+              if [[ ${FLAVOUR} == 'debian' ]]; then
+                DOCKER_TAGS="${DOCKER_TAGS}${DOCKER_HUB_IMAGE}:latest,${GHCR_IMAGE}:latest,"
+              fi
+              
+            fi
+          elif [[ ${GITHUB_REF} == refs/pull/* ]]; then
+            PR_NUMBER=$(echo ${GITHUB_REF} | cut -d'/' -f3)
+            # For PR builds, only tag the GHCR image.
+            DOCKER_TAGS="${GHCR_IMAGE}:pr-${PR_NUMBER},"
           fi
-        fi
-        echo "DOCKER_TAGS='${DOCKER_TAGS}'"
+          echo "DOCKER_TAGS='${DOCKER_TAGS}'"
 
-        echo "Build: [$(date +"%F %T")] [${GITHUB_REF_NAME}] [${GITHUB_SHA}] [${FLAVOUR}]" > ./overlay/version.txt
+          echo "Build: [$(date +"%F %T")] [${GITHUB_REF_NAME}] [${GITHUB_SHA}] [${FLAVOUR}]" > ./overlay/version.txt
 
-        DOCKER_PUSH="true"
-        if [[ ${DOCKER_IMAGE} != 'docker.io/josh5/steam-headless' ]]; then
-          DOCKER_PUSH="false"
-        fi
-        if [[ ${VERSION_TAG%/merge} =~ "pr-"* ]]; then
-          DOCKER_PUSH="false"
-        fi
-        if [[ ${VERSION_TAG%/merge} =~ ^[0-9]+$ ]]; then
-          DOCKER_PUSH="false"
-        fi
-        if [[ "X${DOCKER_TAGS}" == "X" ]]; then
-          DOCKER_PUSH="false"
-        fi
-        echo "DOCKER_PUSH='${DOCKER_PUSH}'"
-        cat ./overlay/version.txt
+          DOCKER_PUSH="true"
+          if [[ ${DOCKER_HUB_IMAGE} != 'docker.io/josh5/steam-headless' ]]; then
+            DOCKER_PUSH="false"
+          fi
+          if [[ ${VERSION_TAG%/merge} =~ "pr-"* ]]; then
+            DOCKER_PUSH="false"
+          fi
+          if [[ ${VERSION_TAG%/merge} =~ ^[0-9]+$ ]]; then
+            DOCKER_PUSH="false"
+          fi
+          if [[ "X${DOCKER_TAGS}" == "X" ]]; then
+            DOCKER_PUSH="false"
+          fi
+          echo "DOCKER_PUSH='${DOCKER_PUSH}'"
+          cat ./overlay/version.txt
 
-        echo "docker_image=${DOCKER_IMAGE}" >> $GITHUB_OUTPUT
-        echo "docker_tags=$(echo ${DOCKER_TAGS} | sed 's/,$//')" >> $GITHUB_OUTPUT
-        echo "docker_platforms=linux/amd64" >> $GITHUB_OUTPUT
-        echo "docker_push=${DOCKER_PUSH}" >> $GITHUB_OUTPUT
+          echo "docker_hub_image:${DOCKER_HUB_IMAGE:?}"
+          echo "docker_hub_image=${DOCKER_HUB_IMAGE:?}" >> $GITHUB_OUTPUT
 
-    # Cache the build
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      id: cache
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.flavour }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.flavour }}-
-    
-    # Login to Docker Hub
-    - name: Login to Docker Hub
-      if: success() && (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/'))
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    # Run docker build and push
-    - name: Docker Build and Push
-      if: success()
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: Dockerfile.${{ matrix.flavour }}
-        pull: true
-        platforms: ${{ steps.prepare.outputs.docker_platforms }}
-        push: ${{ steps.prepare.outputs.docker_push }}
-        tags: |
-          ${{ steps.prepare.outputs.docker_tags }}
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          echo "ghcr_image:${GHCR_IMAGE:?}"
+          echo "ghcr_image=${GHCR_IMAGE:?}" >> $GITHUB_OUTPUT
 
-    # Keep only latest cache
-    #   https://github.com/docker/build-push-action/issues/252
-    #   https://github.com/moby/buildkit/issues/1896
-    - name: Move cache
-      if: always()
-      run: |
-        if [[ -e /tmp/.buildx-cache-new ]]; then
-          echo "Cleaning up old cache..."
-          rm -rf /tmp/.buildx-cache
-          mv -v /tmp/.buildx-cache-new /tmp/.buildx-cache
-        fi
+          echo "sha_short:${SHA_SHORT:?}"
+          echo "sha_short=${SHA_SHORT:?}" >> $GITHUB_OUTPUT
+
+          echo "service_name:${SERVICE_NAME:?}"
+          echo "service_name=${SERVICE_NAME:?}" >> $GITHUB_OUTPUT
+
+          echo "docker_image:${DOCKER_HUB_IMAGE:?}"
+          echo "docker_image=${DOCKER_HUB_IMAGE:?}" >> $GITHUB_OUTPUT
+
+          echo "docker_tags:$(echo ${DOCKER_TAGS} | sed 's/,$//')"
+          echo "docker_tags=$(echo ${DOCKER_TAGS} | sed 's/,$//')" >> $GITHUB_OUTPUT
+
+          echo "docker_push:${DOCKER_PUSH:?}"
+          echo "docker_push=${DOCKER_PUSH:?}" >> $GITHUB_OUTPUT
+
+          echo "docker_build_date:${BUILD_DATE:?}" 
+          echo "docker_build_date=${BUILD_DATE:?}" >> $GITHUB_OUTPUT
+
+          echo "docker_platforms=linux/amd64" >> $GITHUB_OUTPUT
+
+      # ---
+      - name: Log into GHCR registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ---
+      - name: Log into Docker Hub registry
+        if: success() && (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/'))
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 #v3.3.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # ---
+      - name: Docker meta
+        if: success()
+        id: meta
+        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 #v5.6.1
+        with:
+          images: |
+            ${{ steps.prepare.outputs.docker_image }}
+          labels: |
+            maintainer=Josh.5
+            source.version=${{ steps.prepare.outputs.sha_short }}
+            source.project=Steam Headless
+            source.service=${{ steps.prepare.outputs.service_name }}
+            org.opencontainers.image.title=${{ steps.prepare.outputs.service_name }}
+            org.opencontainers.image.created=${{ steps.prepare.outputs.docker_build_date }}
+
+      # ---
+      - name: Build Image
+        if: success()
+        uses: docker/build-push-action@b32b51a8eda65d6793cd0494a773d4f6bcef32dc #v6.11.0
+        with:
+          context: .
+          file: Dockerfile.${{ matrix.flavour }}
+          platforms: ${{ steps.prepare.outputs.docker_platforms }}
+          pull: 'true'
+          push: ${{ steps.prepare.outputs.docker_push }}
+          tags: |
+            ${{ steps.prepare.outputs.docker_tags }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ steps.prepare.outputs.service_name }}-${{ matrix.flavour }}-main
+          cache-to: type=gha,scope=${{ steps.prepare.outputs.service_name }}-${{ matrix.flavour }}-main,mode=max
