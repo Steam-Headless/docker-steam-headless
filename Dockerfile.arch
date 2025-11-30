@@ -249,7 +249,7 @@ RUN \
             gnome-software \
     && \
     echo "**** Configure flatpak ****" \
-        && chmod u-s /usr/bin/bwrap \
+        && chmod u+s /usr/bin/bwrap \
         && flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo \
         && su - default -c "flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo" \
     && \
@@ -326,6 +326,7 @@ RUN \
             gst-plugins-base \
             gst-plugins-good \
             gst-plugins-ugly \
+            socat \
     && \
     #echo "**** Fetch ucspi-tcp ****" \
     #    && mkdir -p /tmp/ucspi-tcp-0.88 \
@@ -387,11 +388,12 @@ RUN \
 # Install Sunshine
 RUN \
     echo "**** Install stable sunshine ****" \
-        && su - default -c "yay -Syu --noconfirm --needed miniupnpc sunshine-bin" \
+        && su - default -c "yay -Syu --noconfirm --needed icu76 miniupnpc sunshine-bin" \
         && setcap cap_sys_admin+p $(readlink -f $(which sunshine)) \
+        && ln -sf /usr/lib/libicuuc.so /usr/lib/libicuuc.so.76 \
     && \
     echo "**** Section cleanup ****" \
-	    && pacman -Scc --noconfirm \
+        && pacman -Scc --noconfirm \
         && rm -fr /home/default/.cache/yay \
         && rm -fr /var/lib/pacman/sync/* \
         && rm -fr /var/cache/pacman/pkg/* \
@@ -417,6 +419,8 @@ RUN \
     echo "**** Install Steam ****" \
 	    && pacman -Syu --noconfirm --needed \
             steam \
+        && mkdir -p /usr/games \
+        && ln -sf /usr/bin/steam /usr/games/steam \
     && \
     echo "**** Section cleanup ****" \
 	    && pacman -Scc --noconfirm \
@@ -487,6 +491,7 @@ ENV \
 # APPIMAGE_EXTRACT_AND_RUN="0" 
 ENV \
     MODE="primary" \
+    SKIP_UDEV_WAIT="1" \
     WEB_UI_MODE="vnc" \
     ENABLE_VNC_AUDIO="true" \
     NEKO_PASSWORD=neko \

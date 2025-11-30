@@ -20,7 +20,7 @@ trap _term SIGTERM SIGINT
 
 # EXECUTE PROCESS:
 # Wait for udev
-if [ $(grep autostart /etc/supervisor.d/udev.ini 2> /dev/null) == "autostart=true" ]; then
+if [ $(grep autostart /etc/supervisor.d/udev.ini 2> /dev/null) == "autostart=true" ] && [ "${SKIP_UDEV_WAIT:-0}" != "1" ]; then
     wait_for_udev
 fi
 # Run X server

@@ -4,14 +4,14 @@ print_header "Configure udevd"
 
 # Since this container may also be run with CAP_SYS_ADMIN, ensure we can actually execute "udevadm trigger"
 run_dumb_udev="false"
+# Ensure udev runtime path exists so udevd/libudev consumers (Xorg, sunshine) can see input devices
+if [ ! -d /run/udev ]; then
+    print_step_header "Create /run/udev path"
+    mkdir -p /run/udev
+fi
 if [ ! -w /sys ]; then
     # Disable supervisord script since we are not able to write to sysfs
     print_step_header "Disable udevd - /sys is mounted RO"
-    sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
-    run_dumb_udev="true"
-elif [ ! -d /run/udev ]; then
-    # Disable supervisord script since we are not able to write to udev/data path
-    print_step_header "Disable udevd - /run/udev does not exist"
     sed -i 's|^autostart.*=.*$|autostart=false|' /etc/supervisor.d/udev.ini
     run_dumb_udev="true"
 elif [ ! -w /run/udev ]; then

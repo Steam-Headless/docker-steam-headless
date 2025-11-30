@@ -18,8 +18,8 @@ trap _term SIGTERM SIGINT
 
 
 # EXECUTE PROCESS:
-# Start dumb-udev
-dumb-udev &
+# Start dumb-udev in relay-only mode to avoid chmod on read-only /dev mounts
+dumb-udev --relay-only &
 dumb_udev_pid=$!
 
 # WAIT FOR CHILD PROCESS:

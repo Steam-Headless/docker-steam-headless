@@ -70,6 +70,9 @@ export_desktop_dbus_session
 # Wait for the desktop to start
 wait_for_desktop
 
+# Prefer ICU 76 for sunshine binary
+export LD_PRELOAD="/usr/lib/libicuuc.so.76:/usr/lib/libicui18n.so.76:/usr/lib/libicudata.so.76${LD_PRELOAD:+:$LD_PRELOAD}"
+
 # Start the sunshine server
 /usr/bin/dumb-init /usr/bin/sunshine "${USER_HOME:?}/.config/sunshine/sunshine.conf" &
 sunshine_pid=$!

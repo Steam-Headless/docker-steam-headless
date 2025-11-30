@@ -30,6 +30,20 @@ export XDG_CACHE_HOME="${USER_HOME:?}/.cache"
 export XDG_CONFIG_HOME="${USER_HOME:?}/.config"
 export XDG_DATA_HOME="${USER_HOME:?}/.local/share"
 
+# Ensure Steam bootstrap link points to the actual data directory
+STEAM_DATA_DIR="${USER_HOME}/.local/share/Steam"
+STEAM_LINK="${USER_HOME}/.steam/steam"
+if [ -d "$STEAM_LINK" ] && [ ! -L "$STEAM_LINK" ]; then
+    mkdir -p "${STEAM_DATA_DIR}" "${STEAM_LINK%/*}"
+    shopt -s dotglob
+    for item in "${STEAM_LINK}"/*; do
+        mv -n "$item" "${STEAM_DATA_DIR}/" 2> /dev/null || true
+    done
+    shopt -u dotglob
+    rm -rf "$STEAM_LINK"
+fi
+ln -sfn "${STEAM_DATA_DIR}" "${STEAM_LINK}"
+
 # EXECUTE PROCESS:
 # Wait for the X server to start
 wait_for_x
