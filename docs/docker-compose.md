@@ -87,6 +87,9 @@ cd /opt/container-services/steam-headless
 sudo docker-compose up -d --force-recreate
 ```
 
+NOTE: On non-headless systems (Desktop versions OS), the active GUI can block the container from accessing the display engine, leading to 'Xorg' crashes. Solution in issue [#200](https://github.com/Steam-Headless/docker-steam-headless/issues/200#issuecomment-3540172221).
+
+
 After container executes successfully, navigate to your docker host URL in your browser on port 8083 and click connect.
 `http://<host-ip>:8083/`
 ![img.png](./images/web_connect.png)
