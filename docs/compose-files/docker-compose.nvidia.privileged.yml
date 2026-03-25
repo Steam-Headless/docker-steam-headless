@@ -76,4 +76,4 @@ services:
       - ${SHARED_SOCKETS_DIR}/pulse/:/tmp/pulse/:rw
 
       # Input devices used for mouse and joypad support inside the container.
-      - /dev/input/:/dev/input/:r/w
+      - /dev/input/:/dev/input/:ro
