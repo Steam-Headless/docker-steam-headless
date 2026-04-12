@@ -33,7 +33,7 @@ services:
       # System
       - TZ=${TZ}
       - USER_LOCALES=${USER_LOCALES}
-      - DISPLAY=${DISPLAY}
+      - DISPLAY=${X_DISPLAY}
       # User
       - PUID=${PUID}
       - PGID=${PGID}
