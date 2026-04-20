@@ -21,6 +21,7 @@ _term() {
 trap _term SIGTERM SIGINT
 
 sync_input_nodes() {
+    created_nodes=0
     mkdir -p /dev/input
 
     for sys in /sys/class/input/*/dev; do
@@ -34,6 +35,7 @@ sync_input_nodes() {
         mknod "${path}" c "${major}" "${minor}" 2>/dev/null || continue
         chmod 0660 "${path}" 2>/dev/null || true
         chgrp input "${path}" 2>/dev/null || true
+        created_nodes=1
     done
 }
 
@@ -70,20 +72,19 @@ dumb_udev_pid=$!
 while true; do
     sync_input_nodes
 
-    if sunshine_inputs_present; then
-        if [[ ! -e "${state_dir}/xorg-restarted" ]]; then
-            # Sunshine creates its virtual input devices on client connect. In
-            # restricted containers with a private /dev, the sysfs devices may
-            # exist before /dev/input/event* nodes are visible to Xorg. Build
-            # the missing nodes, then restart Xorg once so it enumerates them
-            # cleanly.
-            sleep 2
-            sync_input_nodes
-            supervisorctl restart xorg >/dev/null 2>&1 || true
-            : > "${state_dir}/xorg-restarted"
-        fi
-    else
-        rm -f "${state_dir}/xorg-restarted"
+    if sunshine_inputs_present \
+        && [[ "${created_nodes}" -eq 1 ]] \
+        && [[ ! -e "${state_dir}/xorg-restarted" ]]; then
+        # Sunshine creates its virtual input devices on client connect. In
+        # restricted containers with a private /dev, the sysfs devices may
+        # exist before /dev/input/event* nodes are visible to Xorg. Build
+        # the missing nodes, then restart Xorg once so it enumerates them
+        # cleanly. The sentinel persists for the container lifetime to avoid
+        # restart storms on reconnect cycles.
+        sleep 2
+        sync_input_nodes
+        supervisorctl restart xorg >/dev/null 2>&1 || true
+        : > "${state_dir}/xorg-restarted"
     fi
 
     sleep 1
