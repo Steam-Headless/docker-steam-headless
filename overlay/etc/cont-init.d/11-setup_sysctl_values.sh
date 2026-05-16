@@ -3,7 +3,7 @@
 print_header "Configure some system kernel parameters"
 
 
-if [ "$(cat /proc/sys/vm/max_map_count)" -ge 524288 ]; then
+if [ "$(cat /proc/sys/vm/max_map_count)" -le 524288 ]; then
     if [ -w "/proc/sys/vm/max_map_count" ]; then
         print_step_header "Setting the maximum number of memory map areas a process can create to 524288"
         echo 524288 > /proc/sys/vm/max_map_count
