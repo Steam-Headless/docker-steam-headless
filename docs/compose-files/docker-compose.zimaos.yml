@@ -1,0 +1,69 @@
+---
+# ZimaOS / CasaOS example compose file.
+# See docs/zimaos.md for setup instructions.
+name: steam-headless
+
+services:
+  steam-headless:
+    image: josh5/steam-headless:latest
+    container_name: steam-headless
+    restart: unless-stopped
+    shm_size: ${SHM_SIZE}
+    ipc: host
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 524288
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_NICE
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+
+    # Host networking is required for controller input passthrough.
+    network_mode: host
+    hostname: ${NAME}
+    extra_hosts:
+      - "${NAME}:127.0.0.1"
+
+    environment:
+      - TZ=${TZ}
+      - USER_LOCALES=${USER_LOCALES}
+      - DISPLAY=${DISPLAY}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - USER_PASSWORD=${USER_PASSWORD}
+      - MODE=${MODE}
+      - WEB_UI_MODE=${WEB_UI_MODE}
+      - ENABLE_VNC_AUDIO=${ENABLE_VNC_AUDIO}
+      - PORT_NOVNC_WEB=${PORT_NOVNC_WEB}
+      - NEKO_NAT1TO1=${NEKO_NAT1TO1}
+      - ENABLE_STEAM=${ENABLE_STEAM}
+      - STEAM_ARGS=${STEAM_ARGS}
+      - ENABLE_SUNSHINE=${ENABLE_SUNSHINE}
+      - SUNSHINE_USER=${SUNSHINE_USER}
+      - SUNSHINE_PASS=${SUNSHINE_PASS}
+      - ENABLE_EVDEV_INPUTS=${ENABLE_EVDEV_INPUTS}
+      - FORCE_X11_DUMMY_CONFIG=${FORCE_X11_DUMMY_CONFIG}
+      - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES}
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES}
+      - NVIDIA_DRIVER_VERSION=${NVIDIA_DRIVER_VERSION}
+
+    devices:
+      - /dev/fuse
+      # Enable uinput only when the host exposes /dev/uinput and ENABLE_EVDEV_INPUTS=true.
+      # - /dev/uinput
+      # AMD/Intel: adjust card/renderD IDs for your GPU (see docs/docker-compose.md).
+      - /dev/dri/card1
+      - /dev/dri/renderD128
+    device_cgroup_rules:
+      - 'c 13:* rmw'
+
+    volumes:
+      - ${HOME_DIR}/:/home/default/:rw
+      - ${GAMES_DIR}/:/mnt/games/:rw
+      - ${SHARED_SOCKETS_DIR}/.X11-unix/:/tmp/.X11-unix/:rw
+      - ${SHARED_SOCKETS_DIR}/pulse/:/tmp/pulse/:rw

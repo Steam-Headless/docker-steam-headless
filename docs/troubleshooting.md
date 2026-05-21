@@ -1,3 +1,35 @@
+## Steam does not launch on ZimaOS / CasaOS
+
+Symptoms:
+
+- Steam appears in the process list but no window opens
+- Desktop autostart logs show `Permission denied` under `~/.steam/`
+- Running `steam` reports it is already running
+
+This commonly affects ZimaOS and CasaOS App Store deployments. See [ZimaOS setup](./zimaos.md) for the full guide.
+
+### Fix checklist
+
+1. **Set `PUID=1000` and `PGID=1000`** in your environment. App Store templates sometimes default to `PUID=65534` (`nobody`), which cannot write to the persistent home volume.
+2. **Clear `STEAM_ARGS`** — remove `-silent` until you have logged in at least once. A silent launch hides the Steam window and matches reports in [issue #207](https://github.com/Steam-Headless/docker-steam-headless/issues/207).
+3. **Fix ownership** on the persistent home directory:
+
+```shell
+sudo chown -R 1000:1000 /opt/container-data/steam-headless/home
+```
+
+4. **Recreate** the container after changing environment variables (do not only restart).
+5. Check logs:
+
+```shell
+docker exec steam-headless tail -50 /home/default/.cache/log/desktop.err.log
+docker exec steam-headless tail -50 /home/default/.steam/debian-installation/logs/console-linux.txt
+```
+
+### NVIDIA hosts
+
+If the above steps succeed but the Steam UI still does not render on NVIDIA hardware, try `NVIDIA_DRIVER_VERSION=535.154.05` and review [issue #207](https://github.com/Steam-Headless/docker-steam-headless/issues/207).
+
 ## Flatpaks not working
 
 Steam runs with Flatpak. These Flatpaks are instlled into the `default` user's home directory so they persist between container updates. Sometimes Flatpaks can get into a knot between major Steam Headless updates. In such cases, it may not work correctly. To fix this, just delete the Flatpak runtime in your `default` user's home directory a restart the container.

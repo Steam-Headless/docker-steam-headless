@@ -73,6 +73,12 @@ From this example output we can see that the Intel GPU is `/dev/dri/card1` and `
 - [NVIDIA GPUs Docker Compose Template](./compose-files/docker-compose.nvidia.yml).
 - [Privileged NVIDIA GPUs Docker Compose Template](./compose-files/docker-compose.nvidia.yml) (grants full access to host devices).
 
+### ZimaOS / CasaOS:
+- [ZimaOS setup guide](./zimaos.md)
+- [ZimaOS Docker Compose template](./compose-files/docker-compose.zimaos.yml)
+- [ZimaOS environment file](./compose-files/.env.zimaos)
+- [ZimaOS helper script](./compose-files/scripts/up.zimaos.sh)
+
 ## CONFIGURE ENV:
 
 Create a Steam Headless `/opt/container-services/steam-headless/.env` file with the contents found in this example [Environment File](./compose-files/.env).

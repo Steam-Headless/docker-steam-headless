@@ -59,6 +59,7 @@ If your host is already running X, you can just use that. To do this, be sure to
 - [Docker Compose](./docs/docker-compose.md)
 - [Unraid](./docs/unraid.md)
 - [Ubuntu Server](./docs/ubuntu-server.md)
+- [ZimaOS / CasaOS](./docs/zimaos.md)
 
 
 ---
@@ -73,4 +74,4 @@ For a development environment, I have created a script in the devops directory.
 - Require user to enter password for sudo
 - Document how to run this container:
     - Other server OS
-    - TrueNAS Scale 
+    - TrueNAS Scale
