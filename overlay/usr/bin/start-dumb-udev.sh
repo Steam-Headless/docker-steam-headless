@@ -5,12 +5,16 @@
 # File Created: Tuesday, 12th January 2022 8:46:47 am
 # Author: Josh.5 (jsunnex@gmail.com)
 # -----
-# Last Modified: Friday, 14th January 2022 9:21:00 am
-# Modified By: Josh.5 (jsunnex@gmail.com)
+# Last Modified: Saturday, 20th June 2026 9:21:00 am
+# Modified By: Victor Lavaud (victor.lavaud@pm.me)
 ###
 set -e
 
 state_dir=/run/udev-input-fix
+
+# Number of consecutive seconds the Sunshine/passthrough input devices must
+# be absent before the watcher re-arms itself. Tune via env var if needed.
+ABSENCE_DEBOUNCE_SECONDS="${ABSENCE_DEBOUNCE_SECONDS:-10}"
 
 # CATCH TERM SIGNAL:
 _term() {
@@ -67,10 +71,12 @@ fi
 dumb-udev &
 dumb_udev_pid=$!
 
+absent_seconds=0
 while true; do
     sync_input_nodes
-
     if sunshine_inputs_present; then
+        # Devices are present again - cancel any debounce countdown in progress.
+        absent_seconds=0
         if [[ ! -e "${state_dir}/xorg-restarted" ]]; then
             # Sunshine creates its virtual input devices on client connect. In
             # restricted containers with a private /dev, the sysfs devices may
@@ -83,7 +89,13 @@ while true; do
             : > "${state_dir}/xorg-restarted"
         fi
     else
-        rm -f "${state_dir}/xorg-restarted"
+        if [[ -e "${state_dir}/xorg-restarted" ]]; then
+            absent_seconds=$(( absent_seconds + 1 ))
+            if (( absent_seconds >= ABSENCE_DEBOUNCE_SECONDS )); then
+                rm -f "${state_dir}/xorg-restarted"
+                absent_seconds=0
+            fi
+        fi
     fi
 
     sleep 1
