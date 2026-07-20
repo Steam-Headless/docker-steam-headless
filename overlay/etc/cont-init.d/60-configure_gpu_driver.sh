@@ -26,7 +26,7 @@ export intel_gpu_model="$(lspci | grep -i "VGA compatible controller: Intel" | c
 
 # AMD params
 export amd_cpu_model="$(lscpu | grep 'Model name:' | grep -i amd | cut -d':' -f2 | xargs)"
-export amd_gpu_model="$(lspci | grep -i vga | grep -i amd)"
+export amd_gpu_model="$(lspci | grep -i -E 'vga|display' | grep -i amd)"
 
 function download_driver {
     local driver_url
