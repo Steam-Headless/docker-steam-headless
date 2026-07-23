@@ -71,7 +71,7 @@ From this example output we can see that the Intel GPU is `/dev/dri/card1` and `
 
 ### NVIDIA:
 - [NVIDIA GPUs Docker Compose Template](./compose-files/docker-compose.nvidia.yml).
-- [Privileged NVIDIA GPUs Docker Compose Template](./compose-files/docker-compose.nvidia.yml) (grants full access to host devices).
+- [Privileged NVIDIA GPUs Docker Compose Template](./compose-files/docker-compose.nvidia.privileged.yml) (grants full access to host devices).
 
 ## CONFIGURE ENV:
 
