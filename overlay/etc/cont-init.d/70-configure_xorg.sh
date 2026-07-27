@@ -118,7 +118,8 @@ function configure_x_server {
         print_step_header "No monitors connected. Installing dummy xorg.conf"
         # Use a dummy display input
         cp -f /templates/xorg/xorg.dummy.conf /etc/X11/xorg.conf
-    elif ([ "${FORCE_X11_DUMMY_CONFIG}" = "AMD" ]); then
+    fi
+    if ([ "${FORCE_X11_DUMMY_CONFIG}" = "AMD" ]); then
         print_step_header "Installing AMD xorg.conf"
         # Use a dummy display input
         cp -f /templates/xorg/xorg.amd.conf /etc/X11/xorg.conf
