@@ -3,8 +3,9 @@ LABEL maintainer="Josh.5 <jsunnex@gmail.com>"
 
 # Update package repos
 ARG DEBIAN_FRONTEND=noninteractive
+
 RUN \
-    echo "**** Update apt database ****" \
+    echo "**** Enable contrib, non-free in apt database ****" \
         && sed -i '/^Components: main/ s/$/ contrib non-free/' /etc/apt/sources.list.d/debian.sources \
     && \
     echo
@@ -454,6 +455,8 @@ RUN \
             htop \
             vainfo \
             vdpauinfo \
+            radeontop \
+            nvtop \
     && \
     echo "**** Section cleanup ****" \
         && apt-get clean autoclean -y \

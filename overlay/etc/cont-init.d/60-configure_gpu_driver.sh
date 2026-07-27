@@ -181,17 +181,24 @@ function install_deb_mesa {
         if [ "${ENABLE_SID:-}" = "true" ]; then
             print_step_header "Add Debian SID sources"
             echo "deb http://deb.debian.org/debian/ sid main" >/etc/apt/sources.list
+            BP="sid"
+        else
+          # Add backports instead
+          echo 'deb http://deb.debian.org/debian trixie-backports main' > /etc/apt/sources.list.d/backports.list
+          BP="trixie-backports"
         fi
         apt-get update &>>/tmp/init-mesa-libs-install.log
         print_step_header "Install mesa vulkan drivers"
         echo "" >>/tmp/init-mesa-libs-install.log
-        apt-get install -y --no-install-recommends \
+        apt-get install -t ${BP:-trixie-backports} -y --no-install-recommends \
             libvulkan1 \
             libvulkan1:i386 \
-            mesa-vulkan-drivers \
-            mesa-vulkan-drivers:i386 \
+            mesa-libgallium \
+            mesa-libgallium:i386 \
             mesa-utils \
             mesa-utils-extra \
+            mesa-vulkan-drivers \
+            mesa-vulkan-drivers:i386 \
             vulkan-tools \
             &>>/tmp/init-mesa-libs-install.log
     else

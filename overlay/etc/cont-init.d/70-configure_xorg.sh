@@ -84,7 +84,7 @@ function configure_x_server {
         rm ${display_file}
     fi
 
-    # Ensure X-windows session path is owned by root 
+    # Ensure X-windows session path is owned by root
     mkdir -p /tmp/.ICE-unix
     chown root:root /tmp/.ICE-unix/
     chmod 1777 /tmp/.ICE-unix/
@@ -112,12 +112,16 @@ function configure_x_server {
     else
         print_step_header "Leaving evdev inputs disabled"
     fi
-    
+
     # Configure dummy config if no monitor is connected (not applicable to NVIDIA)
-    if ([ "X${monitor_connected}" = "X" ] || [ "${FORCE_X11_DUMMY_CONFIG}" = "true" ]); then 
+    if ([ "X${monitor_connected}" = "X" ] || [ "${FORCE_X11_DUMMY_CONFIG}" = "true" ]); then
         print_step_header "No monitors connected. Installing dummy xorg.conf"
         # Use a dummy display input
         cp -f /templates/xorg/xorg.dummy.conf /etc/X11/xorg.conf
+    elif ([ "${FORCE_X11_DUMMY_CONFIG}" = "AMD" ]); then
+        print_step_header "Installing AMD xorg.conf"
+        # Use a dummy display input
+        cp -f /templates/xorg/xorg.amd.conf /etc/X11/xorg.conf
     fi
 }
 
