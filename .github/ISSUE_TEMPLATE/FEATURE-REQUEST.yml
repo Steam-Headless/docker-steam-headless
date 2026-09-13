@@ -1,33 +1,40 @@
----
-
 name: Feature Request
-description: Suggest a new feature.
-labels: ['status:awaiting-triage', 'type:enhancement']
+description: Suggest an idea or feature proposal for Steam Headless V2
+title: '[Feature]: '
+labels: ['type:feature-request']
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to help improve!
+        ### Feature Proposals
+        Thank you for helping improve Steam Headless! Please outline your proposal, rationale, and target use case below.
+
+        For informal discussions, brainstorming, or setup questions, please chat in our [Discord Community](https://streamingtech.co.nz/discord) first.
   - type: textarea
     id: problem
     attributes:
-      label: Is your feature request related to a problem?
-      description: If so, please provide clear and concise description of the problem.
-      placeholder: eg. I'm always frustrated when '...'
-  - type: textarea
-    id: feature
-    attributes:
-      label: What is your feature request?
-      description: A clear and concise description of the feature.
+      label: Problem Statement
+      description: Is your feature proposal related to a specific limitation or problem? Please describe it clearly.
     validations:
       required: true
   - type: textarea
-    id: workaround
+    id: solution
     attributes:
-      label: Are there any workarounds?
-      description: A clear and concise description of any alternative solutions or features you've considered.
+      label: Proposed Solution
+      description: Describe the solution or functionality you would like to see implemented.
+    validations:
+      required: true
   - type: textarea
-    id: additional
+    id: alternatives
     attributes:
-      label: Additional Context
-      description: Add any other context or screenshots about the feature request here.
+      label: Alternatives Considered
+      description: Describe any alternative approaches or workarounds you have considered.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this feature has not already been requested.
+          required: true

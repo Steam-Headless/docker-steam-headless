@@ -1,0 +1,39 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Steam Headless Compatibility Configuration",
+    "description": "Validation configuration and minimum version requirements for Steam Headless compatibility reports",
+    "supported_os": {
+        "Unraid": {
+            "min_version": "7.2.5"
+        },
+        "TrueNAS SCALE": {
+            "min_version": "25.10"
+        },
+        "Ubuntu": {
+            "min_version": "24.04"
+        },
+        "Debian": {
+            "min_version": "13"
+        },
+        "Fedora Server": {
+            "min_version": "44"
+        },
+        "Red Hat Enterprise Linux": {
+            "min_version": "10"
+        },
+        "Rocky Linux": {
+            "min_version": "10"
+        },
+        "AlmaLinux": {
+            "min_version": "10"
+        },
+        "CentOS Stream": {
+            "min_version": "10"
+        }
+    },
+    "supported_gpu_vendors": [
+        "NVIDIA",
+        "AMD",
+        "Intel"
+    ]
+}

@@ -1,87 +1,73 @@
----
-
 name: Bug Report
-description: Please do not use bug reports for support issues.
-title: "[Bug]: "
-labels: ['status:awaiting-triage', 'type:bug']
+description: File a reproducible bug report for Steam Headless
+title: '[Bug]: '
+labels: ['type:bug']
 body:
   - type: markdown
     attributes:
       value: |
-        **THIS IS NOT THE PLACE TO ASK FOR SUPPORT!** Please use [Discord](https://unmanic.app/discord) for support issues.
+        ### Important Notice
+        **GitHub issues are strictly reserved for verified software bugs and regressions.**
+
+        If you need configuration assistance, hardware compatibility guidance, or general troubleshooting, please join our [Discord Community](https://streamingtech.co.nz/discord).
+
+        **General support questions or unverified environment issues opened here will be closed immediately and redirected to Discord.**
   - type: textarea
     id: description
     attributes:
-      label: Describe the Bug
+      label: Bug Description
       description: A clear and concise description of the bug.
     validations:
       required: true
   - type: textarea
-    id: steps
+    id: reproduction
     attributes:
       label: Steps to Reproduce
-      description: List each action required in order to reproduce the issue.
+      description: Describe the exact steps required to reproduce the issue.
       placeholder: |
-        1. First Step '...'
-        2. Second Step '...'
-        3. So on '...'
-        4. See error
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected Behavior
-      description: A clear and concise description of what you expected to happen.
-  - type: textarea
-    id: screenshots
-    attributes:
-      label: Screenshots
-      description: Provide screenshots to help explain your problem.
-  - type: textarea
-    id: relevant
-    attributes:
-      label: Relevant Settings
-      description: Include all settings/configuration that are relevant to your setup.
-      placeholder: |
-        - eg. Configuration of your Docker container.
-        - eg. Configurations within the application/container.
-        - eg. External processes that you have connected to or communicating with the application/container.
-  - type: input
-    id: version
-    attributes:
-      label: Version
-      description: The version is the first line printed in the Docker log.
-      placeholder: 'Build: [10/08/22 03:09:26] [master] [477e25f82c2612b6345ca0c9777345e6b5129965]'
+        1. Start container with command / Compose configuration '...'
+        2. Open SHUI at 'https://<ip>:8483'
+        3. Launch Steam or start stream '...'
+        4. See error '...'
     validations:
       required: true
   - type: textarea
-    id: platform
+    id: expected
     attributes:
-      label: Platform
-      description: |
-        Detail the host OS platform, version and software versions.
-          - Distribution: `$(. /etc/os-release; echo "${NAME} - ${VERSION}")`
-          - Linux Kernel: `$(uname -rpio)`
-          - GPU Driver versions: `$(nvidia-smi | grep 'Version:')`
-          - Docker: `$(docker -v)`
-          - Docker-compose: `$(docker compose -v)`
+      label: Expected Behaviour
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Host operating system, GPU model and driver version, container image tag, etc.
       placeholder: |
-        - Distribution:
-        - Linux Kernel:
-        - GPU Driver versions:
-        - Docker:
-        - Docker-compose:
+        - Host OS: Fedora 44 Server / Ubuntu 24.04 / Unraid 7.x
+        - GPU: Intel Iris Pro 580 / NVIDIA RTX 3080 / AMD RX 6700 XT
+        - Driver Version: e.g. NVIDIA 550.54.14 / Mesa 24.x
+        - Container Image: registry.gitlab.com/streamingtech/products/steam-headless/docker-steam-headless-v2:latest
+        - Network Mode: host / macvlan
+        - Docker Version: 28.x
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
-      label: Relevant log output
-      description: |
-        Please copy and paste any relevant log output. 
-        This will be automatically formatted into code, so no need for backticks.
-        Note: Most relevant logs are found either in the docker logs or inside the container in /home/default/.cache/log/
-      render: Shell
-  - type: markdown
+      label: Relevant Logs
+      description: Please paste sanitised container logs (`docker logs <container>`) and SHUI journal output. Ensure all passwords, tokens, and personal credentials are removed.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirmations
     attributes:
-      value: |
-        Make sure to close your issue when it's solved! If you found the solution yourself please comment so that others benefit from it.
+      label: Confirmations
+      options:
+        - label: I have verified that this issue is reproducible and not a general configuration or hardware setup question.
+          required: true
+        - label: I understand that support questions opened as GitHub issues will be closed immediately and directed to Discord.
+          required: true
+        - label: I have removed all sensitive credentials, passwords, and private tokens from my logs.
+          required: true

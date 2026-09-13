@@ -1,0 +1,162 @@
+[
+    {
+        "name": "COMPAT-REPORT GPU: AMD",
+        "color": "C4262B",
+        "description": "^(AMD)$"
+    },
+    {
+        "name": "COMPAT-REPORT GPU: Intel",
+        "color": "0068B4",
+        "description": "^(Intel)$"
+    },
+    {
+        "name": "COMPAT-REPORT GPU: NVIDIA",
+        "color": "68A300",
+        "description": "^(NVIDIA)$"
+    },
+    {
+        "name": "COMPAT-REPORT MODE: Host",
+        "color": "5C509C",
+        "description": "^(Host)"
+    },
+    {
+        "name": "COMPAT-REPORT MODE: Macvlan",
+        "color": "2C8C99",
+        "description": "^(Macvlan)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: AlmaLinux",
+        "color": "1D76DB",
+        "description": "^(AlmaLinux)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: CentOS Stream",
+        "color": "1D76DB",
+        "description": "^(CentOS Stream)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: Debian",
+        "color": "1D76DB",
+        "description": "^(Debian)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: Fedora Server",
+        "color": "1D76DB",
+        "description": "^(Fedora)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: Red Hat Enterprise Linux",
+        "color": "1D76DB",
+        "description": "^(Red Hat Enterprise Linux|RHEL)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: Rocky Linux",
+        "color": "1D76DB",
+        "description": "^(Rocky Linux)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: TrueNAS SCALE",
+        "color": "1D76DB",
+        "description": "^(TrueNAS SCALE)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: Ubuntu",
+        "color": "1D76DB",
+        "description": "^(Ubuntu)"
+    },
+    {
+        "name": "COMPAT-REPORT OS: Unraid",
+        "color": "1D76DB",
+        "description": "^(Unraid)"
+    },
+    {
+        "name": "COMPAT-REPORT RESULT: broken",
+        "color": "d73a4a",
+        "description": "^(Not working)"
+    },
+    {
+        "name": "COMPAT-REPORT RESULT: issues",
+        "color": "D99B00",
+        "description": "^(Working with issues)"
+    },
+    {
+        "name": "COMPAT-REPORT RESULT: partial",
+        "color": "C9510C",
+        "description": "^(Partially working)"
+    },
+    {
+        "name": "COMPAT-REPORT RESULT: working",
+        "color": "1EAA1E",
+        "description": "^(Working: Fully functional)"
+    },
+    {
+        "name": "priority:high",
+        "color": "FBCA04",
+        "description": "High priority issue"
+    },
+    {
+        "name": "priority:low",
+        "color": "FBCA04",
+        "description": "Low priority issue"
+    },
+    {
+        "name": "priority:medium",
+        "color": "FBCA04",
+        "description": "Medium priority issue"
+    },
+    {
+        "name": "state:added",
+        "color": "1EAA1E",
+        "description": "Feature has been added to the next release"
+    },
+    {
+        "name": "state:fixed",
+        "color": "1EAA1E",
+        "description": "Bug has been fixed in the next release"
+    },
+    {
+        "name": "state:stale",
+        "color": "AAAAAA",
+        "description": "Issue is inactive and pending closure"
+    },
+    {
+        "name": "state:wontfix",
+        "color": "FFFFFF",
+        "description": "This will not be worked on"
+    },
+    {
+        "name": "status:awaiting-triage",
+        "color": "9D509D",
+        "description": "Awaiting triage and review"
+    },
+    {
+        "name": "status:in-progress",
+        "color": "9D509D",
+        "description": "Work is currently in progress"
+    },
+    {
+        "name": "status:in-review",
+        "color": "9D509D",
+        "description": "Changes or report under review"
+    },
+    {
+        "name": "status:need-more-info",
+        "color": "9D509D",
+        "description": "Further details or reproduction steps required"
+    },
+    {
+        "name": "type:bug",
+        "color": "d73a4a",
+        "description": "Something isn't working"
+    },
+    {
+        "name": "type:compatibility",
+        "color": "DBC275",
+        "description": "Hardware and OS compatibility reports and discussions"
+    },
+    {
+        "name": "type:feature-request",
+        "color": "a2eeef",
+        "description": "New feature or request for feature enhancement"
+    }
+]

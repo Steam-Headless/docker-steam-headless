@@ -1,13 +1,12 @@
 ---
-
 # Configuration for Label Actions - https://github.com/dessant/label-actions
 
-added:
+'state:added':
   comment: >
     This feature has been added and will be available in the next release.
     This issue will be automatically closed once the update is available.
 
-fixed:
+'state:fixed':
   comment: >
     This bug has been fixed and will be available in the next release.
     This issue will be automatically closed once the update is available.
@@ -25,9 +24,9 @@ invalid:duplicate:
 
 invalid:support:
   comment: >
-    :wave: @{issue-author}, we use the issue tracker exclusively for bug reports.
+    :wave: @{issue-author}, we use the issue tracker exclusively for bug reports, feature requests, and compatibility reports.
     However, this issue appears to be a support request. Please use our
-    [Discord Server](https://unmanic.app/discord) to get help. Thanks.
+    [Discord Server](https://streamingtech.co.nz/discord) to get help. Thanks.
   close: true
   lock: true
   lock-reason: 'off-topic'

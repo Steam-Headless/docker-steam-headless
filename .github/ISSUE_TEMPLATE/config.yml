@@ -1,10 +1,11 @@
----
-
 blank_issues_enabled: false
 contact_links:
-  - name: Discord support
-    url: https://unmanic.app/discord
-    about: Ask questions in Discord.
+  - name: Community Support & Questions (Discord)
+    url: https://streamingtech.co.nz/discord
+    about: Please ask questions, get help configuring containers, and discuss setup on our Discord server. GitHub issues are strictly for verified bugs and confirmed feature requests.
+  - name: Documentation
+    url: https://github.com/Steam-Headless/
+    about: Read the official documentation for setup instructions, network configuration, and troubleshooting guides.
   - name: Unraid Forum
     url: https://forums.unraid.net/topic/118390-support-josh5-steam-headless/
     about: For Unraid users, please check the forums to see if your question has already been answered.

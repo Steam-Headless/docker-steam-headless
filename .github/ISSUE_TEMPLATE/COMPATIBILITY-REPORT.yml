@@ -1,0 +1,188 @@
+name: Compatibility Report
+description: Submit a hardware and OS compatibility report for the community
+title: '(Placeholder - Issue title will be automatically populated with the information provided below on submit)'
+labels: ['type:compatibility']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Community Compatibility Report
+        Share your hardware, operating system, and container setup results with the community!
+
+        This report serves as a living document and reference discussion for others running similar hardware and software combinations (e.g. specific GPU architectures, driver versions, or host OS platforms).
+
+        *Note: If you are reporting a reproducible software bug or crash in Steam Headless itself, please use the **[Bug Report](BUG-REPORT.yml)** template instead.*
+
+        ---
+
+        ### 📋 Quick System Info Helper
+        To easily collect your exact system specifications, copy and run this command in your host terminal:
+
+        ```bash
+
+        echo "=== Steam Headless System Info ==="
+        if [ -f /etc/unraid-version ]; then . /etc/unraid-version; OS=Unraid; VER="$version"; elif command -v midclt >/dev/null 2>&1 && V="$(midclt call system.version 2>/dev/null)" && [[ $V == TrueNAS-* ]]; then OS="TrueNAS SCALE"; VER="${V#TrueNAS-}"; elif [ -f /etc/os-release ]; then . /etc/os-release; OS="$NAME"; VER="${VERSION:-$VERSION_ID}"; else OS=Unknown; VER=Unknown; fi
+        printf "Host Operating System:      %s\nHost OS Version:            %s\nHost Linux Kernel Version:  %s\nDocker Version:             %s\n" "$OS" "$VER" "$(uname -r)" "$(docker --version 2>/dev/null || echo 'Not installed')"
+        echo "GPU Information:"; NVER="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -n1)"
+        if command -v lspci >/dev/null 2>&1; then lspci -nn | grep -Ei '\[(0300|0302|0380)\]:' | while IFS= read -r line; do
+          case "$line" in *"[10de:"*) V=NVIDIA;; *"[1002:"*) V=AMD;; *"[8086:"*) V=Intel;; *) V=Other;; esac
+          PCI="${line%% *}"; [[ "$PCI" == *:*:* ]] || PCI="0000:$PCI"; D="$(basename "$(readlink -f "/sys/bus/pci/devices/$PCI/driver" 2>/dev/null)" 2>/dev/null)"; [ "$V" = NVIDIA ] && [ -n "$NVER" ] && D="${D:+$D }$NVER"
+          M="$(echo "$line" | sed -E 's/^[0-9a-f:.]+ +(VGA compatible controller|3D controller|Display controller)( \[[0-9a-f]+\])?: +//I;s/ +\[[0-9a-f]{4}:[0-9a-f]{4}\].*$//I')"
+          printf "  GPU Vendor: %s\n    - GPU Model:  %s\n    - GPU Driver: %s\n" "$V" "$M" "${D:-Unknown}"
+        done; else echo "  Unable to detect GPUs: lspci not installed"; fi
+
+        ```
+  - type: dropdown
+    id: os
+    attributes:
+      label: Host Operating System
+      description: Select your host operating system. Only listed supported distributions and minimum versions are eligible.
+      options:
+        - Fedora Server (44+)
+        - Unraid (7.2.5+)
+        - TrueNAS SCALE (25.10+)
+        - Ubuntu (24.04+)
+        - Debian (13+)
+        - Red Hat Enterprise Linux (10+)
+        - Rocky Linux (10+)
+        - AlmaLinux (10+)
+        - CentOS Stream (10+)
+    validations:
+      required: true
+  - type: input
+    id: os_version
+    attributes:
+      label: Host OS Version
+      description: Enter numeric version only (e.g. 7.3.2, 25.10.7, 24.04.1). Note minimum supported versions (Unraid 7.2.5+, TrueNAS SCALE 25.10+, Ubuntu 24.04+, Debian 13+, Fedora Server 44+, EL10+).
+      placeholder: e.g. 7.3.2 / 25.10.7 / 24.04.1 / 13.0 / 44 / 10.0
+    validations:
+      required: true
+  - type: input
+    id: kernel_version
+    attributes:
+      label: Host Linux Kernel Version
+      description: Output of `uname -r` on the host system.
+      placeholder: e.g. 6.8.0-45-generic / 6.12.105-production+truenas / 6.18.38-Unraid
+    validations:
+      required: true
+  - type: input
+    id: docker_version
+    attributes:
+      label: Docker Version
+      description: Output of `docker --version` on the host.
+      placeholder: e.g. Docker version 28.3.1, build 38b7060 / Docker version 29.5.3
+    validations:
+      required: true
+  - type: dropdown
+    id: gpu_vendor
+    attributes:
+      label: GPU Vendor
+      description: Primary GPU vendor used for hardware acceleration / display.
+      options:
+        - NVIDIA
+        - AMD
+        - Intel
+    validations:
+      required: true
+  - type: input
+    id: gpu_model
+    attributes:
+      label: GPU Model
+      description: Exact GPU model from the system info helper output.
+      placeholder: e.g. NVIDIA GeForce RTX 2060 / GeForce GTX 1050 Ti / Intel HD Graphics 630 / Radeon RX 6700 XT
+    validations:
+      required: true
+  - type: input
+    id: gpu_driver
+    attributes:
+      label: GPU Driver
+      description: Host GPU driver version (e.g. NVIDIA driver version or Mesa version).
+      placeholder: e.g. 580.173.02 / 550.107.02 / Mesa 24.1.7
+    validations:
+      required: false
+  - type: dropdown
+    id: deployment_mode
+    attributes:
+      label: Deployment Mode
+      description: In which mode was Steam Headless deployed?
+      options:
+        - 'Host Mode (Single session - Host networking with direct host hardware access)'
+        - 'Macvlan Mode (Multi-session - Macvlan networking, virtualized desktops sharing hardware)'
+    validations:
+      required: true
+  - type: dropdown
+    id: overall_status
+    attributes:
+      label: Overall Compatibility Result
+      description: Overall result on this hardware/software setup.
+      options:
+        - 'Working: Fully functional (Desktop UI, Audio, Video encoding, Steam, Streaming all work)'
+        - 'Working with issues: Functional with minor workarounds or minor quirks'
+        - 'Partially working: Core functionality degraded (e.g. no hardware encoding, audio issues)'
+        - 'Not working: Container fails to start, crashes, or black screen'
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Detailed Report & Findings
+      description: |
+        Detail what worked and what didn't on your hardware setup.
+        Feel free to edit, customize, or delete sections below to match what you tested.
+        *(Note: If you encounter software bugs with Steam Headless itself, please file a [Bug Report](BUG-REPORT.yml) instead).*
+      value: |
+        <!--
+        Tip: Replace the placeholder items below with your own test findings.
+        You can mark items with: [Worked], [Worked with issues], [Partially working], [Not working], or [Not tested].
+        Feel free to delete any sections or lines that you did not test!
+        -->
+
+        ### 🌐🖥️ Steam Headless UI & Portal
+        *Note: Front-end UI bugs should be reported via Bug Reports. This section is for remote streaming & hardware compatibility.*
+        - **Portal Remote Stream**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Hardware-accelerated video encoding active (smooth stream, low decode lag)?
+          - In-browser audio streaming working correctly?
+          - Latency observations (subjective, but useful if pointing to software vs hardware encoding):
+        - **Dashboard & Hardware Diagnostics**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Did GPU, CPU, memory, and driver diagnostics detect and display properly for your hardware?
+
+        ### ☀️🌙 Sunshine & Moonlight Streaming
+        - **Sunshine Configuration & Pairing**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+        - **Moonlight Client Streaming & Video Performance**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Resolution & Framerate tested (e.g. 1080p@60fps, 1440p@120fps, 4K@60fps):
+          - Video encoder used (NVENC / VAAPI / QuickSync):
+        - **Automatic Resolution & Refresh Rate Switching on Connect**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Did the desktop automatically switch resolution to match your Moonlight client (e.g. 800p on Steam Deck, 1080p, 1440p, 4K) and restore on disconnect?
+        - **Input Devices & Controller Passthrough**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Input devices tested (e.g. Keyboard, Mouse, Gamepads, Joysticks, Wheels, etc.):
+          - Controller rumble / vibration, gyro, and button mapping behavior:
+
+        ### 🎮 Tested Games, Launchers & Emulators
+        *List games, launchers, or emulators tested and note their compatibility at the end of each line:*
+        - **Steam Game (Proton)**: Cyberpunk 2077 [Worked - 60 FPS, NVENC active, audio OK]
+        - **Steam Game (Native Linux)**: Portal 2 [Worked]
+        - **Alternative Launcher (Heroic / Lutris / Junk-Store)**: Heroic Games Launcher [Worked with issues - explain quirks]
+        - **Emulators (RPCS3 / Dolphin / RetroArch / Cemu / PCSX2)**: [Worked / Not tested]
+
+        ### 🪟 KDE Plasma Desktop & App Management
+        - **Desktop Experience & Display Settings**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Resolution switching, refresh rates, virtual display handling:
+          - Audio device / output switching within KDE Plasma:
+        - **Flatpaks & App Management (Discover / EmuDeck / Package Installers)**: [Worked / Worked with issues / Partially working / Not working / Not tested]
+          - Installing and launching Flatpaks, configuration tools (e.g. EmuDeck installer), or extra Linux apps:
+
+        ### ⚙️ Hardware Caveats, Workarounds & Custom Config
+        - **Docker Compose / Environment Overrides**: (e.g. custom device mounts `/dev/dri`, `/dev/nvidia*`, custom shm_size, or custom env vars)
+        - **Host / Driver Caveats**: (e.g. special kernel boot parameters, IOMMU / GPU isolation requirements, or known quirks for this specific hardware)
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Diagnostic Logs & System Output (Optional)
+      description: |
+        If you encountered any hardware errors, encoding failures, or crashes, paste relevant error logs,
+        `nvidia-smi`, `vulkaninfo`, `glxinfo`, or container output here.
+      render: shell
+    validations:
+      required: false

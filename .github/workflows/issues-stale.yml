@@ -1,5 +1,4 @@
 ---
-
 name: Stale Issues / PRs
 
 on:
@@ -10,42 +9,60 @@ jobs:
   stale:
     name: Check Stale Issues / PRs
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
     steps:
-      - name: Stale
-        uses: actions/stale@v5
+      - name: Stale Regular Issues & PRs
+        uses: actions/stale@v9
         with:
           close-issue-message: >
-            This issue was closed because it has been stalled for 5 days with no activity.
+            This issue was closed because it has been stalled for 10 days with no activity.
           close-pr-message: >
             This PR was closed because it has been stalled for 10 days with no activity.
           days-before-stale: 60
           days-before-close: 10
           exempt-all-assignees: true
-          exempt-issue-labels: 'added,fixed,type:enhancement,status:awaiting-triage,status:in-progress'
-          exempt-pr-labels: 'type:dependencies,status:in-progress,status:in-review'
-          stale-issue-label: 'stale'
+          exempt-issue-labels: 'state:added,state:fixed,type:feature-request,type:compatibility,status:awaiting-triage,status:in-progress'
+          exempt-pr-labels: 'status:in-progress,status:in-review'
+          stale-issue-label: 'state:stale'
           stale-issue-message: >
-            This issue is stale because it has been open for 30 days with no activity.
-            Comment or remove the stale label, otherwise this will be closed in 5 days.
-          stale-pr-label: 'stale'
+            This issue is stale because it has been open for 60 days with no activity.
+            Comment or remove the stale label, otherwise this will be closed in 10 days.
+          stale-pr-label: 'state:stale'
           stale-pr-message: >
             This PR is stale because it has been open for 60 days with no activity.
             Comment or remove the stale label, otherwise this will be closed in 10 days.
 
+      - name: Stale Compatibility Reports
+        uses: actions/stale@v9
+        with:
+          only-labels: 'type:compatibility'
+          days-before-stale: 180
+          days-before-close: 14
+          exempt-all-assignees: false
+          stale-issue-label: 'state:stale'
+          stale-issue-message: >
+            This compatibility report has had no activity for 6 months and is marked as stale.
+            If you have updated test results or findings with this hardware and OS combination, comment below to keep it active.
+          close-issue-message: >
+            This compatibility report has been closed due to 6 months of inactivity.
+            It remains searchable for community reference, and adding a new comment will automatically reopen it.
+
       - name: Invalid Template
-        uses: actions/stale@v5
+        uses: actions/stale@v9
         with:
           close-issue-message: >
-            This issue was closed because the the template was not completed after 5 days.
+            This issue was closed because the template was not completed after 5 days.
           close-pr-message: >
-            This PR was closed because the the template was not completed after 5 days.
+            This PR was closed because the template was not completed after 5 days.
           days-before-stale: 0
           days-before-close: 5
-          exempt-pr-labels: 'type:dependencies,status:in-progress,status:in-review'
           only-labels: 'invalid:template-incomplete'
           stale-issue-label: 'invalid:template-incomplete'
           stale-issue-message: >
-            Invalid issues template.
+            Invalid issue template. Please complete the template within 5 days.
           stale-pr-label: 'invalid:template-incomplete'
           stale-pr-message: >
             Invalid PR template.
