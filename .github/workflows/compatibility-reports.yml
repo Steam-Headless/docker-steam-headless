@@ -4,8 +4,6 @@ name: Compatibility Reports Automation
 on:
   issues:
     types: [opened, edited, reopened]
-  issue_comment:
-    types: [created]
 
 jobs:
   manage-report:
