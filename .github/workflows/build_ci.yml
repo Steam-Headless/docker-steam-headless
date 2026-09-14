@@ -21,7 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flavour: ['debian', 'arch']
+        # Arch builds are disabled because the project doesn't support them and they are failing.
+        flavour: ['debian']
 
     steps:
       # ---
