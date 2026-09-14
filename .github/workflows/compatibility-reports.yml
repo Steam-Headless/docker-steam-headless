@@ -1,5 +1,4 @@
 ---
-
 name: Compatibility Reports Automation
 
 on:
@@ -11,6 +10,9 @@ on:
 jobs:
   manage-report:
     name: Process Compatibility Report
+    if: >-
+      ${{ !github.event.issue.pull_request &&
+      contains(github.event.issue.labels.*.name, 'type:compatibility') }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
