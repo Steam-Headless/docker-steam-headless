@@ -498,9 +498,10 @@ RUN \
         && apt-get install -y \
             va-driver-all \
     && \
-    echo "**** Download latest Sunshine release ****" \
-        && SUNSHINE_RELEASE=$(curl -sX GET "https://api.github.com/repos/LizardByte/Sunshine/releases/latest" | jq -r '.tag_name') \
-        && SUNSHINE_URL=$(curl -sX GET "https://api.github.com/repos/LizardByte/Sunshine/releases/latest" | jq -r '.assets[] | select(.name | contains("sunshine-debian-trixie-amd64.deb")) | .browser_download_url') \
+    echo "**** Download pinned Sunshine release ****" \
+        && SUNSHINE_RELEASE="v2026.516.143833" \
+        && SUNSHINE_RELEASE_JSON="$(curl -fsSL "https://api.github.com/repos/LizardByte/Sunshine/releases/tags/${SUNSHINE_RELEASE}")" \
+        && SUNSHINE_URL="$(printf '%s' "${SUNSHINE_RELEASE_JSON}" | jq -er '[.assets[] | select(.name | test("^(sunshine_.*\\+debiantrixie_amd64|sunshine-debian-trixie-amd64)\\.deb$")) | .browser_download_url][0]')" \
         && echo "Downloading Sunshine ${SUNSHINE_RELEASE} from ${SUNSHINE_URL}" \
         && wget -O /usr/src/sunshine.deb "${SUNSHINE_URL}" \
     && \
