@@ -1,0 +1,331 @@
+name: New OS Report
+description: Share a verified Host OS / NAS setup and request support documentation
+title: '[New OS]: '
+labels: ['type:feature-request']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🐧 New Host Operating System Report
+
+        Thank you for helping expand Steam Headless to new platforms.
+
+        > [!IMPORTANT]
+        > **This template is for host OS setups that you have already configured and verified working yourself.**
+        > Record the host's state *before* you changed it and every change required to make Steam Headless work. This lets us write reproducible documentation for other users. If you need help with an unsupported OS, please join our [Discord Community](https://streamingtech.co.nz/discord).
+
+        ### Requirements being evaluated
+
+        - Linux kernel 5.6 or newer (`>= 5.6`); cgroup v2 (`cgroup2fs`); Docker Engine 28.0 or newer
+        - Host device nodes: `/dev/uinput`, `/dev/uhid`, `/dev/fuse`, and the selected GPU DRM render node
+        - Sufficient inotify and `vm.max_map_count` limits for the containers and games tested
+
+        Do not include passwords, tokens, private IP addresses, hostnames, usernames, email addresses, domains, MAC addresses, or private storage paths. Replace them with placeholders.
+
+        ---
+
+        ### 📋 System information helper
+
+        Run this on the host before making changes, then run it again after completing setup. Record the pre-change values in the relevant fields below and paste the final output into **Final Host Information Helper Output**.
+
+        ```bash
+
+        echo '=== Steam Headless Host Information ==='
+        if [ -f /etc/unraid-version ]; then . /etc/unraid-version; OS=Unraid; VER="$version"; elif command -v midclt >/dev/null 2>&1 && V="$(midclt call system.version 2>/dev/null)" && [[ $V == TrueNAS-* ]]; then OS='TrueNAS SCALE'; VER="${V#TrueNAS-}"; elif [ -f /etc/os-release ]; then . /etc/os-release; OS="$NAME"; VER="${VERSION:-$VERSION_ID}"; else OS=Unknown; VER=Unknown; fi
+        printf 'Host OS: %s\nHost OS version: %s\nArchitecture: %s\nKernel: %s\ncgroup filesystem: %s\nDocker Engine (server): %s\nDocker Compose: %s\n' "$OS" "$VER" "$(uname -m)" "$(uname -r)" "$(stat -fc %T /sys/fs/cgroup 2>/dev/null || echo Unknown)" "$(docker version --format '{{.Server.Version}}' 2>/dev/null || echo 'Not available')" "$(docker compose version --short 2>/dev/null || echo 'Not available')"
+        docker info --format 'Docker cgroup driver: {{.CgroupDriver}}' 2>/dev/null || true
+        docker info --format 'Docker cgroup version: {{.CgroupVersion}}' 2>/dev/null || true
+        docker info --format 'Docker security options: {{json .SecurityOptions}}' 2>/dev/null || true
+        printf 'inotify max_user_instances: %s\ninotify max_user_watches: %s\nvm.max_map_count: %s\n' "$(sysctl -n fs.inotify.max_user_instances 2>/dev/null || echo Unknown)" "$(sysctl -n fs.inotify.max_user_watches 2>/dev/null || echo Unknown)" "$(sysctl -n vm.max_map_count 2>/dev/null || echo Unknown)"
+        for device in /dev/uinput /dev/uhid /dev/fuse /dev/dri/renderD*; do [ -c "$device" ] && printf 'Device available: %s\n' "$device"; done
+        command -v getenforce >/dev/null 2>&1 && printf 'SELinux: %s\n' "$(getenforce)"
+        command -v aa-status >/dev/null 2>&1 && aa-status --enabled && echo 'AppArmor: enabled'
+        echo 'GPU information:'; NVER="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -n1)"
+        if command -v lspci >/dev/null 2>&1; then lspci -nn | grep -Ei '\[(0300|0302|0380)\]:' | while IFS= read -r line; do
+          case "$line" in *"[10de:"*) V=NVIDIA;; *"[1002:"*) V=AMD;; *"[8086:"*) V=Intel;; *) V=Other;; esac
+          PCI="${line%% *}"; [[ "$PCI" == *:*:* ]] || PCI="0000:$PCI"; D="$(basename "$(readlink -f "/sys/bus/pci/devices/$PCI/driver" 2>/dev/null)" 2>/dev/null)"; [ "$V" = NVIDIA ] && [ -n "$NVER" ] && D="${D:+$D }$NVER"
+          M="$(echo "$line" | sed -E 's/^[0-9a-f:.]+ +(VGA compatible controller|3D controller|Display controller)( \[[0-9a-f]+\])?: +//I;s/ +\[[0-9a-f]{4}:[0-9a-f]{4}\].*$//I')"
+          printf '  GPU Vendor: %s\n    - GPU Model:  %s\n    - GPU Driver: %s\n' "$V" "$M" "${D:-Unknown}"
+        done; else echo '  Unable to detect GPUs: lspci not installed'; fi
+
+        ```
+
+  - type: markdown
+    attributes:
+      value: '## 1. Host OS baseline — before Steam Headless preparation'
+  - type: input
+    id: os_name
+    attributes:
+      label: Host Operating System Name
+      description: Exact Linux distribution or NAS operating system name.
+      placeholder: e.g. Arch Linux / Proxmox VE / Alpine Linux / openSUSE Leap / QNAP QTS / Synology DSM / NixOS
+    validations:
+      required: true
+  - type: input
+    id: os_version
+    attributes:
+      label: Host OS Version / Release
+      description: Release version or rolling-release identifier.
+      placeholder: e.g. 8.2-2 / 7.2 / Tumbleweed / 2024.1 / Rolling
+    validations:
+      required: true
+  - type: input
+    id: host_architecture
+    attributes:
+      label: Host Architecture
+      description: Output of `uname -m`.
+      placeholder: e.g. x86_64 / aarch64
+    validations:
+      required: true
+  - type: input
+    id: kernel_version
+    attributes:
+      label: Host Linux Kernel Version
+      description: Output of `uname -r`. The running kernel must be 5.6 or newer (`>= 5.6`).
+      placeholder: e.g. 6.12.8-arch1-1 / 6.8.12-1-pve
+    validations:
+      required: true
+  - type: input
+    id: cgroup_filesystem
+    attributes:
+      label: Host cgroup Filesystem Type
+      description: Output of `stat -fc %T /sys/fs/cgroup`; Steam Headless requires `cgroup2fs`.
+      placeholder: cgroup2fs
+    validations:
+      required: true
+  - type: textarea
+    id: host_information_final
+    attributes:
+      label: Final Host Information Helper Output
+      description: Paste the complete final-state output of the `=== Steam Headless Host Information ===` helper above. It must be from the host used for this report.
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: docker_preinstalled
+    attributes:
+      label: Did Docker Engine Require Manual Installation or Configuration?
+      description: Include enabling an optional vendor container service, changing daemon configuration, or permissions.
+      options:
+        - Yes
+        - No — supplied and ready to use
+    validations:
+      required: true
+  - type: input
+    id: docker_version
+    attributes:
+      label: Docker Engine Server Version
+      description: Output of `docker version --format '{{.Server.Version}}'`. Docker Engine 28.0 or newer is required.
+      placeholder: e.g. 28.3.1
+    validations:
+      required: true
+  - type: textarea
+    id: docker_setup
+    attributes:
+      label: Docker Engine Installation or Configuration
+      description: '⚠️ ONLY provide setup details if you selected `Yes` above. Otherwise enter `No changes required`. Include packages, vendor application/template, commands, daemon configuration, permissions, and persistence steps.'
+      placeholder: |
+        - Initial state: Docker was not installed / vendor container service was disabled.
+        - Changes: Installed ...; enabled ...; added my user to ...
+        - Persistence: ...
+    validations:
+      required: true
+  - type: input
+    id: gpu_info
+    attributes:
+      label: GPU Hardware and Final Driver
+      description: GPU vendor/model and the driver version used for the successful test.
+      placeholder: e.g. NVIDIA GeForce RTX 3070 — 580.173 / AMD Radeon RX 6700 XT — Mesa 24.2 / Intel Arc A770
+    validations:
+      required: true
+  - type: dropdown
+    id: gpu_driver_provided
+    attributes:
+      label: Did GPU Drivers, Runtime, or Firmware Require Setup?
+      description: Include driver, runtime, firmware, or GPU-specific host configuration required for Steam Headless.
+      options:
+        - Yes
+        - No — OS-provided setup worked
+    validations:
+      required: true
+  - type: textarea
+    id: gpu_setup
+    attributes:
+      label: GPU Driver, Runtime, and Firmware Setup
+      description: '⚠️ ONLY provide setup details if you selected `Yes` above. Otherwise enter `No changes required`. Include the initial state and exact fix: packages/repos, NVIDIA Container Toolkit/CDI/runtime setup, Mesa/Vulkan packages, firmware, kernel modules, boot parameters, and persistence.'
+    validations:
+      required: true
+  - type: dropdown
+    id: required_devices_baseline
+    attributes:
+      label: Did Required Host Device Nodes Require Configuration?
+      description: Assess `/dev/uinput`, `/dev/uhid`, `/dev/fuse`, and the chosen GPU DRM render node before preparation.
+      options:
+        - Yes
+        - No — all required device nodes were available
+    validations:
+      required: true
+  - type: textarea
+    id: device_setup
+    attributes:
+      label: Device Node Baseline and Required Changes
+      description: '⚠️ ONLY provide setup details if you selected `Yes` above. Otherwise enter `No changes required`. List the pre-change and final state for `/dev/uinput`, `/dev/uhid`, `/dev/fuse`, and the selected `/dev/dri/renderD*`; include modules, udev rules, permissions, device mappings, and cgroup device rules.'
+    validations:
+      required: true
+  - type: textarea
+    id: resource_limits
+    attributes:
+      label: Inotify and Virtual Memory Limits — Before and After
+      description: Record the original and final values of `fs.inotify.max_user_instances`, `fs.inotify.max_user_watches`, and `vm.max_map_count`; number of Steam Headless containers; whether values were sufficient; exact changes; and how they persist after reboot/update.
+      placeholder: |
+        - Containers tested: 2
+        - Before: max_user_instances=128; max_user_watches=...; vm.max_map_count=65530
+        - After: max_user_instances=256; max_user_watches=...; vm.max_map_count=1048576
+        - Change and persistence: Added ... to ... and applied with ...
+    validations:
+      required: true
+  - type: dropdown
+    id: mandatory_access_control
+    attributes:
+      label: Host Mandatory Access Control
+      description: Report the host's SELinux/AppArmor state before preparation.
+      options:
+        - Neither SELinux nor AppArmor enabled
+        - SELinux enabled
+        - AppArmor enabled
+        - Both SELinux and AppArmor enabled
+        - Unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: mac_changes_required
+    attributes:
+      label: Did SELinux or AppArmor Require Changes?
+      description: Include policy, profile, or Compose security-option changes.
+      options:
+        - Yes
+        - No — no changes required
+    validations:
+      required: true
+  - type: textarea
+    id: mac_setup
+    attributes:
+      label: SELinux / AppArmor Baseline and Required Changes
+      description: '⚠️ ONLY provide setup details if you selected `Yes` above. Otherwise enter `No changes required`. State the original enforcing/profile status, policy or Compose security-option changes, and persistence steps.'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '## 2. Deployment configuration'
+  - type: dropdown
+    id: deployment_method
+    attributes:
+      label: Deployment Method Used
+      description: Select the method that produced the verified working deployment.
+      options:
+        - Docker Compose
+        - Docker run command
+        - NAS/vendor application template
+        - Other platform-specific template or orchestration
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment_mode
+    attributes:
+      label: Deployment Network Mode Tested
+      description: Select the mode used for the verified deployment.
+      options:
+        - Host Mode — single session, host networking
+        - Macvlan Mode — multi-session, macvlan networking
+        - Both Host Mode and Macvlan Mode
+    validations:
+      required: true
+  - type: input
+    id: image_version
+    attributes:
+      label: Steam Headless Image Repository and Immutable Digest Tested
+      description: |
+        Provide the exact image repository and immutable digest. You may include the human-friendly tag as additional information, but do not use a tag alone.
+        After the image has been pulled, run `docker image inspect '<image-reference>' --format '{{index .RepoDigests 0}}'` and paste its output here.
+      placeholder: e.g. josh5/steam-headless@sha256:...
+    validations:
+      required: true
+  - type: input
+    id: deployment_source
+    attributes:
+      label: Deployment Template or Documentation Source and Revision
+      description: Link or identify the upstream Compose example, vendor template, or documentation used, including its release, tag, commit, or revision.
+      placeholder: e.g. docs/compose-files/docker-compose.nvidia.yml at v2.0.0 / vendor template version 1.2.3
+    validations:
+      required: true
+  - type: textarea
+    id: deployment_config
+    attributes:
+      label: Working Deployment Configuration
+      description: Provide the complete sanitised Docker Compose file, `docker run` command, or vendor/template export. Use fenced code blocks with the correct language. Replace private details with placeholders.
+    validations:
+      required: true
+  - type: textarea
+    id: deployment_steps
+    attributes:
+      label: Deployment Setup Steps
+      description: Give the ordered steps needed to deploy the working configuration. For macvlan include parent interface, subnet/gateway, IP assignment, and any host-to-container routing workaround.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '## 3. Verification results'
+  - type: dropdown
+    id: overall_status
+    attributes:
+      label: Overall Result
+      description: Overall result on this host after the documented changes.
+      options:
+        - Fully working
+        - Working with documented caveats
+    validations:
+      required: true
+  - type: textarea
+    id: verification_results
+    attributes:
+      label: Testing and Verification Results
+      description: Report what you tested and whether it worked, including UI/portal, GPU acceleration, audio, Sunshine/Moonlight, controller input, and at least one game or launcher.
+      placeholder: |
+        - Steam Headless UI and Portal: [Working / Not tested / Issue]
+        - Hardware video encoding: [Working — NVENC / VAAPI / Quick Sync / Not tested]
+        - Sunshine and Moonlight: [Working — resolution and frame rate]
+        - Gamepad and controller input: [Working — devices tested]
+        - Games and launchers: [title, Proton/native, result]
+    validations:
+      required: true
+  - type: checkboxes
+    id: persistence_verification
+    attributes:
+      label: Reconnection Verification
+      options:
+        - label: I restarted or recreated the Steam Headless container from the documented configuration, reconnected to it, and confirmed it was working again.
+          required: true
+        - label: I rebooted the host, reconnected to Steam Headless, and confirmed it was working again.
+          required: true
+  - type: textarea
+    id: caveats_workarounds
+    attributes:
+      label: OS-Specific Caveats and Documentation Notes (Optional)
+      description: List update/reboot concerns, storage or networking prerequisites, known quirks, and anything that should appear in OS-specific installation documentation.
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: I personally installed, configured, and confirmed Steam Headless working on this Host OS.
+          required: true
+        - label: I included the host baseline before changes and the changes required for the verified setup.
+          required: true
+        - label: I removed passwords, tokens, private addresses, and other secrets from this report.
+          required: true
+        - label: I understand candidate support provides community-derived installation documentation only. The development team has no dedicated appliance for this OS and cannot guarantee reproduction or regression testing of future bug reports.
+          required: true
