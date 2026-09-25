@@ -107,7 +107,7 @@ body:
       label: Did Docker Engine Require Manual Installation or Configuration?
       description: Include enabling an optional vendor container service, changing daemon configuration, or permissions.
       options:
-        - Yes
+        - 'Yes'
         - No — supplied and ready to use
     validations:
       required: true
@@ -144,7 +144,7 @@ body:
       label: Did GPU Drivers, Runtime, or Firmware Require Setup?
       description: Include driver, runtime, firmware, or GPU-specific host configuration required for Steam Headless.
       options:
-        - Yes
+        - 'Yes'
         - No — OS-provided setup worked
     validations:
       required: true
@@ -161,7 +161,7 @@ body:
       label: Did Required Host Device Nodes Require Configuration?
       description: Assess `/dev/uinput`, `/dev/uhid`, `/dev/fuse`, and the chosen GPU DRM render node before preparation.
       options:
-        - Yes
+        - 'Yes'
         - No — all required device nodes were available
     validations:
       required: true
@@ -203,7 +203,7 @@ body:
       label: Did SELinux or AppArmor Require Changes?
       description: Include policy, profile, or Compose security-option changes.
       options:
-        - Yes
+        - 'Yes'
         - No — no changes required
     validations:
       required: true
