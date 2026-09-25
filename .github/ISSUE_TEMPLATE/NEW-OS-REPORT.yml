@@ -1,6 +1,6 @@
 name: New OS Report
 description: Share a verified Host OS / NAS setup and request support documentation
-title: '[New OS]: '
+title: '[New OS]: <Exact Linux distribution or NAS operating system name>'
 labels: ['type:feature-request']
 body:
   - type: markdown
@@ -54,11 +54,10 @@ body:
     attributes:
       value: '## 1. Host OS baseline — before Steam Headless preparation'
   - type: input
-    id: os_name
+    id: os_link
     attributes:
-      label: Host Operating System Name
-      description: Exact Linux distribution or NAS operating system name.
-      placeholder: e.g. Arch Linux / Proxmox VE / Alpine Linux / openSUSE Leap / QNAP QTS / Synology DSM / NixOS
+      label: Link to Host OS Website
+      description: Provide a link to the new host OS website.
     validations:
       required: true
   - type: input
@@ -67,14 +66,6 @@ body:
       label: Host OS Version / Release
       description: Release version or rolling-release identifier.
       placeholder: e.g. 8.2-2 / 7.2 / Tumbleweed / 2024.1 / Rolling
-    validations:
-      required: true
-  - type: input
-    id: host_architecture
-    attributes:
-      label: Host Architecture
-      description: Output of `uname -m`.
-      placeholder: e.g. x86_64 / aarch64
     validations:
       required: true
   - type: input
@@ -270,7 +261,7 @@ body:
     id: deployment_steps
     attributes:
       label: Deployment Setup Steps
-      description: Give the ordered steps needed to deploy the working configuration. For macvlan include parent interface, subnet/gateway, IP assignment, and any host-to-container routing workaround.
+      description: Give the ordered steps needed to deploy the working configuration. For macvlan include parent interface, subnet/gateway, IP assignment, and any host-to-container routing workaround. Include images of setup if they will help document the setup process.
     validations:
       required: true
 
