@@ -3,13 +3,13 @@ name: Build and Deploy CI
 on:
   workflow_dispatch:
   push:
-    branches: ['dev-**', 'pr-**', staging, master]
+    branches: ['dev-**', 'pr-**', staging]
     tags: ['**']
   pull_request:
-    branches: [staging, master]
-  schedule:
-    # At 02:30 on Saturday
-    - cron: '30 2 * * 6'
+    branches: [staging]
+  # schedule:
+  #   # At 02:30 on Saturday
+  #   - cron: '30 2 * * 6'
 
 jobs:
   build_docker:
