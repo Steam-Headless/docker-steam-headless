@@ -315,7 +315,7 @@ RUN \
 
 # Install Web Frontend
 ARG NODE_VERSION="v20"
-ARG FRONTEND_VERSION=a8eb92f
+ARG FRONTEND_VERSION=c1d9f6e
 RUN \
     echo "**** Install Node ${NODE_VERSION} ****" \
         && mkdir -p /tmp/nodejs \
@@ -332,7 +332,7 @@ RUN \
         && mkdir -p /opt \
         && cd /opt \
         && rm -rf /opt/frontend \
-        && git clone https://github.com/Steam-Headless/frontend.git --branch master /opt/frontend \
+        && git clone https://github.com/Steam-Headless/frontend.git --branch v2-update /opt/frontend \
         && cd /opt/frontend \
         && git checkout ${FRONTEND_VERSION} 2> /dev/null \
         && git submodule init \
